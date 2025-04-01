@@ -1,0 +1,24 @@
+{
+    "name": "sense-info/petite-cms",
+    "version": "0.3.0",
+    "config": {
+        "allow-plugins": {
+            "php-http/discovery": true
+        }
+    },
+    "require": {
+        "bcosca/fatfree-core": "^3.8",
+        "phpoffice/phpspreadsheet": "^2.2",
+        "tecnickcom/tcpdf": "^6.7",
+        "aws/aws-sdk-php": "^3.320",
+        "intervention/image": "^3.8",
+        "maciejczyzewski/bottomline": "^0.2.3",
+        "catfan/medoo": "^2.1",
+        "twig/twig": "^3.11",
+        "rakit/validation": "^1.4",
+        "mailgun/mailgun-php": "^4.3",
+        "symfony/http-client": "^6.4",
+        "nyholm/psr7": "^1.8",
+        "phrity/websocket": "^3.1.0"
+    }
+}

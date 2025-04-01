@@ -1,0 +1,43 @@
+#!/bin/bash
+
+# 
+# cp bin/sample_env ~/.env
+# 
+# use git cache
+# 
+# $ git config --global credential.helper 'cache --timeout=3600'
+# 
+# */10 * * * * /path-2-dir/bin/autoPull.sh >> /path-2-dir/log/autoPull.log
+# 
+
+export $(egrep -v '^#' $HOME/.env_clms | xargs);
+
+# Validate number of arguments
+if [[ $# -eq 0 ]]; then
+
+	whoami;
+	NOW=$(date --date="now" +"%Y%m%d%H%M%S");
+	
+	echo "";
+	echo  "Current DateTime: $NOW";
+
+	START_TIME=$SECONDS;
+
+	cd $BAS_DIR$WRK_DIR/;
+
+	pwd;
+
+	git pull origin $WRK_BRH;
+
+	ELAPSED_TIME=$(($SECONDS - $START_TIME));
+
+	echo "";
+	echo  "Elapsed Time: [$ELAPSED_TIME]";
+
+	echo "";
+	exit 0;
+else
+	echo "UNCERTAIN: Invalid number of arguments - Usage: autoPull.sh";
+	echo "";
+	exit 1;
+fi

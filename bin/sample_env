@@ -1,0 +1,17 @@
+### Init ######
+# 
+# cp bin/sample_env ~/.env_okbom
+# 
+
+### Folder ######
+BAS_DIR=/var/www
+WRK_DIR=/loc.f3cms
+
+BACKUP_DIR=/backup
+
+### DB ######
+DB_PWD=
+DB_HOST=
+
+### Branch ######
+WRK_BRH=main

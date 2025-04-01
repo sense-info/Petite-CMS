@@ -1,0 +1,25 @@
+# Mac OS X Desktop Services Store
+.DS_Store
+*.mp4
+
+# log\\
+log/nginx/*.log
+log/autoPull.log
+
+# www
+www/pma/*
+!www/pma/config.inc.php
+www/f3cms/vendor/*
+!www/f3cms/vendor/.gitkeep
+www/cache/*
+!www/cache/.gitkeep
+www/tmp/*
+!www/tmp/.gitkeep
+
+# database
+ib*
+*.opt
+database/*
+!database/.gitkeep
+
+conf/nginx/letsencrypt/*f3cms*.pem

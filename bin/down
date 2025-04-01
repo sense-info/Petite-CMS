@@ -1,0 +1,9 @@
+#!/bin/bash
+
+CU_DIR="$( cd "$( dirname "$0" )" && cd ../ && pwd )";
+
+export $(egrep -v '^#' $CU_DIR/.env | xargs);
+
+docker-compose -p $APP_NAME --file $DOCKER_CONF_PATH/docker-compose.yml stop
+
+docker ps
