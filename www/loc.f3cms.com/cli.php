@@ -1,32 +1,47 @@
 <?php
 
-require_once __DIR__ . '/vendor/autoload.php';
+if (PHP_SAPI != 'cli') {
+    die('Only in cli mode');
+}
 
+$siteDir = 'loc.f3cms.com/';
 $rootDir = __DIR__ . '/../';
 $webRootDir = __DIR__ . '/';
 
-require_once __DIR__ . '/libs/Autoload.php';
-require_once __DIR__ . '/libs/Utils.php';
+require_once $rootDir .'f3cms/vendor/autoload.php';
+require_once $rootDir .'f3cms/libs/Autoload.php';
+require_once $rootDir .'f3cms/libs/Utils.php';
 
 $f3 = \Base::instance();
 
 // config
-require './config.php';
+require $rootDir .'config/config.php';
+require_once $rootDir . 'config/' . $siteDir . 'config.php';
+require_once $rootDir . 'config/' . $siteDir . 'config.' . ($f3->get('APP_ENV')) . '.php';
+
+$f3->set('TEMP', __DIR__ . '/../tmp/');
+$f3->set('LOGS', $f3->get('TEMP').'logs/');
+$f3->set('UI', __DIR__ . '/../f3cms/theme/');
+
+$logger = new \Log('crontab.log');
+$f3->set('cliLogger', $logger);
+
+$logger->write('Info - 新排程');
+
+if ($f3->get('crontabhost') != gethostname()) {
+    $logger->write('Error - 本機不能執行排程');
+    // echo date('Y/m/d H:i:s') . ' - 本機不能執行排程' . PHP_EOL;
+    exit();
+}
 
 $f3->set('opts', \F3CMS\fOption::load('', 'Preload'));
 
 // Define routes
 $f3->route('GET /', function ($f3, $args) {
-    echo '**F3CMS CLI**';
+    echo PHP_EOL.'**'. $f3->get('site_title') .' CLI**'.PHP_EOL.PHP_EOL;
 });
 
-$f3->route('GET /demo', function ($f3, $args) {
-    $logger = new \Log('move.log');
-    $worker = new \F3CMS\Worker('\F3CMS\rPost', 'get', $logger);
-
-    $worker->startWorker(
-        ['9P1917', '9F0276', '7F7862', '6Y7912', '4Q7199', 'S2346', '32173J', '62173B', '23471Q'], 'Queue'
-    );
-});
+$f3->route('GET /@freq/@tally', '\F3CMS\rCrontab->do_job');
 
 $f3->run();
+
