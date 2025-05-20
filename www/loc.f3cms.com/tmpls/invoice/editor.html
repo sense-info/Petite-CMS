@@ -1,0 +1,116 @@
+<form class="gee engrossed-form invoice-form unsaved" data-gene="init:initForm" data-tmpl="invoiceForm" id="invoiceForm">
+  <div class="columns is-multiline is-engrossed-t editor pid-{{:item.id}}-">
+    <div class="column">
+      <div class="box">
+        <div class="tabs-content" >
+          <div class="tab-box" title="基本資訊">
+            <div class="columns is-multiline">
+              <div class="column is-4">
+                <div class="field">
+                  <label class="label">唯一值</label>
+                  <p class="control">
+                    <input class="input" name="slug" type="text">
+                  </p>
+                </div>
+
+                <div class="field">
+                    <label class="label">會員姓名</label>
+                    <div class="control is-block">
+                        <input type="text" class="multipleSelect" data-sortable="0" name="member_id" data-params='{"level":"KOL"}' placeholder="會員姓名" data-url='member/get_opts' />
+                    </div>
+                </div>
+              </div>
+              <div class="column is-4">
+                <div class="field">
+                  <label class="label">發票編號</label>
+                  <p class="control">
+                    <input class="input" name="title" type="text" placeholder="發票編號">
+                  </p>
+                </div>
+                <div class="field">
+                  <label class="label">可配點金額</label>
+                  <small>填寫金額並改為"已驗証"後可以進行加點</small>
+                  <p class="control">
+                    <input class="input" name="point" type="number" placeholder="可配點金額">
+                  </p>
+                </div>
+              </div>
+              <div class="column is-4">
+                <div class="field">
+                  <label class="label">發票日期</label>
+                  <p class="control">
+                    <input class="input" name="issue_date" type="text" placeholder="發票日期">
+                  </p>
+                </div>
+                <div class="field">
+                  <label class="label">消費金額</label>
+                  <p class="control">
+                    <input class="input" name="amount" type="number" placeholder="消費金額">
+                  </p>
+                </div>
+                <div class="field">
+                  <label class="label">通路</label>
+                  <p class="control">
+                    <input class="input" name="seller" type="text" placeholder="通路">
+                  </p>
+                </div>
+              </div>
+              <div class="column is-6">
+                <div class="field">
+                  <label class="label">狀態</label>
+                  {{if item.status != 'Done' }}
+                    <input type="radio" class="is-checkradio" name="status" value="New" checked="checked" id="invoice-status-new">
+                    <label class="radio" for="invoice-status-new">新建</label>
+                    <input type="radio" class="is-checkradio" name="status" value="Accepted" id="invoice-status-accepted">
+                    <label class="radio" for="invoice-status-accepted">已驗証</label>
+                    <input type="radio" class="is-checkradio" name="status" value="Invalid" id="invoice-status-invalid">
+                    <label class="radio" for="invoice-status-invalid">無效</label>
+                    <input type="radio" class="is-checkradio" name="status" value="Done" id="invoice-status-done" disabled>
+                    <label class="radio" for="invoice-status-done">已配點</label>
+                  {{else}}已配點{{/if}}
+                </div>
+              </div>
+              <div class="column is-6">
+                <div class="field">
+                  <label class="label">上傳圖片</label>
+                  <gee-upload module-name="invoice" data-param="pic" info-text="請勿大於 20 MB"></gee-upload>
+                </div>
+              </div>
+            </div>
+          </div>
+          <!-- <div class="tab-box only-af-save" title="其它">
+            <gee:meta-editor data-module="invoice"></gee:meta-editor>
+          </div> -->
+          <div class="tab-box only-af-save" title="品項">
+            <div class="columns is-multiline only-af-save">
+              <div class="column">
+                <div class="field has-text-right">
+                  <a class="button is-primary modal-btn gee" data-gene="click:lineitem.showModal" data-tmpl="lineitemForm" data-src="lineitem" data-size="nor" data-id="0" data-silence="1" data-parent="{{:item.id}}">新增品項</a>
+                </div>
+                <div class="content pre-gee" data-gene="init:arena.initBox" data-layout="lineitems" data-query="ORDER:sorter,m.invoice_id:{{:item.id}}" data-parent="{{:item.id}}">
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="column is-4">
+      <div class="box">
+        <div class="field is-grouped">
+          <p class="control">
+            <button type="button" class="button is-primary pre-gee" data-gene="click:setRow" data-tmpl="invoiceForm">儲存發票</button>
+          </p>
+          {{if item.point }}{{if item.status == 'Accepted' }}<p class="control">
+            <button type="button" class="button is-warning pre-gee" data-gene="click:arena/touch"
+              data-confirm="可配點金額: {{:item.point}} 點？ 點擊【確定】後加點!!" data-endpoint="invoice/done" data-params='{"pid":"{{:item.id}}"}'>加點</button>
+          </p>{{/if}}{{/if}}
+        </div>
+
+        <figure class="image"> <img class="preview-pic" src="{{:~fixLink(item.pic)}}"> </figure>
+
+      </div>
+      <input type="hidden" name="id">
+    </div>
+  </div>
+</form>

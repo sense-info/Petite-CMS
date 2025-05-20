@@ -1,0 +1,33 @@
+<div class="box">
+  <form class="gee" data-gene="init:thread.initForm" data-tmpl="threadForm" id="threadForm">
+    <div class="field">
+      <label class="label">題目</label>
+      <p class="control">
+        <input class="input" name="body" type="text" placeholder="記得不用加 Q">
+      </p>
+    </div>
+    
+    <div class="field">
+      <label class="label">排序</label>
+      <p class="control">
+        <input class="input" name="sorter" type="text" placeholder="排序：預設 99">
+      </p>
+    </div>
+    <div class="field">
+      <input type="radio" class="is-checkradio" name="status" value="Enabled" checked="checked" id="thread-status-enabled">
+      <label class="radio" for="thread-status-enabled">啟用</label>
+      <input type="radio" class="is-checkradio" name="status" value="Disabled" id="thread-status-disabled">
+      <label class="radio" for="thread-status-disabled">停用</label>
+    </div>
+    <div class="field is-grouped">
+      <p class="control">
+        <button type="button" class="button is-primary pre-gee" data-gene="click:thread.setRow">送出</button>
+      </p>
+      <p class="control">
+        <button type="button" class="button is-link pre-gee" data-gene="click:hideModal">關閉</button>
+      </p>
+    </div>
+    <input type="hidden" name="id">
+    <input type="hidden" name="press_id">
+  </form>
+</div>

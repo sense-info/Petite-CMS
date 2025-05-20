@@ -1,0 +1,52 @@
+<div class="gee" data-gene="init:arena.loadBox,click:reactList,dblclick:reactList" data-tmpl="threadList" data-path="press/threads" data-nopde="1" style="position: relative; margin: 10px 0;">
+  <div style="position: absolute; top: -48px; right: 105px"><a class="button is-info modal-btn pre-gee j-reload-thread-btn j-reload-message-btn" data-gene="click:arena.reloadBox"><i class="fa fa-refresh"></i></a></div>
+  <div class="pre-gee" data-gene="init:editor.sortor" data-module="thread" data-prefix="thread"><div class="thread-sortable">
+  {{props data}}
+  <div class="box thread-sortable-item loop-item" data-id="{{:prop.id}}">
+    <div class="has-text-right is-pulled-right">
+
+      <a class="button is-danger delete" style="margin: 7px 15px;" data-func="thread.delRow" data-id="{{:prop.id}}"></button> 
+
+      <a class="button is-info modal-btn" data-func="message.showModal" data-tmpl="messageForm" data-src="message" data-size="lg" data-id="0" data-silence="1" data-parent="{{:prop.id}}">新增回應</a></div>
+    <p class="title sortable-hit" data-func="editor.switchField" data-event="dblclick" data-module="thread" data-pid="{{:prop.id}}" data-column="body">{{:~nl2br(prop.body)}} 
+      <a class="sortable-holder"><i class="fa"></i></a></p>
+
+
+      <div class="pre-gee" data-gene="init:editor.sortor" data-module="message" style="margin: 10px 0;" ><div class="sortable" data-parent="{{:prop.id}}">
+        {{props prop.rows}}
+            <article class="media sortable-item loop-item" data-id="{{:prop.id}}">
+              <div class="media-left">
+                <p class="image is-64x64">
+                  <img class="is-rounded" pre-src="{{:~loadPic(prop.avatar, 300, 300) }}">
+                </p>
+              </div>
+              <div class="media-content">
+                <div class="content">
+                  <p class="sortable-hit" data-module="message" data-pid="{{:prop.id}}" data-column="content">{{:prop.content}}</p>
+                </div><!--  data-func="editor.switchField" data-event="dblclick" -->
+                <nav class="level is-mobile">
+                  <div class="level-left">
+                    <samll class="level-item">{{:prop.realname}}({{:prop.intro}})</samll>
+                    <a class="level-item">
+                      <span class="icon is-small" data-func="message.loadRow" data-tmpl="messageForm" data-src="message" data-size="lg" data-id="{{:prop.id}}"><i class="fa fa-pencil"></i></span>
+                    </a>
+                    <a class="level-item sortable-holder">
+                      <i class="fa"></i>
+                    </a>
+                  </div>
+                  <div class="level-right">
+                    <div class="tags level-item">  <span class="tag {{if prop.status == 'Disabled' }}is-warning{{/if}}"> {{:prop.status}} </span> 
+                     <span class="tag {{if prop.display == 'Member' }}is-warning{{/if}}"> {{:prop.display}} </span>  </div>
+                  </div>
+                </nav>
+              </div>
+              <div class="media-right">
+                <button class="delete" data-func="message.delRow" data-id="{{:prop.id}}"></button> 
+              </div>
+            </article>
+        {{/props}}
+      </div></div>
+  </div>
+  {{/props}}
+  </div></div>
+</div>

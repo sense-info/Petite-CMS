@@ -1,0 +1,85 @@
+
+<nav class="level">
+  <div class="level-left"><h1 class="module-title title is-2">發票</h1> <p class="desc">發票完整清單</p></div>
+  <div class="level-right">
+    <p class="level-item hidden">
+      <!-- <a class="button is-primary modal-btn gee" data-gene="click:showModal" data-tmpl="invoiceForm" data-src="modal" data-size="nor" data-id="0">新增</a> -->
+      <a class="button is-primary engrossed-btn gee" data-gene="click:press.loadRow" data-tmpl="invoiceForm" data-src="editor" data-size="lg" data-id="0" data-module="invoice">新增</a>
+    </p>
+  </div>
+</nav>
+
+<nav class="list-filter level">
+  <div class="level-left">
+    <div class="level-item query-box">
+      <p class="control">
+        <div class="select" >
+          <select name="query" class="gee" data-gene="change:checkOption">
+            <optgroup label="資料">
+              <option value="m.title~">發票編號</option>
+              <option value="m.insert_ts<>">建立時間起迄</option>
+            </optgroup>
+            <optgroup label="狀態">
+                <option value="m.status=New">新建</option>
+                <option value="m.status=Accepted">已驗証</option>
+                <option value="m.status=Done">已開立</option>
+                <option value="m.status=Invalid">無效</option>
+            </optgroup>
+          </select>
+        </div>
+      </p>
+    </div>
+    <div class="level-item">
+      <div class="field has-addons">
+        <p class="control">
+          <input class="input" type="text" placeholder="請輸入條件">
+        </p>
+        <p class="control">
+          <button class="button is-expanded gee" data-gene="init:initQueryForm,click:combineQuery" type="button">查詢</button>
+        </p>
+      </div>
+    </div>
+    <p class="level-item is-hidden">搜尋條件：</p>
+    <div class="tags js-query-list level-item"></div>
+  </div>
+</nav>
+<div class="columns is-multiline">
+  <div class="column is-10 is-offset-1">
+    <div class="content box-shadow is-scrollable">
+      <!-- LIST -->
+      <table class="list-body table is-striped is-hoverable">
+        <thead>
+          <tr>
+            <th>發票編號</th>
+            <th>開立時間</th>
+            <th>客戶名稱</th>
+            <th>狀態</th>
+            <th>金額</th>
+            <th>加入時間</th>
+            <th class="is-actions-cell">操作</th>
+          </tr>
+        </thead>
+        <tfoot></tfoot>
+        <tbody class="gee" data-gene="init:loadList,click:reactList" data-tmpl="invoiceList" data-nopde="1">
+          <tr>
+            <td>{{:prop.title}}</td>
+            <td>{{:prop.issue_date}}</td>
+            <td>{{:prop.customer}}</td>
+            <td>{{:~txtLabel(prop.status, {'New': '新建', 'Accepted': '已驗証', 'Done': '已配點', 'Invalid': '無效'})}}</td>
+            <td>{{:prop.point}}</td>
+            <td>{{:prop.insert_ts}}</td>
+            <td class="is-actions-cell">
+              <a href="javascript:;" data-func="press.loadRow" data-tmpl="invoiceForm" data-src="editor" data-id="{{:prop.id}}" class="button is-info engrossed-btn" title="{{:prop.title}}"> 編輯 </a>
+              {{if prop.point }}{{if prop.status == 'Accepted' }}<button type="button" class="button is-warning pre-gee" data-gene="click:arena/touch"
+          data-confirm="開立對象: {{:prop.customer}} ？ 點擊【確定】後開立!!" data-endpoint="invoice/done" data-params='{"pid":"{{:prop.id}}"}'>開立</button>{{/if}}{{/if}}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="list-footer level"><div class="level-left">
+        <span class="total-items level-item"></span>
+        <nav class="pagination level-item"><ul id="paginate"></ul></nav>
+    </div></div>
+  </div>
+</div>

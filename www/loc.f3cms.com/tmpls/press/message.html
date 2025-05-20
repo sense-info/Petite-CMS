@@ -1,0 +1,48 @@
+<div class="box">
+  <form class="gee" data-gene="init:message.initForm" data-tmpl="messageForm" id="messageForm">
+    <div class="field">
+      <label class="label">回應</label>
+        <p class="control">
+          <gee:editor data-param="content" data-inline="0" data-simple="1"></gee:editor>
+        </p>
+    </div>
+
+    <div class="field is-grouped">
+      <p class="control">
+        <button type="button" class="button is-primary pre-gee" data-gene="click:message.setRow">送出</button>
+      </p>
+      <p class="control">
+        <button type="button" class="button is-link pre-gee" data-gene="click:hideModal">關閉</button>
+      </p>
+    </div>
+
+    <div class="field">
+      <label class="label">回應人</label>
+      <div class="control is-block">
+        <input type="text" class="multipleSelect" data-sortable="1" name="teacher_id" placeholder="輸入姓名查詢" data-params='{"level":"KOL"}' data-url='member/get_opts' />
+      </div>
+    </div>
+    <div class="field">
+      <label class="label">瀏覽限制</label>
+      <input type="radio" class="is-checkradio" name="display" value="Public" checked="checked" id="message-display-public">
+      <label class="radio" for="message-display-public">公開</label>
+      <input type="radio" class="is-checkradio" name="display" value="Member" id="message-display-member">
+      <label class="radio" for="message-display-member">會員</label>
+    </div>
+    <div class="field">
+      <label class="label">狀態</label>
+      <input type="radio" class="is-checkradio" name="status" value="Enabled" checked="checked" id="message-status-enabled">
+      <label class="radio" for="message-status-enabled">啟用</label>
+      <input type="radio" class="is-checkradio" name="status" value="Disabled" id="message-status-disabled">
+      <label class="radio" for="message-status-disabled">停用</label>
+    </div>
+    <div class="field">
+      <label class="label">排序</label>
+      <p class="control">
+        <input class="input" name="sorter" type="text" placeholder="排序：預設 99">
+      </p>
+    </div>
+    <input type="hidden" name="id">
+    <input type="hidden" name="thread_id">
+  </form>
+</div>

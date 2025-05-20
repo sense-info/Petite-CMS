@@ -1,0 +1,38 @@
+<div class="gee" data-gene="init:arena.loadBox,click:reactList,dblclick:reactList" data-tmpl="firerList" data-path="member/firers" data-nopde="1" style="position: relative; margin: 10px 0;">
+  <div style="position: absolute; top: -48px; right: 115px"><a class="button is-info modal-btn pre-gee j-reload-thread-btn j-reload-firer-btn" data-gene="click:arena.reloadBox"><i class="fa fa-refresh"></i></a></div>
+  <div class="pre-gee" data-gene="init:editor.sortor" data-module="firer" data-prefix="firer"><div class="firer-sortable">
+  {{props data}}
+  <div class="box firer-sortable-item loop-item" data-id="{{:prop.id}}">
+
+    <article class="media sortable-item loop-item" data-id="{{:prop.id}}">
+      <div class="media-left">
+        <p class="image is-64x64">
+          <img class="is-rounded" pre-src="{{:~loadPic(prop.avatar, 300, 300) }}">
+        </p>
+      </div>
+      <div class="media-content">
+        <div class="content">
+          <p class="sortable-hit" data-module="firer" data-pid="{{:prop.id}}" data-column="summary">{{:~nl2br(prop.summary)}}</p>
+        </div><!--  data-func="editor.switchField" data-event="dblclick" -->
+        <nav class="level is-mobile">
+          <div class="level-left">
+            <samll class="level-item">{{:prop.realname}}({{:prop.intro}})</samll>
+            <a class="level-item">
+              <span class="icon is-small" data-func="firer.loadRow" data-tmpl="firerForm" data-src="firer" data-size="nor" data-id="{{:prop.id}}"><i class="fa fa-pencil"></i></span>
+            </a>
+            <a class="level-item sortable-holder"><i class="fa"></i></a>
+          </div>
+          <div class="level-right">
+            <div class="tags level-item">  <span class="tag {{if prop.status == 'Disabled' }}is-warning{{/if}}"> {{:prop.status}} </span> </div>
+          </div>
+        </nav>
+      </div>
+      <div class="media-right">
+        <!-- <button class="delete" data-func="firer.delRow" data-id="{{:prop.id}}"></button>  -->
+      </div>
+    </article>
+
+  </div>
+  {{/props}}
+  </div></div>
+</div>

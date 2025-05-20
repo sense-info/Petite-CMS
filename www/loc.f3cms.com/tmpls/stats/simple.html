@@ -1,0 +1,89 @@
+<nav class="level">
+  <div class="level-left"><h1 class="module-title title is-2">數據面板</h1> <p class="desc">預設為 30 日內數據，可以設定查詢條件</p></div>
+</nav>
+
+<nav class="list-filter level">
+  <div class="level-left">
+    <div class="level-item query-box">
+      <p class="control">
+        <div class="select" >
+          <select name="query" class="gee" data-gene="change:checkOption">
+            <option value="insert_ts=30days">30 天內</option>
+            <option value="insert_ts<>">時間起迄</option>
+          </select>
+        </div>
+      </p>
+    </div>
+    <div class="level-item">
+      <div class="field has-addons">
+        <p class="control">
+          <input class="input" type="text" placeholder="Find a option">
+        </p>
+        <p class="control">
+          <button class="button is-expanded gee" data-gene="init:initQueryForm,click:combineQuery" type="button">查詢</button>
+        </p>
+      </div>
+    </div>
+    <p class="level-item is-hidden">搜尋條件：</p>
+    <div class="tags js-query-list level-item"></div>
+  </div>
+</nav>
+
+<div class="columns is-multiline gee" data-gene="init:loadList,click:reactList" data-tmpl="statsSimpleList" data-nopde="1" data-method="market">
+  <div class="column is-3">
+    <article class="message is-info">
+      <div class="message-header">
+        <p>綁定LINE OA 人數</p>
+      </div>
+      <div class="message-body has-text-right"><span> {{:data.join_line_sum}} </span>人</div>
+    </article>
+  </div>
+  <div class="column is-3">
+    <article class="message is-info">
+      <div class="message-header">
+        <p>綁定發票載具人數</p>
+      </div>
+      <div class="message-body has-text-right"><span> {{:data.bind_account_sum}} </span>人</div>
+    </article>
+  </div>
+  <div class="column is-3">
+    <article class="message is-info">
+      <div class="message-header">
+        <p>新增手動發票</p>
+      </div>
+      <div class="message-body has-text-right"><span>{{:data.upload_sum}}</span>張</div>
+    </article>
+  </div>
+  <div class="column is-3">
+    <article class="message is-info">
+      <div class="message-header">
+        <p>新增載具發票</p>
+      </div>
+      <div class="message-body has-text-right"><span>{{:data.carrier_sum}}</span>張</div>
+    </article>
+  </div>
+  <div class="column is-3">
+    <article class="message is-info">
+      <div class="message-header">
+        <p>手動發票發點</p>
+      </div>
+      <div class="message-body has-text-right"><span>{{:data.manual_add_sum}}</span>點</div>
+    </article>
+  </div>
+  <div class="column is-3">
+    <article class="message is-info">
+      <div class="message-header">
+        <p>載具發票發點</p>
+      </div>
+      <div class="message-body has-text-right"><span>{{:data.carrier_add_sum}}</span>點</div>
+    </article>
+  </div>
+  <div class="column is-3">
+    <article class="message is-info">
+      <div class="message-header">
+        <p>歡迎禮贈點</p>
+      </div>
+      <div class="message-body has-text-right"><span>{{:data.welcome_add_sum}}</span>點</div>
+    </article>
+  </div>
+</div>

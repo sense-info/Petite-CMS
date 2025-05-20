@@ -1,0 +1,86 @@
+<nav class="level">
+  <div class="level-left">
+    <nav class="breadcrumb">
+      <ul>
+        <li> <a class="gee" href="javascript:;" data-gene="click:loadMain" data-module="dashboard" data-layout="advanced">進階</a> </li>
+        <li class="is-active"> <a>AI 出支</a> </li>
+      </ul>
+    </nav>
+  </div>
+  <div class="level-right">
+      <p class="level-item">
+          <a class="button is-primary engrossed-btn gee is-hidden" data-gene="click:press.loadRow" data-tmpl="llmtokenForm" data-src="editor" data-id="0">新建</a>
+          <a class="button is-info gee" data-gene="click:getQueryUri" data-uri="/llmtoken/xls">下載</a>
+      </p>
+  </div>
+</nav>
+
+<nav class="list-filter level">
+  <div class="level-left">
+    <div class="level-item query-box">
+      <p class="control">
+        <div class="select" >
+          <select name="query" class="gee" data-gene="change:checkOption">
+            <optgroup label="資料">
+              <option value="id~">ID</option>
+              <option value="insert_ts<>">時間起迄</option>
+            </optgroup>
+          </select>
+        </div>
+      </p>
+    </div>
+    <div class="level-item">
+      <div class="field has-addons">
+        <p class="control">
+          <input class="input" type="text" placeholder="請輸入條件">
+        </p>
+        <p class="control">
+          <button class="button is-expanded gee" data-gene="init:initQueryForm,click:combineQuery" type="button">查詢</button>
+        </p>
+      </div>
+    </div>
+    <p class="level-item is-hidden">搜尋條件：</p>
+    <div class="tags js-query-list level-item"></div>
+  </div>
+</nav>
+
+<div class="columns is-multiline">
+  <div class="column is-10 is-offset-1 b-table">
+    <div class="content box-shadow table-wrapper has-mobile-cards">
+      <table class="list-body table is-striped is-hoverable">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>模型</th>
+            <th>提示</th>
+            <th>NTD</th>
+            <th>回覆</th>
+            <th>NTD</th>
+            <th>加總</th>
+            <th>NTD</th>
+            <th>加入時間</th>
+          </tr>
+        </thead>
+        <tfoot></tfoot>
+        <tbody class="gee" data-gene="init:loadList,click:reactList" data-tmpl="llmtokenList" data-nopde="1">
+          <tr>
+            <td data-label="ID">{{:prop.id}}</td>
+            <td data-label="模型">{{:prop.model}}</td>
+            <td data-label="提示">{{:prop.prompt_tokens}}</td>
+            <td data-label=""><span class="dollar"></span>{{:prop.prompt_cost * 32 / 10000000}}</td>
+            <td data-label="回覆">{{:prop.completion_tokens}}</td>
+            <td data-label=""><span class="dollar"></span>{{:prop.completion_cost * 32 / 10000000}}</td>
+            <td data-label="加總">{{:prop.total_tokens}}</td>
+            <td data-label=""><span class="dollar"></span>{{:prop.total_cost * 32 / 10000000}}</td>
+            <td data-label="加入時間">{{:prop.insert_ts}}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="list-footer level"><div class="level-left">
+        <span class="total-items level-item"></span>
+        <nav class="pagination level-item"><ul id="paginate"></ul></nav>
+    </div></div>
+  </div>
+</div>

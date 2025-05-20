@@ -1,0 +1,28 @@
+<div class="box">
+  <h4 class="heading is-size-4 has-text-primary has-text-right">受邀者預設身份為 KOL</h4>
+  <form class="gee" data-gene="init:initForm" data-tmpl="memberNewForm" id="memberNewForm">
+
+    <div class="field">
+      <label class="label">Email</label>
+      <p class="control">
+        <input class="input" name="email" type="email" placeholder="Email">
+      </p>
+    </div>
+
+    <div class="field">
+      <label class="label">大頭照</label>
+      <gee-upload module-name="member" data-param="avatar" info-text="300x300"></gee-upload>
+    </div>
+
+    <div class="field is-grouped">
+      <p class="control">
+        <button type="button" class="button is-primary pre-gee" data-gene="click:setRow">寄送開通驗證信</button>
+      </p>
+      <p class="control">
+        <button type="button" class="button is-link pre-gee" data-gene="click:hideModal">關閉</button>
+      </p>
+    </div>
+    <input type="hidden" name="id">
+    <input type="hidden" name="level" value="Owner">
+  </form>
+</div>
