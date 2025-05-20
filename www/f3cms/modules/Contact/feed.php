@@ -11,10 +11,10 @@ class fContact extends Feed
     const MULTILANG = 0;
 
     const ST_NEW     = 'New';
-    const ST_PROCESS = 'Process';
+    const ST_Process = 'Process';
     const ST_DONE    = 'Done';
 
-    const BE_COLS = 'id,status,name,email,insert_ts,last_ts';
+    const BE_COLS = 'm.id,m.status,m.name,m.type,m.email,m.insert_ts,m.last_ts';
 
     /**
      * @param $req
@@ -24,6 +24,7 @@ class fContact extends Feed
         $now = date('Y-m-d H:i:s');
 
         $data = [
+            'type'      => $req['type'],
             'name'      => $req['name'],
             'email'     => $req['email'],
             'message'   => $req['message'],

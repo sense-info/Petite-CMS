@@ -25,9 +25,9 @@ class kStaff extends Kit
         return [
             'login'        => [
                 'account' => 'required|min:3|max:200', // 建議長度 8-16 字元，含英數字
-                // SELECT `id`, `account`, LENGTH(`account`) AS LengthOfString FROM `tbl_member`
-                //     WHERE 1 HAVING LengthOfString > 16 OR  LengthOfString < 4;
-                // 526, 1062, 61, 415
+                                                             // SELECT `id`, `account`, LENGTH(`account`) AS LengthOfString FROM `tbl_member`
+                                                             //     WHERE 1 HAVING LengthOfString > 16 OR  LengthOfString < 4;
+                                                             // 526, 1062, 61, 415
 
                 'pwd'  => 'required|min:4|max:32', // 建議長度 8-16 字元，含英數字
             ],

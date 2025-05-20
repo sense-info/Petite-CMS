@@ -2449,6 +2449,81 @@ INSERT INTO `tbl_zipcode` (`id`, `county_id`, `zipcode`, `town`, `county`) VALUE
 (366, 23, '210', '北竿', '連江縣'),
 (367, 23, '211', '莒光', '連江縣'),
 (368, 23, '212', '東引', '連江縣');
+
+
+
+--
+-- 資料表結構 `tbl_yell`
+--
+
+CREATE TABLE `tbl_yell` (
+  `id` int(11) NOT NULL,
+  `source` varchar(50) NOT NULL,
+  `action` varchar(50) NOT NULL,
+  `req` varchar(1000) DEFAULT NULL,
+  `res` text,
+  `insert_ts` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+--
+-- 資料表索引 `tbl_yell`
+--
+ALTER TABLE `tbl_yell`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `action_idx` (`action`);
+
+--
+-- 使用資料表 AUTO_INCREMENT `tbl_yell`
+--
+ALTER TABLE `tbl_yell`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=1;
+
+--
+-- 資料表結構 `tbl_shorten`
+--
+
+CREATE TABLE IF NOT EXISTS `tbl_shorten` (
+  `id` int UNSIGNED NOT NULL AUTO_INCREMENT COMMENT 'Shorten ID',
+  `cap` int NOT NULL DEFAULT '9999',
+  `hits` int UNSIGNED NOT NULL DEFAULT '0',
+  `finished` int UNSIGNED NOT NULL DEFAULT '0',
+  `status` enum('Disabled','Enabled') CHARACTER SET utf8mb4 NOT NULL DEFAULT 'Disabled' COMMENT '狀態',
+  `origin` varchar(255) CHARACTER SET utf8mb4 NOT NULL COMMENT '原始網址',
+  `token` varchar(255) CHARACTER SET utf8mb4 NOT NULL COMMENT '短網址 key',
+  `note` varchar(300) CHARACTER SET utf8mb4 DEFAULT NULL,
+  `last_ts` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `last_user` int DEFAULT NULL,
+  `insert_ts` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `insert_user` int DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `token_uni` (`token`),
+  KEY `origin_uni` (`origin`) USING BTREE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+
+
+--
+-- 資料表結構 `tbl_draft`
+--
+
+CREATE TABLE IF NOT EXISTS `tbl_draft` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `press_id` int NOT NULL DEFAULT '0' COMMENT '新聞稿 ID',
+  `owner_id` int NOT NULL DEFAULT '0' COMMENT '擁有者 ID',
+  `status` enum('New','Waiting','Done','Invalid','Used') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT 'New' COMMENT '草稿狀態',
+  `lang` varchar(5) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'tw' COMMENT '語言',
+  `method` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '' COMMENT 'LLM 函式',
+  `intent` text COLLATE utf8mb4_unicode_ci COMMENT '意圖',
+  `guideline` text COLLATE utf8mb4_unicode_ci COMMENT '指導方針/原文',
+  `content` mediumtext CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci COMMENT '內容',
+  `insert_ts` timestamp NULL DEFAULT CURRENT_TIMESTAMP COMMENT '插入時間',
+  `last_ts` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '最後更新時間',
+  `insert_user` int DEFAULT '0' COMMENT '新增的使用者 ID',
+  `last_user` int DEFAULT '0' COMMENT '最後更新的使用者 ID',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='草稿清單';
+
+
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

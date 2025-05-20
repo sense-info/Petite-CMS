@@ -11,28 +11,33 @@ class fAdv extends Feed
     const ST_ON  = 'Enabled';
     const ST_OFF = 'Disabled';
 
-    const BE_COLS = 'm.id,l.title,m.position_id,m.weight,m.start_date,m.end_date,m.counter,m.exposure,m.status,m.last_ts';
+    const BE_COLS = 'm.id,l.title,m.position_id,m.position_id,m.weight,m.cover,m.start_date,m.end_date,m.counter,m.exposure,m.status,m.last_ts';
 
     public static function getPositions()
     {
-        return [
-            '1' => [
-                'id'    => '1',
-                'title' => '首頁/HERO大圖(建議：900*1200)',
-            ],
-            // '2' => [
-            //     'id'    => '2',
-            //     'title' => '外部連結(400*200)'
-            // ],
-            // '3' => [
-            //     'id'    => '3',
-            //     'title' => '首頁跳出式提示'
-            // ],
-            // '4' => [
-            //     'id'    => '4',
-            //     'title' => '會員跳出式提示'
-            // ]
-        ];
+        $positions = fGenus::getOpts('adv', 'm.group');
+        $idArray = array_column($positions, 'id');
+
+        return array_combine($idArray, $positions);
+
+        // return [
+        //     '1' => [
+        //         'id'    => '1',
+        //         'title' => '首頁/HERO大圖(1600*800)',
+        //     ],
+        //     '2' => [
+        //         'id'    => '2',
+        //         'title' => '外部連結(400*200)',
+        //     ],
+        //     '3' => [
+        //         'id'    => '3',
+        //         'title' => '首頁跳出式提示',
+        //     ],
+        //     '4' => [
+        //         'id'    => '4',
+        //         'title' => '會員跳出式提示',
+        //     ],
+        // ];
     }
 
     /**
@@ -59,6 +64,11 @@ class fAdv extends Feed
         ]);
     }
 
+    public static function genOrder()
+    {
+        return ['m.position_id' => 'ASC', 'm.weight' => 'DESC', 'm.insert_ts' => 'DESC'];
+    }
+
     /**
      * @param $position_id
      * @param $limit
@@ -71,7 +81,8 @@ class fAdv extends Feed
         }
 
         $condition = ' WHERE m.`position_id` = :position_id AND m.`status` = :status ';
-        $condition .= " AND m.`end_date` > '" . date('Y-m-d') . "' ";
+        $condition .= " AND m.`end_date` > '" . date('Y-m-d H:i:s') . "' ";
+        $condition .= " AND m.`start_date` < '" . date('Y-m-d H:i:s') . "' ";
 
         $select = 'SELECT m.`id`, l.`title`, m.`status`, m.`weight`, m.`cover`, m.`uri`, m.`theme`, m.`background`, l.`subtitle`, l.`content`';
         $from   = ' FROM `' . self::fmTbl() . '` AS m INNER JOIN `' . self::fmTbl('lang') . '` AS l ON l.`parent_id` = m.`id` AND l.`lang`=\'' . parent::_lang() . '\' ' . $condition;

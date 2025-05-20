@@ -37,26 +37,6 @@ class rMenu extends Reaction
     }
 
     /**
-     * @param $f3
-     * @param $args
-     */
-    public function do_list($f3, $args)
-    {
-        $req = parent::_getReq();
-
-        chkAuth(fMenu::PV_R);
-
-        $req['page']  = (isset($req['page'])) ? ($req['page'] - 1) : 0;
-        $req['limit'] = (!empty($req['limit'])) ? max(min($req['limit'] * 1, 24), 3) : 12;
-
-        $req['query'] = (!isset($req['query'])) ? '' : $req['query'];
-
-        $rtn = fMenu::limitRows($req['query'], $req['page']);
-
-        return self::_return(1, $rtn);
-    }
-
-    /**
      * get menus in option mode
      *
      * @param int $parent_id - parent type id
@@ -112,6 +92,10 @@ class rMenu extends Reaction
 
         $req = parent::_getReq();
 
+        if (empty($req['menuID'])) {
+            return parent::_return(8002);
+        }
+
         $fc = new FCHelper('menu');
 
         $rtn = $fc->get('menu_' . parent::_lang() . '_' . $req['menuID'], 1); // 1 mins
@@ -124,6 +108,37 @@ class rMenu extends Reaction
         }
 
         return parent::_return(1, $rtn);
+    }
+
+    public static function do_deepClone()
+    {
+        chkAuth(fMenu::PV_U);
+
+        $req = parent::_getReq();
+
+        if (!isset($req['id'])) {
+            return self::_return(8004);
+        }
+
+        self::deepCloneMenu($req['id']);
+
+        return parent::_return(1);
+    }
+
+    public static function deepCloneMenu($menuID, $parent_id = 0)
+    {
+        $menu = fMenu::one($menuID);
+        if (!$menu) {
+            return false;
+        }
+
+        $newMenuId = fMenu::cloneMenu($menu, $parent_id);
+
+        // 複製子節點
+        $childMenus = self::sort_menus($menuID, 0, '', 0);
+        foreach ($childMenus as $childMenu) {
+            self::deepCloneMenu($childMenu['id'], $newMenuId);
+        }
     }
 
     /**

@@ -18,6 +18,7 @@ class rStaff extends Reaction
     const RTN_REPEAT     = 'Repeated';
     const RTN_MUTLI      = 'Mutli';
     const RTN_WRONGIP    = 'WrongIP';
+    const RTN_WRONGCSRF  = 'WrongCSRF';
 
     /**
      * @param $f3
@@ -58,12 +59,13 @@ class rStaff extends Reaction
     {
         $rtn = self::RTN_LOGINED;
 
-        $req = parent::_getReq();
+        $req     = parent::_getReq();
+        $counter = 0;
 
         Validation::return($req, kStaff::rule('login'));
 
         if ($_SERVER['HTTP_X_REQUESTED_TOKEN'] != f3()->get('SESSION.csrf')) {
-            $rtn = self::RTN_MISSCOLS;
+            $rtn = self::RTN_WRONGCSRF;
         }
 
         if (self::RTN_LOGINED == $rtn) {
@@ -115,8 +117,8 @@ class rStaff extends Reaction
 
             $lastFootmark = fDoorman::lastFootmark(fDoorman::T_STAFF, $cu['id']);
             if ($lastFootmark > f3()->get('passwd_expired')) {
-                // $rtn           = self::RTN_TOOOLD;
-                $result['msg'] = sprintf(self::formatMsgs()[self::RTN_TOOOLD]['msg'], $lastFootmark);
+                $rtn           = self::RTN_TOOOLD;
+                $result['msg'] = self::formatMsgs()[$rtn]['msg'];
 
                 fStaff::saveCol([
                     'col' => 'needReset',
@@ -127,7 +129,7 @@ class rStaff extends Reaction
 
             $role = fRole::one($cu['role_id'], 'id');
 
-            fStaff::_setCurrent($cu['account'], $cu['id'], $cu['email'], '', $role['priv']);
+            fStaff::_setCurrent($cu['account'], $cu['id'], $cu['email'], '', $role['priv'], $role['menu_id']);
             $result['lastFootmark'] = $lastFootmark;
         }
 
@@ -161,20 +163,9 @@ class rStaff extends Reaction
             if (null == $cu) {
                 $rtn = self::RTN_WRONGDATA;
             } else {
-                if (fStaff::ST_FREEZE == $cu['status']) {
-                    $rtn = self::RTN_UNVERIFIED;
-                }
-            }
-        }
-
-        if (!empty($req['pwd'])) {
-            // check last 3 password
-            $last3Footmark = fDoorman::lotsFootmark(fDoorman::T_STAFF, fStaff::_current('id'));
-
-            $hash = hash('sha512', $req['pwd']);
-
-            if (in_array($hash, $last3Footmark)) {
-                $rtn = self::RTN_REPEAT;
+                // if (fStaff::ST_FREEZE == $cu['status']) {
+                //     $rtn = self::RTN_UNVERIFIED;
+                // }
             }
         }
 
@@ -187,13 +178,7 @@ class rStaff extends Reaction
             unset($req['pwd_confirm']);
 
             if (!empty($req['pwd'])) {
-                fDoorman::insertFootmark(fDoorman::T_STAFF, $pid, $req['pwd']);
-
-                fStaff::saveCol([
-                    'col' => 'needReset',
-                    'val' => 0,
-                    'pid' => $cu['id'],
-                ]);
+                fDoorman::insertFootmark(fDoorman::T_STAFF, $pid, fStaff::_setPsw($req['pwd']));
             }
 
             [$data, $other] = fStaff::_handleColumn($req);
@@ -204,7 +189,7 @@ class rStaff extends Reaction
 
             $role = fRole::one($cu['role_id'], 'id');
 
-            fStaff::_setCurrent($cu['account'], $cu['id'], $cu['email'], '', $role['priv']);
+            fStaff::_setCurrent($cu['account'], $cu['id'], $cu['email'], '', $role['priv'], $role['menu_id']);
         }
 
         return self::_return(self::formatMsgs()[$rtn]['code'], $result);
@@ -235,12 +220,6 @@ class rStaff extends Reaction
         if (kStaff::_isLogin()) {
             $rtn['isLogin'] = 1;
             $rtn['user']    = fStaff::_current('*');
-
-            if ($rtn['user']['priv'] > 32) {
-                $rtn['user']['menu'] = 16;
-            } else {
-                $rtn['user']['menu'] = 52;
-            }
         }
 
         return self::_return(1, $rtn);
@@ -252,7 +231,7 @@ class rStaff extends Reaction
      */
     public function do_sudo($f3, $args)
     {
-        kStaff::_chkLogin();
+        chkAuth(fStaff::PV_U); // kStaff::_chkLogin();
 
         $member = fMember::one($args['UID']);
 
@@ -261,7 +240,7 @@ class rStaff extends Reaction
             $normal = canDo(fMember::PV_R);
 
             if ($super || ($normal && fStaff::_current('email') == $member['email'])) {
-                fMember::_setCurrent($member['account'], $member['id'], $member['avatar'], $member['nickname'], $member['realname'], $member['email'], $member['status'], $member['level']);
+                fMember::_setCurrent($member['account'], $member['id'], $member['avatar'], $member['nickname'], $member['agency_id'], $member['role']);
                 fStaff::insertSudo($member['id']);
                 fStream::insert('Sudo', $member['id'], '登入會員帳號：' . $member['account'] . ' 進行操作');
             } else {
@@ -315,11 +294,11 @@ class rStaff extends Reaction
             ],
             'TooOld'   => [
                 'code' => 8209,
-                'msg'  => '密碼上次變更為 %d 天前，請儘快變更密碼!',
+                'msg'  => '密碼過舊，請儘快變更密碼!',
             ],
             'Repeated' => [
                 'code' => 8210,
-                'msg'  => '密碼變更時，至少不可以與前三次使用過之密碼相同，請重新設定!',
+                'msg'  => '密碼重覆，請重新設定!',
             ],
             'Mutli'    => [
                 'code' => 8211,
@@ -328,6 +307,10 @@ class rStaff extends Reaction
             'WrongIP'    => [
                 'code' => 8212,
                 'msg'  => '來源 IP 異常(' . f3()->IP . ')!',
+            ],
+            'WrongCSRF'    => [
+                'code' => 8213,
+                'msg'  => 'CSRF 異常，請重整畫面後重試',
             ],
         ], parent::formatMsgs());
     }

@@ -18,10 +18,9 @@ class oContact extends Outfit
             f3()->error(404);
         }
 
-        f3()->set('cu', $row);
+        _dzv('cu', $row);
         f3()->set('breadcrumb_sire', ['title' => '首頁', 'slug' => '/home']);
-        f3()->set('act_link', 'contact');
 
-        parent::wrapper('/contact.html', $row['title'], '/contact');
+        parent::render('contact.twig', $row['title'], '/contact');
     }
 }

@@ -8,45 +8,27 @@ namespace F3CMS;
 class rGenus extends Reaction
 {
     /**
-     * @param array $row
-     *
-     * @return mixed
-     */
-    public static function handleRow($row = [])
-    {
-        $row['tags'] = fGenus::lotsTag($row['id']);
-
-        return $row;
-    }
-
-    /**
      * @param $f3
      * @param $args
      */
     public function do_get_opts($f3, $args)
     {
-        // chkAuth(fGenus::PV_R);
+        chkAuth(fGenus::PV_R);
 
         $req       = self::_getReq();
-        $condition = [
-            'm.status' => fGenus::ST_ON,
-        ];
 
         if (!empty($req['group'])) {
-            $condition['m.group'] = $req['group'];
+            $condition = 'm.group';
+            $query = $req['group'];
         }
 
         if (!empty($req['query'])) {
-            $condition['l.title[~]'] =  $req['query'];
+            $condition = 'm.name';
+            $query = $req['query'];
         }
 
-        $opts = fGenus::limitRows($condition, 0, 20);
-        $rtn  = [];
+        $opts = fGenus::getOpts($query, $condition);
 
-        foreach ($opts['subset'] as &$row) {
-            $rtn[] = ['id' => $row['id'], 'title' => $row['title'] . ' / ' . $row['slug']];
-        }
-
-        return self::_return(1, $rtn);
+        return parent::_return(1, $opts);
     }
 }

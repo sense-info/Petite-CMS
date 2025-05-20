@@ -20,6 +20,9 @@ class fOption extends Feed
     const PV_U = 'mgr.site';
     const PV_D = 'mgr.site';
 
+    const BE_COLS = 'id,group,loader,status,name,content';
+    const PAGELIMIT = 100;
+
     /**
      * @param $group
      * @param $mode
@@ -133,21 +136,6 @@ class fOption extends Feed
         }
 
         return $query;
-    }
-
-    /**
-     * @param $query
-     * @param $page
-     * @param $limit
-     * @param $cols
-     */
-    public static function limitRows($query = '', $page = 0, $limit = 10, $cols = '')
-    {
-        $lang = Module::_lang();
-
-        $filter = self::genQuery($query);
-
-        return parent::paginate(self::fmTbl(), $filter, $page, $limit, ['id', 'group', 'loader', 'status', 'name', 'content']);
     }
 
     /**

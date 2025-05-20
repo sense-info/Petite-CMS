@@ -14,9 +14,7 @@ class rAdv extends Reaction
     {
         $req = parent::_getReq();
 
-        $req['meta'] = (!empty($req['meta'])) ? 1 : 0;
-
-        $limit = max(min($req['limit'] * 1, 12), 3);
+        $limit = max(min($req['limit'] * 1, 12), 1);
 
         $rtn = [];
 
@@ -55,6 +53,115 @@ class rAdv extends Reaction
         fAdv::addCounter($row['id']);
 
         f3()->reroute($row['uri']);
+    }
+
+    /**
+     * @param $f3
+     * @param $args
+     */
+    public function do_clearCache($f3, $args)
+    {
+        chkAuth(fAdv::PV_D);
+
+        $req = parent::_getReq();
+
+        kAdv::clearCache($req['pid']); // TODO: use f3 config
+
+        return self::_return(1);
+    }
+
+    /**
+     * @param $f3
+     * @param $args
+     */
+    public function do_list($f3, $args)
+    {
+        chkAuth(fAdv::PV_R);
+        $req = parent::_getReq();
+
+        if (fStaff::_current('lang')) {
+            f3()->set('acceptLang', \__::pluck(fStaff::_current('lang'), 'key'));
+        }
+
+        if (empty($req['query'])) {
+            $req['query'] = [];
+        }
+
+        $req['page'] = (isset($req['page'])) ? ($req['page'] - 1) : 0;
+
+        $rtn    = fAdv::limitRows($req['query'], $req['page'], 200, ',m.uri');
+        $groups = [];
+
+        $positions = fAdv::getPositions();
+
+        $positions = array_merge([
+            '0' => [
+                'id'    => '0',
+                'title' => '未選擇',
+            ]
+        ], $positions);
+
+        foreach ($rtn['subset'] as $row) {
+            if (!isset($positions[$row['position_id']])) {
+                $positions[$row['position_id']] = [
+                    'id'    => $row['position_id'],
+                    'title' => '未知分類 #' . $row['position_id'],
+                ];
+            }
+            $groups[$row['position_id']]['title']  = $positions[$row['position_id']]['title'];
+            $groups[$row['position_id']]['rows'][] = $row;
+        }
+
+        $rtn['subset'] = $groups;
+
+        return parent::_return(1, $rtn);
+    }
+
+    public function do_push($f3, $args)
+    {
+        chkAuth(fAdv::PV_U);
+        $req = parent::_getReq();
+
+        $press = fPress::one((int) $req['pid']);
+
+        if (empty($press) || empty($press['lang'][f3()->get('defaultLang')]['content'])) {
+            return self::_return(8106, ['msg' => '原文無內容']);
+        }
+
+        $positions = fGenus::getOpts('adv', 'm.group');
+
+        if (empty($positions)) {
+            return self::_return(8106, ['msg' => '無可用廣告版位']);
+        }
+
+        $adv = [
+            'position_id' => $positions[0]['id'],
+            'weight' => 1,
+            'cover' => $press['cover'],
+            'uri' => '/p/' . $press['id'] . '/' . $press['slug'],
+            'start_date' => date('Y-m-d H:i:s'),
+            'end_date' => date('Y-m-d H:i:s', strtotime('+ 30 days')),
+            'meta' => [
+                'press_id' => $press['id'],
+                'cate_id' => $press['cate_id']
+            ]
+        ];
+
+        foreach ($press['lang'] as $idx => $row) {
+            $adv['lang'][$idx] = [
+                'title' => $press['lang'][$idx]['title'],
+                'subtitle' => $press['online_date'],
+                'content' => (!empty($press['lang'][$idx]['exposure'])) ? $press['lang'][$idx]['exposure'] : $press['lang'][$idx]['info']
+            ];
+        }
+
+        $pid = fAdv::save($adv);
+
+        if ($pid) {
+            return self::_return(1, ['msg' => '已新增廣告，請至廣告管理進行上架。']);
+        } else {
+            return self::_return(8106, ['msg' => '未完成新增!!']);
+        }
     }
 
     /**

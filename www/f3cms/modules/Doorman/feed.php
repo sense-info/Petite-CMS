@@ -50,7 +50,7 @@ class fDoorman extends Feed
         $data = [
             'parent_id'   => $id,
             'pwd'         => $pwd,
-            'status'      => self::ST_NEW,
+            // 'status'      => self::ST_NEW,
             'insert_ts'   => $now,
             'insert_user' => $user,
         ];
@@ -137,8 +137,8 @@ class fDoorman extends Feed
         $limit = (int) min(100, max(2, $limit));
 
         $rows = self::exec('SELECT `pwd`, `insert_ts` FROM `' . tpf() . strtolower($type) . '_footmark` WHERE `parent_id` = :parent_id ORDER BY `id` ' . self::limit(0, $limit), [
-            ':parent_id' => $parentID,
-        ]);
+        ':parent_id' => $parentID,
+    ]);
 
         if (!empty($rows)) {
             if ('' != $col) {

@@ -10,22 +10,20 @@ class oPost extends Outfit
     /**
      * @param $args
      */
-    public static function home($args)
-    {
-        parent::render('index.twig', '首頁', '/home');
-    }
-
-    /**
-     * @param $args
-     */
     public static function sitemap($args)
     {
         $subset = fPress::limitRows([
-            'm.status' => [fPress::ST_PUBLISHED, fPress::ST_CHANGED],
+            'm.status' => [fPress::ST_PUBLISHED, fPress::ST_CHANGED]
         ], 0, 1000);
 
         f3()->set('rows', $subset);
         f3()->set('page', fOption::load('page'));
+
+        $categories = fCategory::limitRows([
+            'm.status' => fCategory::ST_ON
+        ], 0, 20, ',m.insert_ts');
+
+        f3()->set('categories', $categories);
 
         self::_echoXML('sitemap');
     }
@@ -36,7 +34,7 @@ class oPost extends Outfit
     public static function rss($args)
     {
         $subset = fPress::limitRows([
-            'm.status' => [fPress::ST_PUBLISHED, fPress::ST_CHANGED],
+            'm.status' => [fPress::ST_PUBLISHED, fPress::ST_CHANGED]
         ], 0, 1000);
 
         $subset['subset'] = \__::map($subset['subset'], function ($cu) {
@@ -60,19 +58,18 @@ class oPost extends Outfit
     }
 
     /**
-     * @param $f3
      * @param $args
      */
-    public function do_lineXml($f3, $args)
+    public static function lineXml($args)
     {
         if (!f3()->get('connectLineXml')) {
-            exit('403 Forbidden');
+            die('403 Forbidden');
         }
 
         // TODO: is LINE connention?
 
         $subset = fPress::limitRows([
-            'm.status' => [fPress::ST_PUBLISHED, fPress::ST_CHANGED],
+            'm.status' => [fPress::ST_PUBLISHED, fPress::ST_CHANGED]
         ], 0, 100, ',l.content');
 
         $subset['subset'] = \__::map($subset['subset'], function ($cu) {
@@ -118,16 +115,20 @@ class oPost extends Outfit
             f3()->error(404);
         }
 
-        if ('chunyichang' == f3()->get('theme')) {
-            $row['subtitle'] = $row['slug'];
-        }
+        _dzv('cu', $row);
 
-        f3()->set('cu', $row);
-        f3()->set('act_link', strtolower($args['slug']));
+        if ('about' == $row['slug']) {
+            $subset = fAuthor::limitRows('m.status:' . fAuthor::ST_ON . ',m.sorter<20', 1, 24);
+
+            _dzv('authors', $subset['subset']);
+        }
 
         f3()->set('breadcrumb_sire', ['title' => '首頁', 'slug' => '/home']);
 
-        parent::wrapper('/post.html', $row['title'], '/s/' . $row['slug']);
+        $args['layout'] = (isset($args['layout'])) ? $args['layout'] : $row['layout'];
+        // $args['slug']   = (isset($args['slug'])) ? $args['slug'] : 's/' . $row['slug'];
+
+        parent::render('post/' . $args['layout'] . '.twig', $row['title'], '/s/' . $args['slug']);
     }
 
     /**
@@ -151,6 +152,23 @@ class oPost extends Outfit
     /**
      * @param $args
      */
+    public static function terms($args)
+    {
+        $args['slug'] = 'terms';
+        self::show($args);
+    }
+
+    /**
+     * @param $args
+     */
+    public static function maintenance($args)
+    {
+        parent::wrapper('../maintenance.html', 'Maintenance, Coming Soon', '/maintenance');
+    }
+
+    /**
+     * @param $args
+     */
     public static function comingsoon($args)
     {
         $ts  = strtotime(f3()->get('siteBeginDate'));
@@ -167,79 +185,11 @@ class oPost extends Outfit
      */
     public static function notfound($args)
     {
-        f3()->set('ERROR', [
+        _dzv('ERROR', [
             'code' => '404',
             'text' => 'Not Found',
         ]);
 
-        parent::wrapper('/error.html', 'Not Found', '/404');
-    }
-
-    /**
-     * @param $args
-     */
-    public static function word($args)
-    {
-        $phpWord = WHelper::init();
-        $page    = $phpWord->newPage();
-
-        $cert = $phpWord->newCert('三思資訊');
-        $page->addImage($cert, [
-            'wrappingStyle' => 'behind',
-            'width'         => 637,
-            'height'        => 923,
-            'marginTop'     => -1,
-            'marginLeft'    => -1,
-        ]);
-
-        // \PhpOffice\PhpWord\Shared\Html::addHtml($section, '<table style="width:100%"><tr><td><img src="https://www.gettyimages.ca/gi-resources/images/Homepage/Hero/UK/CMS_Creative_164657191_Kingfisher.jpg" width="200"/></td><td>text</td></tr></table>');
-
-        // $header = $page->addHeader();
-        // $header->addWatermark(f3()->get('ROOT') . f3()->get('BASE') . '/upload/img/bg.png', array('marginTop' => 200, 'marginLeft' => 55));
-
-        // $fontStyleName = 'oneUserDefinedStyle';
-        // $phpWord->addFontStyle(
-        //     $fontStyleName,
-        //     array('name' => 'Tahoma', 'size' => 10, 'color' => '1B2232', 'bold' => true)
-        // );
-
-        // $textbox = $page->addTextBox(
-        //     array(
-        //         'alignment'   => \PhpOffice\PhpWord\SimpleType\Jc::CENTER,
-        //         'width'       => 400,
-        //         'height'      => 150,
-        //         'borderSize'  => 1,
-        //         // 'borderColor' => '#FF0000',
-        //         'background-color' => '#FF0000'
-        //     )
-        // );
-        // $textbox->addText('Text box content in section.');
-        // $textbox->addText('Another line.');
-
-        // $page->addText(
-        //     '"Learn from yesterday, live for today, hope for tomorrow. '
-        //         . 'The important thing is not to stop questioning." '
-        //         . '(Albert Einstein)',
-        //     $fontStyleName
-        // );
-
-        // $page->addText(
-        //     '"Great achievement is usually born of great sacrifice, '
-        //         . 'and is never the result of selfishness." '
-        //         . '(Napoleon Hill)',
-        //     $fontStyleName
-        // );
-
-        // $page->addTextBreak(2);
-
-        // $page->addText(
-        //     '"The greatest accomplishment is not in never falling, '
-        //         . 'but in rising again after you fall." '
-        //         . '(Vince Lombardi)',
-        //     $fontStyleName
-        // );
-
-        $phpWord->done('certification_' . date('YmdHis') . '.odt');
-        // $phpWord->done('certification_' . date('YmdHis').'.docx', 'Word2007');
+        parent::render('error.twig', 'Not Found', '/404');
     }
 }

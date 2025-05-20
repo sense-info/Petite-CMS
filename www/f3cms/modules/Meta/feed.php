@@ -18,6 +18,8 @@ class fMeta extends Feed
     const ST_ON  = 'Enabled';
     const ST_OFF = 'Disabled';
 
+    const BE_COLS = 'm.id,m.sorter,m.fence,m.status,m.ps,m.label,m.type,m.input,s.account';
+
     /**
      * @param $tag_id
      *
@@ -61,13 +63,13 @@ class fMeta extends Feed
 
         $filter = [
             'r.' . $pk => $pid,
+            't.status' => fGenus::ST_ON,
         ];
 
         return mh()->select(self::fmTbl('tag') . '(r)',
-            ['[>]' . fGenus::fmTbl('lang') . '(t)'  => ['r.tag_id' => 'parent_id', 'l.lang' => '[SV]' . Module::_lang()]],
-            ['[><]' . fGenus::fmTbl() . '(g)'       => ['r.tag_id' => 'id', 'g.status' => '[SV]' . fGenus::ST_ON]],
+            ['[>]' . tpf() . fGenus::MTB . '(t)'  => ['r.tag_id' => 'id']],
             // '[>]' . fTag::fmTbl('lang') . '(l)' => ['t.id' => 'parent_id', 'l.lang' => '[SV]' . Module::_lang()]],
-            ['r.tag_id(id)', 't.title'], $filter);
+            ['t.id', 't.name(title)'], $filter);
     }
 
     /**
@@ -100,22 +102,17 @@ class fMeta extends Feed
         return $query;
     }
 
-    /**
-     * @param $query
-     * @param $page
-     * @param $limit
-     */
-    public static function limitRows($query = '', $page = 0, $limit = 12, $cols = '')
+    public static function genJoin()
     {
-        $filter = self::genQuery($query);
-
-        $filter['ORDER'] = ['m.sorter' => 'ASC', 'm.fence' => 'ASC'];
-
-        $join = [
+        return [
             '[>]' . fStaff::fmTbl() . '(s)' => ['m.last_user' => 'id'],
             // '[>]' . fTag::fmTbl('lang') . '(l)' => array('m.tag_id' => 'parent_id', 'l.lang' => '[SV]'. Module::_lang())
         ];
-
-        return parent::paginate(self::fmTbl() . '(m)', $filter, $page, $limit, ['m.id', 'm.sorter', 'm.fence', 'm.status', 'm.ps', 'm.label', 'm.type', 'm.input', 's.account'], $join);
     }
+
+    public static function genOrder()
+    {
+        return ['m.sorter' => 'ASC', 'm.fence' => 'ASC'];
+    }
+
 }

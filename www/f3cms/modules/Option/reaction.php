@@ -10,7 +10,7 @@ class rOption extends Reaction
      */
     public function do_list($f3, $args)
     {
-        kStaff::_chkLogin();
+        chkAuth(fOption::PV_R);
 
         $req = parent::_getReq();
 
@@ -18,8 +18,11 @@ class rOption extends Reaction
             f3()->set('acceptLang', \__::pluck(fStaff::_current('lang'), 'key'));
         }
 
-        $req['page']  = (isset($req['page'])) ? ($req['page'] - 1) : 0;
-        $req['query'] = (!isset($req['query'])) ? '' : $req['query'];
+        if (empty($req['query'])) {
+            $req['query'] = [];
+        }
+
+        $req['page'] = (isset($req['page'])) ? ($req['page'] - 1) : 0;
 
         $rtn    = fOption::limitRows($req['query'], $req['page'], 200);
         $groups = [];

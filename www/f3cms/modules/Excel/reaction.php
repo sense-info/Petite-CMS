@@ -13,7 +13,7 @@ class rExcel extends Reaction
     public function do_upload_file($f3, $args)
     {
         if (!kStaff::_isLogin()) {
-            return self::_return(8001);
+            return parent::_return(8001);
         }
 
         $filename = Upload::saveFile(
@@ -87,7 +87,7 @@ class rExcel extends Reaction
 
         f3()->set('SESSION.uploadPrograms', json_encode($rtn));
 
-        return self::_return(1, $rtn);
+        return parent::_return(1, $rtn);
     }
 
     /**
@@ -108,11 +108,11 @@ class rExcel extends Reaction
                 $program['id']    = 0;
             }
 
-            fExcel::exec('INSERT INTO `' . tpf() . 'schedules`(`title`, `uri`, `program_id`, `start_date`, `end_date`, `status`, `last_ts`, ' . "`last_user`, `insert_user`, `insert_ts`) VALUES ('" . $program['title'] . "', '" . $program['uri'] . "', '" . $program['id'] . "', '" . $prog['d'] . ' ' . $prog['s'] . ":00', '" . $prog['d'] . ' ' . $prog['e'] . ":00', 'Yes', '" . date('Y-m-d H:i:s') . "', '" . fStaff::_current('id') . "', '" . fStaff::_current('id') . "', '" . date('Y-m-d H:i:s') . "')");
+            fExcel::exec('INSERT INTO `' . tpf() . 'schedules`(`title`, `uri`, `program_id`, `start_date`, `end_date`, `status`, `last_ts`, ' . "`last_user`, `insert_user`, `insert_ts`) VALUES ('" . $program['title'] . "', '" . $program['uri'] . "', '" . $program['id'] . "', '" . $prog['d'] . ' ' . $prog['s'] . ":00', '" . $prog['d'] . ' ' . $prog['e'] . ":00', 'Yes', '" . date('Y-m-d H:i:s') . "', '" . rStaff::_CStaff('id') . "', '" . rStaff::_CStaff('id') . "', '" . date('Y-m-d H:i:s') . "')");
         }
 
         mh()->commit();
 
-        return self::_return(1, $allData['schedules']);
+        return parent::_return(1, $allData['schedules']);
     }
 }

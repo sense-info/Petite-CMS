@@ -11,17 +11,12 @@ class rPress extends Reaction
      */
     public static function handleRow($row = [])
     {
-        $row['tags']     = fPress::lotsTag($row['id'], true);
-        $row['authors']  = fPress::lotsAuthor($row['id']);
-        $row['relateds'] = fPress::lotsRelated($row['id']);
-        $row['meta']     = fPress::lotsMeta($row['id']);
-
-        $ts = strtotime($row['online_date']);
-        $ts = $ts - $ts % 300; // deduct the seconds that is not a multiple of 5 minutes
-
-        $row['hh']          = date('H', $ts);
-        $row['mm']          = date('i', $ts);
-        $row['online_date'] = date('Y-m-d', $ts);
+        $row['tags']      = fPress::lotsTag($row['id']);
+        $row['authors']   = fPress::lotsAuthor($row['id']);
+        $row['relateds']  = fPress::lotsRelated($row['id']);
+        $row['meta']      = fPress::lotsMeta($row['id']);
+        $row['terms']     = fPress::lotsTerm($row['id']);
+        $row['books']     = fPress::lotsBook($row['id']);
 
         // read history file
         // $fc = new FCHelper('press');
@@ -41,15 +36,12 @@ class rPress extends Reaction
 
         $req = parent::_getReq();
 
-        $req['page']  = (isset($req['page'])) ? ($req['page'] - 1) : 0;
-        $req['limit'] = (!empty($req['limit'])) ? max(min($req['limit'] * 1, 24), 3) : 12;
+        $req['page'] = ($req['page']) ? ($req['page'] - 1) : 1;
 
-        $req['query'] = (!isset($req['query'])) ? '' : $req['query'];
-
-        $rtn = fPress::limitRows($req['query'], $req['page'], $req['limit']);
+        $rtn = fPress::limitRows($req['query'], $req['page']);
 
         foreach ($rtn['subset'] as $k => $row) {
-            $rtn['subset'][$k]['tags']    = fPress::lotsTag($row['id'], true);
+            $rtn['subset'][$k]['tags']    = fPress::lotsTag($row['id']);
             $rtn['subset'][$k]['authors'] = fPress::lotsAuthor($row['id']);
         }
 
@@ -69,19 +61,16 @@ class rPress extends Reaction
         $cu = fPress::one($req['id']);
 
         if (empty($cu)) {
-            return self::_return(8106);
+            return parent::_return(8106);
         }
 
         switch ($req['status']) {
             case fPress::ST_PUBLISHED:
-                if ($cu['online_date'] > date('Y-m-d H:i:s')) {
-                    $req['online_date'] = date('Y-m-d H:i') . ':00';
-                } else {
-                    unset($req['online_date']);
-                }
+                // TODO: add config to control this
+                // $req['online_date'] = date('Y-m-d H:i:00', time() - 60); // DONT use local datetime
 
                 if (0 === f3()->get('cache.press')) {
-                    oPress::force(['slug' => $cu['id']]);
+                    oPress::buildPage(['slug' => $cu['id']]);
                 }
                 break;
             case fPress::ST_OFFLINED:
@@ -94,5 +83,50 @@ class rPress extends Reaction
         fPress::published($req);
 
         return self::_return(1, ['id' => $req['id']]);
+    }
+
+    /**
+     * @param $f3
+     * @param $args
+     */
+    public function do_more($f3, $args)
+    {
+        $query = 'm.status:' . fPress::ST_PUBLISHED;
+
+        $req = parent::_getReq();
+
+        $req['page'] = ($req['page']) ? ($req['page'] - 1) : 1;
+
+        $req['limit'] = max(min($req['limit'] * 1, 24), 3);
+
+        if (!empty($req['pid'])) {
+            if (is_numeric($req['pid'])) {
+                $tag = fTag::one($req['pid'], 'id', ['status' => fTag::ST_ON], false);
+            } else {
+                $tag = fTag::one(parent::_slugify($req['pid']), 'slug', ['status' => fTag::ST_ON], false);
+            }
+        } else {
+            $tag = null;
+        }
+
+        if (!empty($tag)) {
+            $rtn = fPress::lotsByTag($tag['id'], $req['page'], $req['limit']);
+        } else {
+            // if (!empty($req['columnID'])) {
+            //     if ($req['columnType'] == 'topic') {
+            //         $query .= ',m.topic_id:' . intval($req['columnID']);
+            //     } else {
+            //         $query .= ',m.column_id:' . intval($req['columnID']);
+            //     }
+            // }
+            $rtn = fPress::limitRows($query, $req['page'], $req['limit']);
+        }
+
+        foreach ($rtn['subset'] as $k => $row) {
+            $rtn['subset'][$k]['tags'] = fPress::lotsTag($row['id']);
+            $rtn['subset'][$k]['authors'] = fPress::lotsAuthor($row['id']);
+        }
+
+        return self::_return(1, $rtn);
     }
 }

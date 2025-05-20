@@ -20,25 +20,11 @@ class fStaff extends Feed
 
     const BE_COLS = 'm.id,m.account,m.role_id,m.email,m.status,r.title(role)';
 
-    /**
-     * @param $query
-     * @param $page
-     * @param $limit
-     * @param $cols
-     *
-     * @return mixed
-     */
-    public static function limitRows($query = '', $page = 0, $limit = 12, $cols = '')
+    public static function genJoin()
     {
-        $filter = self::genQuery($query);
-
-        $filter['ORDER'] = ['m.insert_ts' => 'DESC'];
-
-        $join = [
+        return [
             '[>]' . fRole::fmTbl() . '(r)' => ['m.role_id' => 'id'],
         ];
-
-        return self::paginate(self::fmTbl() . '(m)', $filter, $page, $limit, explode(',', self::BE_COLS), $join);
     }
 
     /**
@@ -65,13 +51,14 @@ class fStaff extends Feed
      * @param $avatar
      * @param $priv
      */
-    public static function _setCurrent($account, $id, $email, $avatar, $priv)
+    public static function _setCurrent($account, $id, $email, $avatar, $priv, $menu_id)
     {
         f3()->set('SESSION.cu_staff', [
             'name'      => $account,
             'id'        => $id,
             'email'     => $email,
             'avatar'    => $avatar,
+            'menu'      => $menu_id,
             'priv'      => fRole::parseAuth(fRole::parseAuthIdx(fRole::reverseAuth($priv))),
             'has_login' => 1,
         ]);
@@ -94,7 +81,6 @@ class fStaff extends Feed
         //     'account' => 'shuaib25@gmail.com',
         //     'id' => 1,
         //     'nickname' => '測試帳號',
-        //     'email' => 'shuaib25@gmail.com',
         //     'avatar' => 'https://robohash.org/c4e919002494d5e124c544e99e073308?set=set4&s=64',
         //     'has_login' => 1
         // ];

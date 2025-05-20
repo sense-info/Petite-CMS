@@ -19,26 +19,7 @@ class fStream extends Feed
     const PV_D = 'mgr.site';
 
     const BE_COLS = 'm.id,s.email(staff),s.account,m.content,m.status,m.insert_ts,m.target';
-
-    /**
-     * @param $query
-     * @param $page
-     * @param $limit
-     * @param $cols
-     */
-    public static function limitRows($query = '', $page = 0, $limit = 10, $cols = '')
-    {
-        $filter = self::genQuery($query);
-
-        $filter['ORDER'] = ['m.insert_ts' => 'DESC'];
-
-        $join = [
-            '[>]' . fStaff::fmTbl() . '(s)' => ['m.insert_user' => 'id'],
-            // '[>]' . fCustomer::fmTbl() . '(c)' => ['m.customer_id' => 'id']
-        ];
-
-        return parent::paginate(self::fmTbl() . '(m)', $filter, $page, $limit, explode(',', self::BE_COLS), $join);
-    }
+    const PAGELIMIT = 50;
 
     /**
      * @param $target
@@ -64,5 +45,13 @@ class fStream extends Feed
         mh()->insert(self::fmTbl(), $data);
 
         return self::chkErr(mh()->id());
+    }
+
+    public static function genJoin()
+    {
+        return [
+            '[>]' . fStaff::fmTbl() . '(s)' => ['m.last_user' => 'id'],
+            // '[>]' . fTag::fmTbl('lang') . '(l)' => array('m.tag_id' => 'parent_id', 'l.lang' => '[SV]'. Module::_lang())
+        ];
     }
 }

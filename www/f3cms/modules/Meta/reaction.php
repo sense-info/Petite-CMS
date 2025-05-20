@@ -33,8 +33,8 @@ class rMeta extends Reaction
             f3()->set('acceptLang', \__::pluck(fStaff::_current('lang'), 'key'));
         }
 
-        $req['page']  = (isset($req['page'])) ? ($req['page'] - 1) : 0;
-        $req['query'] = (!isset($req['query'])) ? '' : $req['query'];
+        $req['page']  = ($req['page']) ? ($req['page'] - 1) : 1;
+        $req['query'] = (isset($req['query'])) ? $req['query'] : [];
 
         $rtn = fMeta::limitRows($req['query'], $req['page'], 12);
 
@@ -42,7 +42,7 @@ class rMeta extends Reaction
             $rtn['subset'][$k]['tags'] = fMeta::lotsGenus($row['id']);
         }
 
-        return self::_return(1, $rtn);
+        return parent::_return(1, $rtn);
     }
 
     /**
@@ -60,6 +60,6 @@ class rMeta extends Reaction
             $rtn['subset'][$k]['tags'] = '[' . implode('],[', \__::pluck(fMeta::lotsGenus($row['id']), 'id')) . ']';
         }
 
-        return self::_return(1, $rtn['subset']);
+        return parent::_return(1, $rtn['subset']);
     }
 }

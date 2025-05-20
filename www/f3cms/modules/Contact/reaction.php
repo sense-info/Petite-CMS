@@ -10,32 +10,37 @@ class rContact extends Reaction
      */
     public function do_add_new($f3, $args)
     {
-        $req = f3()->get('POST'); // parent::getReq();
+        $req = parent::_getReq();
 
-        if (empty($req['name'])) {
-            return self::_return(8002, ['msg' => '姓名未填寫!!']);
-        }
+        // have to set async false (operonjs/app/scripts/modules/arena.js function adjustAjax)
+        // if (!chkCSRF()) {
+        //     return parent::_return(8002, ['msg' => '欄位未填寫，請重新確認! (miss_token)']);
+        // }
 
-        if (empty($req['email'])) {
-            return self::_return(8002, ['msg' => 'Email 未填寫!!']);
-        }
+        Validation::return($req, kContact::rule('add_new'));
 
-        if (empty($req['message'])) {
-            return self::_return(8002, ['msg' => '訊息未填寫!!']);
+        if (!empty($req['hours'])) {
+            $req['message'] .= PHP_EOL . '時數要求：' . $req['hours'];
         }
 
         fContact::insert($req);
 
         f3()->set('name', $req['name']);
         f3()->set('email', $req['email']);
+
+        f3()->set('phone', !empty($req['phone']) ? $req['phone'] : '');
+        f3()->set('type', !empty($req['type']) ? $req['type'] : '');
+        f3()->set('company', !empty($req['company']) ? $req['company'] : '');
+
         f3()->set('message', nl2br($req['message']));
 
-        $tp      = \Template::instance();
-        $content = $tp->render('mail/contact.html');
+        $sent = Sender::sendmail(
+            f3()->get('site_title') . ' 網站詢問通知',
+            Sender::renderBody('contact'),
+            f3()->get('opts.default.contact_mail')
+        );
 
-        $sent = Sender::sendmail('網站詢問通知', $content, f3()->get('opts.default.contact_mail'));
-
-        return self::_return(1, ['pid' => $obj->id, 'msg' => '感謝您~~']);
+        return parent::_return(1, ['msg' => '感謝您~~']);
     }
 
     /**

@@ -9,14 +9,91 @@ class fGenus extends Feed
 {
     const MTB = 'genus';
 
-    const PV_R = 'mgr.site';
+    const PV_R = 'base.cms';
     const PV_U = 'mgr.site';
     const PV_D = 'mgr.site';
 
     const ST_ON  = 'Enabled';
     const ST_OFF = 'Disabled';
 
-    public const BE_COLS = 'm.id,m.slug,m.sorter,m.group,m.status,l.title,l.info';
+    const MULTILANG = 0;
+
+    const BE_COLS = 'm.id,m.group,m.status,m.name,m.content';
+
+    /**
+     * @param $group
+     *
+     * @return mixed
+     */
+    public static function load($group = '')
+    {
+        $filter = [
+            'LIMIT' => 100,
+            'status' => self::ST_ON,
+            'ORDER' => self::genOrder(),
+        ];
+
+        if ('' != $group) {
+            $filter['group'] = $group;
+        }
+
+        $rows = mh()->select(self::fmTbl(), [
+            'group', 'name', 'content',
+        ], $filter);
+
+        $options = [];
+
+        foreach ($rows as $row) {
+            if ('' != $group) {
+                $options[$row['name']] = $row['content'];
+            } else {
+                $options[$row['group']][$row['name']] = $row['content'];
+            }
+        }
+
+        return $options;
+    }
+
+    /**
+     * @param $query
+     * @param $page
+     * @param $limit
+     */
+    public static function getOpts($query = '', $column = 'm.name')
+    {
+        $filter = [
+            'LIMIT' => 100,
+            'status' => self::ST_ON,
+            'ORDER' => self::genOrder(),
+        ];
+
+        if ('' != $query) {
+            $filter[$column . '[~]'] = $query;
+        }
+
+        return mh()->select(self::fmTbl() . '(m)',
+            ['m.id', 'title' => MHelper::raw('CONCAT(m.<id>, \') \', COALESCE(m.<name>, \'\'))')],
+            $filter
+        );
+    }
+
+    /**
+     * get one row by name
+     *
+     * @param int $name - option name
+     *
+     * @return array
+     */
+    public static function get($name)
+    {
+        $rows = self::exec('SELECT * FROM `' . self::fmTbl() . "` WHERE `name`=? AND `status`='" . self::ST_ON . "' LIMIT 1 ", $name);
+
+        if (1 != count($rows)) {
+            return null;
+        } else {
+            return $rows[0]['content'];
+        }
+    }
 
     public static function genOrder()
     {
@@ -28,28 +105,28 @@ class fGenus extends Feed
      *
      * @return mixed
      */
-    public static function adjustFilter($oldFilter = [])
+    public static function genQuery($queryStr = '')
     {
-        $oldFilter = parent::adjustFilter($oldFilter);
+        $query = parent::genQuery($queryStr);
 
-        if (array_key_exists('all', $oldFilter)) {
-            $oldFilter['OR']['l.title[~]'] = $oldFilter['all'];
-            $oldFilter['OR']['m.group[~]'] = $oldFilter['all'];
-            unset($oldFilter['all']);
+        if (array_key_exists('all', $query)) {
+            $query['OR']['m.name[~]']  = $query['all'];
+            $query['OR']['m.group[~]'] = $query['all'];
+            unset($query['all']);
         }
 
-        if (array_key_exists('all[!]', $oldFilter)) {
-            $oldFilter['AND']['l.title[!]'] = $oldFilter['all[!]'];
-            $oldFilter['AND']['m.group[!]'] = $oldFilter['all[!]'];
-            unset($oldFilter['all[!]']);
+        if (array_key_exists('all[!]', $query)) {
+            $query['AND']['m.name[!]']  = $query['all[!]'];
+            $query['AND']['m.group[!]'] = $query['all[!]'];
+            unset($query['all[!]']);
         }
 
-        if (array_key_exists('all[!~]', $oldFilter)) {
-            $oldFilter['AND']['l.title[!~]'] = $oldFilter['all[!~]'];
-            $oldFilter['AND']['m.group[!~]'] = $oldFilter['all[!~]'];
-            unset($oldFilter['all[!~]']);
+        if (array_key_exists('all[!~]', $query)) {
+            $query['AND']['m.name[!~]']  = $query['all[!~]'];
+            $query['AND']['m.group[!~]'] = $query['all[!~]'];
+            unset($query['all[!~]']);
         }
 
-        return $oldFilter;
+        return $query;
     }
 }
