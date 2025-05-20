@@ -10,7 +10,20 @@ class FCHelper extends Reaction
     /**
      * @var int
      */
+    public $pause = false;
+
+    /**
+     * @var int
+     */
     public $ifHistory = 0;
+    /**
+     * @var string
+     */
+    private $action = '';
+    /**
+     * @var string
+     */
+    private $path = '';
     /**
      * @var string
      */
@@ -30,8 +43,6 @@ class FCHelper extends Reaction
         if (!file_exists($this->base)) {
             mkdir($this->base, 0770, true);
         }
-
-        $this->pause = false;
 
         if (f3()->get('DEBUG') > 1) {
             $this->pause = true;
