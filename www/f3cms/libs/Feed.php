@@ -1185,12 +1185,7 @@ class Feed extends Module
      */
     final public static function renderUniqueNo($length = 6, $chars = '3456789ACDFGHJKLMNPQRSTWXY')
     {
-        $sn = '';
-        for ($i = 0; $i < $length; ++$i) {
-            $sn .= substr($chars, rand(0, strlen($chars) - 1), 1);
-        }
-
-        return $sn;
+        return secure_random_string($length, $chars);
     }
 
     /**
@@ -1236,10 +1231,6 @@ class Feed extends Module
      */
     final public static function _genToken()
     {
-        $rand1       = Encryption::salt(32);
-        $rand2       = Encryption::salt(32);
-        $tokenString = $rand1 . $rand2;
-
-        return $tokenString;
+        return secure_random_string(64);
     }
 }

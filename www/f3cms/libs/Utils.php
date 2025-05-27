@@ -427,11 +427,7 @@ function setCookieV2($idx, $val = '', $httponly = true)
     }
 
     try {
-        if ('7.3' > PHP_VERSION) {
-            setcookie($idx, $val, $opt['Expires'], $opt['Path'], $opt['Domain'], $opt['Secure'], $opt['Httponly']);
-        } else {
-            setcookie($idx, $val, $opt);
-        }
+        setcookie($idx, $val, $opt['Expires'], $opt['Path'], $opt['Domain'], $opt['Secure'], $opt['Httponly']);
         f3()->set('SESSION.' . $idx, $val);
     } catch (Exception $e) {
         exit('too late for cookie.');
@@ -454,29 +450,27 @@ function getCookie($idx)
     }
 }
 
+function secure_random_string($length, $characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ')
+{
+    $charactersLength = strlen($characters);
+    $randomString = '';
+    for ($i = 0; $i < $length; $i++) {
+        $randomIndex = random_int(0, $charactersLength - 1);
+        $randomString .= $characters[$randomIndex];
+    }
+
+    return $randomString;
+}
+
 /**
  * @return mixed
  */
 function uuid()
 {
-    $chars = bin2hex(random_bytes(32));
-    $uuid  = substr($chars, 0, 8) . '-'
+    $chars = secure_random_string(40, '0123456789abcdefghijklmnopqrstuvwxyz');
+    return substr($chars, 0, 8) . '-'
     . substr($chars, 8, 4) . '-'
     . substr($chars, 12, 4) . '-'
     . substr($chars, 16, 4) . '-'
     . substr($chars, 20, 12);
-
-    return $uuid;
-}
-
-function secure_random_string($length)
-{
-    $rand_string = '';
-    for ($i = 0; $i < $length; ++$i) {
-        $number    = random_int(0, 36);
-        $character = base_convert($number, 10, 36);
-        $rand_string .= $character;
-    }
-
-    return $rand_string;
 }
