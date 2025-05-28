@@ -107,9 +107,9 @@ class oPost extends Outfit
     /**
      * @param $args
      */
-    public static function show($args)
+    public static function _render($args)
     {
-        $row = fPost::one($args['slug'], 'slug', ['status' => fPost::ST_ON], 0);
+        $row = fPost::one(urlencode($args['slug']), 'slug', ['status' => fPost::ST_ON], 0);
 
         if (empty($row)) {
             f3()->error(404);
@@ -137,7 +137,7 @@ class oPost extends Outfit
     public static function about($args)
     {
         $args['slug'] = 'about';
-        self::show($args);
+        self::_render($args);
     }
 
     /**
@@ -146,7 +146,7 @@ class oPost extends Outfit
     public static function privacy($args)
     {
         $args['slug'] = 'privacy';
-        self::show($args);
+        self::_render($args);
     }
 
     /**
@@ -155,7 +155,7 @@ class oPost extends Outfit
     public static function terms($args)
     {
         $args['slug'] = 'terms';
-        self::show($args);
+        self::_render($args);
     }
 
     /**

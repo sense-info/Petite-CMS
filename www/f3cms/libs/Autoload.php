@@ -56,7 +56,7 @@ class F3CMS_Autoloader
      */
     public static function detect($pClassName)
     {
-        if (class_exists($pClassName, false) || (0 !== strpos($pClassName, 'F3CMS'))) {
+        if (class_exists($pClassName, false) || ((0 !== strpos($pClassName, 'F3CMS')) && (0 !== strpos($pClassName, 'PCMS')))) {
             return false;
         }
 
@@ -76,7 +76,7 @@ class F3CMS_Autoloader
             $fileName .= str_replace('_', DIRECTORY_SEPARATOR, $moduleName) . DIRECTORY_SEPARATOR . self::getType()[$type] . '.php';
 
             // use $webRootDir first
-            $fileName1 = str_replace('F3CMS', f3()->get('web_dir') . 'modules', $fileName);
+            $fileName1 = str_replace('PCMS', f3()->get('web_dir') . 'modules', $fileName);
 
             $fileName2 = str_replace('libs', 'modules', __DIR__) . str_replace('F3CMS', '', $fileName);
 

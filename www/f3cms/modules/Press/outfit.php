@@ -134,14 +134,14 @@ class oPress extends Outfit
         $tags     = fPress::lotsTag($cu['id']);
         $authors  = fPress::lotsAuthor($cu['id']);
         $relateds = fPress::lotsRelated($cu['id']);
-        $books    = fPress::lotsBook($cu['id']);
+        // $books    = fPress::lotsBook($cu['id']);
         $terms    = fPress::lotsTerm($cu['id']);
         $metas    = fPress::lotsMeta($cu['id']);
 
         $seo = [
             'desc'    => $cu['info'],
             'img'     => f3()->get('uri') . ((empty($cu['banner'])) ? $cu['cover'] : $cu['banner']),
-            'keyword' => $cu['keyword'],
+            'keyword' => '',
             'header'  => '文章',
         ];
 
@@ -177,7 +177,7 @@ class oPress extends Outfit
         _dzv('tags', $tags);
         _dzv('authors', $authors);
         _dzv('relateds', $relateds);
-        _dzv('books', $books);
+        // _dzv('books', $books);
         _dzv('terms', $terms);
 
         _dzv('next', fPress::neighbor($cu, 'next'));

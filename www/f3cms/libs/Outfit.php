@@ -77,8 +77,13 @@ class Outfit extends Module
         $class  = get_called_class();
         $method = str_replace('do_', '', $next);
 
+        $class = str_replace('F3CMS', 'PCMS', $class);
+
         if (!method_exists($class, $method)) {
-            throw new \Exception('(1004) ' . $class . '::' . $next . ' not found');
+            $class = str_replace('PCMS', 'F3CMS', $class);
+            if (!method_exists($class, $method)) {
+                throw new \Exception('(1004) ' . $class . '::' . $next . ' not found');
+            }
         }
 
         $args = parent::_escape($args, false);

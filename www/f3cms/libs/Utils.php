@@ -407,6 +407,10 @@ function getCaller()
     return $caller;
 }
 
+function safeCount($ary) {
+    return  (!is_countable($ary)) ? 0 : count($ary);
+}
+
 /**
  * @param $idx
  * @param $val

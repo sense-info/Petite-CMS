@@ -21,12 +21,16 @@ class Reaction extends Module
             $args = parent::_escape($args, false);
 
             // Create an instance of the module class.
-            $class = '\F3CMS\r' . ucfirst($args['module']);
+            $class = '\PCMS\r' . ucfirst($args['module']);
 
             // Check if the action has a corresponding method.
             $method = sprintf('do_%s', $args['method']);
             if (!method_exists($class, $method)) {
-                return self::_return(1004, ['class' => $class, 'method' => $method]);
+                $class = str_replace('PCMS', 'F3CMS', $class);
+
+                if (!method_exists($class, $method)) {
+                    return self::_return(1004, ['class' => $class, 'method' => $method]);
+                }
             }
 
             // Create a reflection instance of the module, and obtaining the action method.

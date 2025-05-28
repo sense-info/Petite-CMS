@@ -10,7 +10,7 @@ class rMedia extends Reaction
      */
     public function do_show($f3, $args)
     {
-        $cu = fMedia::one($args['slug'], 'slug', ['status' => fMedia::ST_ON]);
+        $cu = fMedia::one(urlencode($args['slug']), 'slug', ['status' => fMedia::ST_ON]);
 
         if (empty($cu)) {
             f3()->error(404);

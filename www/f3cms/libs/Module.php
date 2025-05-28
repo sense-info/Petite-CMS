@@ -124,6 +124,12 @@ class Module
         $acceptLang = f3()->get('acceptLang');
         if (1 == count($acceptLang)) {
             return f3()->get('defaultLang');
+        } else if (isset($_SERVER['HTTP_X_BACKEND_LANG'])) {
+            $lang = $_SERVER['HTTP_X_BACKEND_LANG'];
+            if (!in_array($lang, $acceptLang)) {
+                $lang = f3()->get('defaultLang');
+            }
+            return $lang;
         } else {
             if (!f3()->exists('lang') || !empty($args)) {
                 $lang = f3()->get('defaultLang');
@@ -132,8 +138,16 @@ class Module
                     $lang = f3()->get('COOKIE.user_lang');
                 }
 
+                if (isset($_SERVER['HTTP_CUSTOMER_LANG'])) {
+                    $lang = $_SERVER['HTTP_CUSTOMER_LANG'];
+                }
+
                 if (!empty($args) && !empty($args['lang'])) {
                     $lang = $args['lang'];
+                }
+
+                if (f3()->exists('REQUEST.lang') && !empty(f3()->get('REQUEST.lang'))) {
+                    $lang = f3()->get('REQUEST.lang');
                 }
 
                 if (!in_array($lang, $acceptLang)) {

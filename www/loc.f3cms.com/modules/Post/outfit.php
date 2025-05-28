@@ -1,11 +1,20 @@
 <?php
+namespace PCMS;
 
-namespace F3CMS;
+require_once '../f3cms/modules/Adv/feed.php';
+require_once '../f3cms/modules/Adv/kit.php';
+require_once '../f3cms/modules/Post/kit.php';
+require_once '../f3cms/modules/Post/outfit.php';
+
+use F3CMS\oPost as Elder;
+use F3CMS\kPost as kPost;
+use F3CMS\fAdv as fAdv;
+use F3CMS\kAdv as kAdv;
 
 /**
  * for render page
  */
-class oPost extends Outfit
+class oPost extends Elder
 {
     /**
      * @param $args
