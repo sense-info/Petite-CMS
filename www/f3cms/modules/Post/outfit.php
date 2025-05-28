@@ -109,7 +109,7 @@ class oPost extends Outfit
      */
     public static function _render($args)
     {
-        $row = fPost::one(urlencode($args['slug']), 'slug', ['status' => fPost::ST_ON], 0);
+        $row = fPost::one(parent::_slugify($args['slug']), 'slug', ['status' => fPost::ST_ON], 0);
 
         if (empty($row)) {
             f3()->error(404);

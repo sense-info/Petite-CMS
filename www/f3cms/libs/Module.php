@@ -211,6 +211,8 @@ class Module
 
         // remove unwanted characters
         // $text = preg_replace('~[^-\w]+~', '', $text);
+        //
+        $text = urlencode($text);
 
         if (empty($text)) {
             return 'n-a';
