@@ -76,7 +76,7 @@ class F3CMS_Autoloader
             $fileName .= str_replace('_', DIRECTORY_SEPARATOR, $moduleName) . DIRECTORY_SEPARATOR . self::getType()[$type] . '.php';
 
             // use $webRootDir first
-            $fileName1 = str_replace('PCMS', f3()->get('web_dir') . 'modules', $fileName);
+            $fileName1 = str_replace('PCMS', f3()->get('webpath') . 'modules', $fileName);
 
             $fileName2 = str_replace('libs', 'modules', __DIR__) . str_replace('F3CMS', '', $fileName);
 

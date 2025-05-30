@@ -14,8 +14,9 @@ class Upload extends Helper
      */
     public static function savePhoto($files, $thumbnail = [], $column = 'photo', $acceptable = [])
     {
-        $root    = rtrim(f3()->get('abspath'), '/'); // f3()->get('ROOT') . f3()->get('BASE'); //
-        $path    = '/upload/img/' . date('Y/m') . '/';
+        $root    = rtrim(f3()->get('abspath') . 'upload/' . f3()->get('upload_dir') , '/');
+        $linkPath    = f3()->get('webpath') . 'upload';
+        $path    = '/img/' . date('Y/m') . '/';
         $current = $files[$column];
 
         $acceptable = (!empty($acceptable)) ? $acceptable : f3()->get('photo_acceptable');
@@ -34,6 +35,10 @@ class Upload extends Helper
 
         if (!FSHelper::mkdir($root . $path) || !is_writable($root . $path)) {
             Reaction::_return('2006', ['msg' => 'failed to mkdir(' . $root . $path . ').']);
+        }
+
+        if (!is_link($linkPath) && !symlink($root, $linkPath)) {
+            Reaction::_return('2006', ['msg' => 'failed to link(' . $root . ').']);
         }
 
         $path_parts = pathinfo($current['name']);
@@ -92,7 +97,7 @@ class Upload extends Helper
                 }
             }
 
-            $new_fn = $filename . '.' . $ext;
+            $new_fn = '/upload' . $filename . '.' . $ext;
 
             if ($webpable && 'develop' != f3()->get('APP_ENV')) {
                 $new_fn = str_replace('.' . $ext, '.webp', $new_fn);
