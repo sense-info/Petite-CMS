@@ -79,9 +79,9 @@ class GAHelper extends Helper
             foreach ($response->getRows() as $row) {
                 $item = [];
                 foreach ($row->getDimensionValues() as $i => $dimVal) {
-                    $item[$dimensions[$i]] = self::_formatDimensionValue($dimensions[$i], $dimVal->getValue());
+                    $item['x'] = self::_formatDimensionValue($dimensions[$i], $dimVal->getValue());
                 }
-                $item['cnt'] = (int)$row->getMetricValues()[0]->getValue();
+                $item['y'] = (int)$row->getMetricValues()[0]->getValue();
                 $result[] = $item;
             }
             return $result;

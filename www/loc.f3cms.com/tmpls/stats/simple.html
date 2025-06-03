@@ -29,13 +29,27 @@
   </div>
 </nav>
 
-<div class="columns is-multiline gee" data-gene="init:loadList" data-tmpl="statsSimpleList" data-nopde="1" data-method="ga">
-  <div class="column is-3">
+<div class="columns is-multiline gee" data-gene="init:loadList" data-tmpl="statsList" data-nopde="1" data-method="status">
+  <div class="column is-6">
     <article class="message is-info">
       <div class="message-header">
         <p>瀏覽次數</p>
       </div>
-      <div class="message-body has-text-right"><span> {{:data.date[0].date}} {{:data.date[0].cnt}} </span>次</div>
+      <div class="message-body">
+        <div class="chart-box mb-2 chart-line" type="line" source="date" id="line-date-state"><canvas class="chart"></canvas></div>
+        <p class="has-text-right"><a href="https://analytics.google.com/analytics/web/" target="_blank" >前往 GA 報表 <span class="icon"><i class="fa fa-share-square-o"></i></span> </a></p>
+      </div>
+    </article>
+  </div>
+  <div class="column is-6">
+    <article class="message is-info">
+      <div class="message-header">
+        <p>流量來源</p>
+      </div>
+      <div class="message-body">
+        <div class="chart-box mb-2 chart-bar" type="bar" source="country" id="line-country-state"><canvas class="chart"></canvas></div>
+        <p class="has-text-right"><a href="https://analytics.google.com/analytics/web/" target="_blank" >前往 GA 報表 <span class="icon"><i class="fa fa-share-square-o"></i></span> </a></p>
+      </div>
     </article>
   </div>
 </div>
