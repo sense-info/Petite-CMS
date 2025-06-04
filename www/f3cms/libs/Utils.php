@@ -221,6 +221,14 @@ function removeZH($string)
     return preg_replace($ascii, '', $string);
 }
 
+function containsCJK($string) {
+    // 定義包含中、日、韓文字符的Unicode範圍的正則表達式
+    $cjkPattern = '/[\x{4E00}-\x{9FFF}\x{3040}-\x{30FF}\x{AC00}-\x{D7AF}]/u';
+
+    // 使用preg_match來檢測字串中是否含有中、日、韓文字元
+    return preg_match($cjkPattern, $string);
+}
+
 /**
  * @param $str
  * @param $mode

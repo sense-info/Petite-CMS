@@ -5,7 +5,10 @@
 
 namespace F3CMS;
 
-class FSHelper
+use Intervention\Image\Drivers\Imagick\Driver;
+use Intervention\Image\ImageManager as Image;
+
+class FSHelper extends Helper
 {
     public static function mkdir($pathAry = [])
     {
@@ -181,6 +184,82 @@ class FSHelper
         return $contents;
     }
 
+    public static function genThumbnails($filename, $file, $thumbnails, $root = '')
+    {
+        try {
+            $path_parts = pathinfo($file['name']);
+            $old_fn     = $path_parts['filename'];
+            $ext        = $path_parts['extension'];
+
+            if ($root == '') {
+                $root = rtrim(f3()->get('abspath') . 'upload/' . f3()->get('upload_dir') , '/');
+            }
+
+            $tmpl = $root . $filename . '%s.' . $ext;
+
+            $manager = Image::withDriver(new Driver());
+
+            $im = $manager->read($file['tmp_name']);
+
+            $webpable = self::is_webpable($file['type']);
+
+            $width  = $im->width();
+            $height = $im->height();
+
+            if ($width > 1440) {
+                $im->save(sprintf($tmpl, '_ori')); // save original img
+                // resizing to default size
+                $im->scale(width: 1440);
+            }
+
+            // TODO: watermark
+            // $im->insert('public/watermark.png', 'bottom-right', 10, 10);
+
+            if (!file_exists(sprintf($tmpl, ''))) {
+                $im->save(sprintf($tmpl, ''));
+            }
+
+            if ($webpable) {
+                self::webp(sprintf($tmpl, ''));
+            }
+
+            $im->scale(width: 720);
+            $im->save(sprintf($tmpl, '_md'));
+            if ($webpable) {
+                self::webp(sprintf($tmpl, '_md'));
+            }
+
+            $im->scale(width: 360);
+            $im->save(sprintf($tmpl, '_sm'));
+            if ($webpable) {
+                self::webp(sprintf($tmpl, '_sm'));
+            }
+
+            // smaller then 360
+            foreach ($thumbnails as $ns) {
+                // cropping and resizing
+                $im->cover($ns[0], $ns[1]);
+
+                $suffix = '_' . $ns[0] . 'x' . $ns[1];
+
+                $im->save(sprintf($tmpl, $suffix));
+                if ($webpable) {
+                    self::webp(sprintf($tmpl, $suffix));
+                }
+            }
+
+            $new_fn = '/upload' . $filename. '.' . $ext;
+            if ($webpable && 'develop' != f3()->get('APP_ENV')) {
+                $new_fn = str_replace('.' . $ext, '.webp', $new_fn);
+                $new_fn .= '?' . $ext;
+            }
+
+            return [$new_fn, $width, $height, $old_fn];
+        } catch (\Exception $e) {
+            return ['error' => $e->getMessage()]; // log?
+        }
+    }
+
     /**
      * @example
      * Template Name: Health Check
@@ -222,5 +301,48 @@ class FSHelper
             'Version'     => 'Version',
             'Status'      => 'Status',
         ];
+    }
+
+    /**
+     * @param $path
+     *
+     * @return mixed
+     */
+    public static function webp($path)
+    {
+        if (file_exists($path)) {
+            try {
+                $logger     = new \Log('convert.log');
+                $path_parts = pathinfo($path);
+                $ext        = $path_parts['extension'];
+
+                $ta    = str_replace('.' . $ext, '.webp', $path);
+                $ratio = 60;
+                $sh    = 'convert ' . $path . ' -quality ' . $ratio . ' -define webp:lossless=false,method=6,auto-filter=true,partitions=3,image-hint=photo ' . $ta . ';';
+
+                $logger->write($sh);
+                shell_exec($sh);
+
+                $path = $ta;
+            } catch (Exception $e) {
+                $logger = new \Log('convert_error.log');
+                $logger->write('failed convert to webp:' . $path);
+            }
+        }
+
+        return $path;
+    }
+
+    /**
+     * @param $mimeType
+     */
+    public static function is_webpable($mimeType)
+    {
+        $taMimeTypes = [
+            'image/jpeg',
+            'image/png',
+        ];
+
+        return in_array($mimeType, $taMimeTypes);
     }
 }

@@ -2,17 +2,14 @@
 
 namespace F3CMS;
 
-use Intervention\Image\Drivers\Imagick\Driver;
-use Intervention\Image\ImageManager as Image;
-
 class Upload extends Helper
 {
     /**
      * @param       $files
-     * @param array $thumbnail
+     * @param array $thumbnails
      * @param       $column
      */
-    public static function savePhoto($files, $thumbnail = [], $column = 'photo', $acceptable = [])
+    public static function savePhoto($files, $thumbnails = [], $column = 'photo', $acceptable = [])
     {
         $root    = rtrim(f3()->get('abspath') . 'upload/' . f3()->get('upload_dir') , '/');
         $linkPath    = f3()->get('webpath') . 'upload';
@@ -41,75 +38,11 @@ class Upload extends Helper
             Reaction::_return('2006', ['msg' => 'failed to link(' . $root . ').']);
         }
 
-        $path_parts = pathinfo($current['name']);
-        $old_fn     = $path_parts['filename'];
-        $ext        = $path_parts['extension'];
-
-        $filename = $path . substr(md5(uniqid(microtime(), 1)), 0, 15);
-
         if (file_exists($current['tmp_name'])) {
-            $manager = Image::withDriver(new Driver());
-
-            $im = $manager->read($current['tmp_name']);
-
-            $webpable = self::is_webpable($current['type']);
-
-            $width  = $im->width();
-            $height = $im->height();
-
-            if ($width > 1440) {
-                $im->save($root . $filename . '_ori.' . $ext); // save original img
-
-                // resizing to default size
-                $im->scale(width: 1440);
-            }
-
-            // TODO: watermark
-            // $im->insert('public/watermark.png', 'bottom-right', 10, 10);
-
-            $im->save($root . $filename . '.' . $ext);
-            if ($webpable) {
-                self::webp($root . $filename . '.' . $ext);
-            }
-
-            $im->scale(width: 720);
-
-            $im->save($root . $filename . '_md.' . $ext);
-            if ($webpable) {
-                self::webp($root . $filename . '_md.' . $ext);
-            }
-
-            $im->scale(width: 360);
-
-            $im->save($root . $filename . '_sm.' . $ext);
-            if ($webpable) {
-                self::webp($root . $filename . '_sm.' . $ext);
-            }
-
-            // smaller then 360
-            foreach ($thumbnail as $ns) {
-                // cropping and resizing
-                $im->cover($ns[0], $ns[1]);
-
-                $im->save($root . $filename . '_' . $ns[0] . 'x' . $ns[1] . '.' . $ext);
-                if ($webpable) {
-                    self::webp($root . $filename . '_' . $ns[0] . 'x' . $ns[1] . '.' . $ext);
-                }
-            }
-
-            $new_fn = '/upload' . $filename . '.' . $ext;
-
-            if ($webpable && 'develop' != f3()->get('APP_ENV')) {
-                $new_fn = str_replace('.' . $ext, '.webp', $new_fn);
-                $new_fn .= '?' . $ext;
-            }
+            return FSHelper::genThumbnails($path . substr(md5(uniqid(microtime(), 1)), 0, 15), $current, $thumbnails);
         } else {
-            $new_fn = '';
-            $width  = 0;
-            $height = 0;
+            return ['', 0, 0, ''];
         }
-
-        return [$new_fn, $width, $height, $old_fn];
     }
 
     /**
@@ -224,61 +157,6 @@ class Upload extends Helper
     }
 
     /**
-     * scan folder
-     *
-     * @param string $dir
-     * @param int    $only_dir -only folder type or all
-     * @param string $target   -target column name or all
-     *
-     * @return array
-     */
-    public static function scan($dir = '', $only_dir = 0, $target = 'all')
-    {
-        $root = f3()->get('ROOT') . f3()->get('BASE');
-
-        $files = [];
-
-        // Is there actually such a folder/file?
-        if (file_exists($root . $dir)) {
-            foreach (scandir($root . $dir) as $f) {
-                if (!$f || '.' == $f[0]) {
-                    continue; // Ignore hidden files
-                }
-
-                if (is_dir($root . $dir . '/' . $f)) {
-                    if (1 == $only_dir || 0 == $only_dir) {
-                        // The path is a folder
-                        $files[] = [
-                            'name'  => $f,
-                            'type'  => 'folder',
-                            'path'  => $dir . '/' . $f,
-                            'items' => self::scan($dir . '/' . $f, $only_dir), // Recursively get the contents of the folder
-                        ];
-                    }
-                } else {
-                    // It is a file
-                    if (2 == $only_dir || 0 == $only_dir) {
-                        $tmp = [
-                            'name' => $f,
-                            'type' => 'file',
-                            'path' => $dir . '/' . $f,
-                            'size' => filesize($root . $dir . '/' . $f), // Gets the size of this file
-                        ];
-
-                        if ('all' == $target) {
-                            $files[] = $tmp;
-                        } else {
-                            $files[] = $tmp[$target];
-                        }
-                    }
-                }
-            }
-        }
-
-        return $files;
-    }
-
-    /**
      * @param $source
      * @param $dist
      * @param $width
@@ -299,48 +177,5 @@ class Upload extends Helper
 
         $imagick->clear();
         $imagick->destroy();
-    }
-
-    /**
-     * @param $path
-     *
-     * @return mixed
-     */
-    public static function webp($path)
-    {
-        if (file_exists($path)) {
-            try {
-                $logger     = new \Log('convert.log');
-                $path_parts = pathinfo($path);
-                $ext        = $path_parts['extension'];
-
-                $ta    = str_replace('.' . $ext, '.webp', $path);
-                $ratio = 60;
-                $sh    = 'convert ' . $path . ' -quality ' . $ratio . ' -define webp:lossless=false,method=6,auto-filter=true,partitions=3,image-hint=photo ' . $ta . ';';
-
-                $logger->write($sh);
-                shell_exec($sh);
-
-                $path = $ta;
-            } catch (Exception $e) {
-                $logger = new \Log('convert_error.log');
-                $logger->write('failed convert to webp:' . $path);
-            }
-        }
-
-        return $path;
-    }
-
-    /**
-     * @param $mimeType
-     */
-    public static function is_webpable($mimeType)
-    {
-        $taMimeTypes = [
-            'image/jpeg',
-            'image/png',
-        ];
-
-        return in_array($mimeType, $taMimeTypes);
     }
 }
