@@ -255,6 +255,20 @@ class Outfit extends Module
         return $newpath;
     }
 
+    public static function convertUrlsToLinks($text) {
+        // 正則表達式匹配模式，用於識別 https 開頭的 URL
+        $regex = '@(?<!["\'])((https)://[^\s/$.].([\w./])*\??[\w&=-]*)@';
+
+        // 使用 preg_replace_callback 來替換匹配的 URL 為 HTML <a> 標籤
+        $textWithLinks = preg_replace_callback($regex, function ($matches) {
+            $url = $matches[1];
+            // 返回替換後的 <a> 標籤
+            return '<a href="' . htmlspecialchars($url) . '">' . htmlspecialchars($url) . '</a>';
+        }, $text);
+
+        return $textWithLinks;
+    }
+
     /**
      * render pathByDevice file name
      *
@@ -423,7 +437,7 @@ class Outfit extends Module
 
     public static function repathImg($str)
     {
-        return str_replace('/upload/', f3()->get('picUri'), empty($str) ? '' : $str);
+        return $str; // str_replace('/upload/', f3()->get('picUri'), empty($str) ? '' : $str);
     }
 
     public static function repathUri($str)

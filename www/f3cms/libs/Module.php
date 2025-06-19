@@ -19,7 +19,7 @@ class Module
                     if ($quote) {
                         $array[$k] = mh()->quote(self::protectedXss2($v));
                     } else {
-                        $array[$k] = ('content' != $k) ? self::_mres(self::protectedXss2($v)) : self::_mres($v, false);
+                        $array[$k] = ('content' != $k) ? self::_mres(self::protectedXss2($v)) : self::_mres(PFHelper::getInstance()->purify(html_entity_decode($v)), false);
                     }
                 } elseif (is_array($v)) {
                     $array[$k] = self::_escape($v, $quote);
