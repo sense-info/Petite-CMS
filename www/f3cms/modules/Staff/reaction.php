@@ -229,6 +229,38 @@ class rStaff extends Reaction
      * @param $f3
      * @param $args
      */
+    public function do_resend($f3, $args)
+    {
+        chkAuth(fStaff::PV_U); // kStaff::_chkLogin();
+        $req = parent::_getReq();
+
+        if (!isset($req['pid'])) {
+            return self::_return(8004);
+        }
+
+        $cu = fStaff::one((int) $req['pid']);
+
+        if (empty($cu)) {
+            return self::_return(8004);
+        }
+
+        $verify_code = fStaff::renderUniqueNo(32);
+
+        kStaff::sendInvite($cu['email'], $verify_code);
+
+        fStaff::saveCol([
+            'col' => 'verify_code',
+            'val' => $verify_code,
+            'pid' => $cu['id'],
+        ]);
+
+        return parent::_return(1, ['msg' => '已寄出驗證信']);
+    }
+
+    /**
+     * @param $f3
+     * @param $args
+     */
     public function do_sudo($f3, $args)
     {
         chkAuth(fStaff::PV_U); // kStaff::_chkLogin();

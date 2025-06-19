@@ -28,7 +28,7 @@ class Sender extends Helper
             if (strlen($content) < 20) { // TODO: add file check
                 $content = self::renderBody($content);
             }
-            $rtn = call_user_func_array('self::' . $method, [$subject, $content, $receiver]);
+            $rtn = call_user_func_array([Sender::class, $method], [$subject, $content, $receiver]);
         }
 
         return $rtn;
