@@ -44,6 +44,51 @@ class rMedia extends Reaction
      *
      * @param object $f3   - $f3
      * @param array  $args - uri params
+     */
+    public function do_upload($f3, $args)
+    {
+        kStaff::_chkLogin();
+
+        $req         = parent::_getReq();
+        $need2Insert = 1;
+
+        if (empty($req['parent_id']) || empty($req['target'])) {
+            $need2Insert = 0;
+        }
+
+        $req['target'] = empty($req['target']) ? 'Normal' : $req['target'];
+
+        $files = f3()->get('FILES');
+        if (empty($files)) {
+            return parent::_return(8004);
+        }
+
+        $path_parts    = pathinfo($files['photo']['name']);
+        $old_fn        = $path_parts['filename'];
+        $thumbnailSize = (f3()->exists($req['target'] . '_thn')) ? f3()->get($req['target'] . '_thn') : f3()->get('default_thn');
+
+        [$filename, $width, $height] = Upload::savePhoto($files, [$thumbnailSize, f3()->get('default_thn'), f3()->get('all_thn')]);
+
+        if ($need2Insert) {
+            $pid = fMedia::insert([
+                'title'     => $old_fn,
+                'target'    => $req['target'],
+                'parent_id' => $req['parent_id'],
+                'slug'      => fMedia::renderUniqueNo(16),
+                'pic'       => $filename,
+            ]);
+        } else {
+            $pid = 0;
+        }
+
+        return self::_return(1, ['filename' => $filename, 'id' => $pid]);
+    }
+
+    /**
+     * save photo
+     *
+     * @param object $f3   - $f3
+     * @param array  $args - uri params
      *
      * @return array - std json
      */
