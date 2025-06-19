@@ -19,25 +19,6 @@ class fAdv extends Feed
         $idArray = array_column($positions, 'id');
 
         return array_combine($idArray, $positions);
-
-        // return [
-        //     '1' => [
-        //         'id'    => '1',
-        //         'title' => '首頁/HERO大圖(1600*800)',
-        //     ],
-        //     '2' => [
-        //         'id'    => '2',
-        //         'title' => '外部連結(400*200)',
-        //     ],
-        //     '3' => [
-        //         'id'    => '3',
-        //         'title' => '首頁跳出式提示',
-        //     ],
-        //     '4' => [
-        //         'id'    => '4',
-        //         'title' => '會員跳出式提示',
-        //     ],
-        // ];
     }
 
     /**

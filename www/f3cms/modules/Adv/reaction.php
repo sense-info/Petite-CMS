@@ -92,17 +92,19 @@ class rAdv extends Reaction
         $rtn    = fAdv::limitRows($req['query'], $req['page'], 200, ',m.uri');
         $groups = [];
 
-        $positions = fAdv::getPositions();
-
-        $positions = array_merge([
-            '0' => [
+        $origAry = fAdv::getPositions();
+        $origAry = array_merge([
+            [
                 'id'    => '0',
                 'title' => '未選擇',
             ]
-        ], $positions);
+        ], $origAry);
+
+        $idArray = array_column($origAry, 'id');
+        $positions = array_combine($idArray, $origAry);
 
         foreach ($rtn['subset'] as $row) {
-            if (!isset($positions[$row['position_id']])) {
+            if (!isset($positions[$row['position_id']])) { // for the unknown position
                 $positions[$row['position_id']] = [
                     'id'    => $row['position_id'],
                     'title' => '未知分類 #' . $row['position_id'],
@@ -128,14 +130,8 @@ class rAdv extends Reaction
             return self::_return(8106, ['msg' => '原文無內容']);
         }
 
-        $positions = fGenus::getOpts('adv', 'm.group');
-
-        if (empty($positions)) {
-            return self::_return(8106, ['msg' => '無可用廣告版位']);
-        }
-
         $adv = [
-            'position_id' => $positions[0]['id'],
+            'position_id' => 0,
             'weight' => 1,
             'cover' => $press['cover'],
             'uri' => '/p/' . $press['id'] . '/' . $press['slug'],
@@ -148,11 +144,13 @@ class rAdv extends Reaction
         ];
 
         foreach ($press['lang'] as $idx => $row) {
-            $adv['lang'][$idx] = [
-                'title' => $press['lang'][$idx]['title'],
-                'subtitle' => $press['online_date'],
-                'content' => (!empty($press['lang'][$idx]['exposure'])) ? $press['lang'][$idx]['exposure'] : $press['lang'][$idx]['info']
-            ];
+            if (isset($press['lang'][$idx]['title'])) {
+                $adv['lang'][$idx] = [
+                    'title' => $press['lang'][$idx]['title'],
+                    'subtitle' => $press['online_date'],
+                    'content' => (!empty($press['lang'][$idx]['exposure'])) ? $press['lang'][$idx]['exposure'] : $press['lang'][$idx]['info']
+                ];
+            }
         }
 
         $pid = fAdv::save($adv);
