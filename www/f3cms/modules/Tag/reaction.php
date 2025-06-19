@@ -110,6 +110,12 @@ class rTag extends Reaction
         $positions = array_combine($idArray, $origAry);
 
         foreach ($rtn['subset'] as $row) {
+            if (!isset($positions[$row['cate_id']])) { // for the unknown genus
+                $positions[$row['cate_id']] = [
+                    'id'    => $row['cate_id'],
+                    'title' => '未知分類 #' . $row['cate_id'],
+                ];
+            }
             $groups[$row['cate_id']]['title']  = $positions[$row['cate_id']]['title'];
             $groups[$row['cate_id']]['rows'][] = $row;
         }

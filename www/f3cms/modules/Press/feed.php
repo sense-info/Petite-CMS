@@ -90,14 +90,15 @@ class fPress extends Feed
             'm.cate_id' => $cu['cate_id'],
             'm.id[!]' => $cu['id'],
             'ORDER' => self::genOrder(),
-            // 'LIMIT' => 1
         ];
 
         if ('next' == $type) {
-            $filter['m.sorter[>=]'] = $cu['sorter'];
-        } else {
             $filter['m.sorter[<=]'] = $cu['sorter'];
-            $filter['ORDER']['m.sorter'] = 'DESC';
+            $filter['m.online_date[>=]'] = $cu['online_date'];
+            $filter['ORDER'] = array_map(fn($order)  => (strtoupper($order) === 'ASC' ? 'DESC' : 'ASC'), $filter['ORDER']);
+        } else {
+            $filter['m.sorter[>=]'] = $cu['sorter'];
+            $filter['m.online_date[<=]'] = $cu['online_date'];
         }
 
         $row = mh()->get(self::fmTbl() . '(m)', self::genJoin(), [

@@ -124,14 +124,18 @@ class oPress extends Outfit
             $filter['status'] = [fPress::ST_PUBLISHED, fPress::ST_CHANGED];
         }
 
-        $cu = fPress::one($id, 'id', $filter, 0);
+        if (is_numeric($id)) {
+            $cu = fPress::one($id, 'id', $filter, 0);
+        } else {
+            $cu = fPress::one(parent::_slugify($id), 'slug', $filter, 0);
+        }
 
         if (empty($cu)) {
             f3()->error(404);
         }
 
         $cate     = fCategory::one($cu['cate_id'], 'id', ['status' => fCategory::ST_ON], 0);
-        $tags     = fPress::lotsTag($cu['id']);
+        $tags     = fPress::lotsTag($cu['id'], true);
         $authors  = fPress::lotsAuthor($cu['id']);
         $relateds = fPress::lotsRelated($cu['id']);
         // $books    = fPress::lotsBook($cu['id']);
@@ -144,15 +148,6 @@ class oPress extends Outfit
             'keyword' => '',
             'header'  => '文章',
         ];
-
-        if (!empty($metas['seo_desc'])) {
-            $seo['desc'] = $metas['seo_desc'];
-        }
-
-        if (!empty($metas['seo_keyword'])) {
-            $seo['keyword']       = $metas['seo_keyword'];
-            $metas['seo_keyword'] = explode(',', $metas['seo_keyword']);
-        }
 
         if (!empty($tags)) {
             $seo['keyword'] .= implode(',', \__::pluck($tags, 'title'));
@@ -170,6 +165,16 @@ class oPress extends Outfit
                 $relateds[$k]['authors'] = fPress::lotsAuthor($row['id']);
             }
         }
+
+        $cu['content'] = parent::convertUrlsToLinks($cu['content']);
+
+        $subset = fMedia::limitRows([
+            'm.status' => fMedia::ST_ON,
+            'm.target' => 'Press',
+            'm.parent_id' => $cu['id'],
+        ], 0, 30);
+
+        _dzv('medias', $subset['subset']);
 
         _dzv('cu', $cu);
         _dzv('cate', $cate);
@@ -193,6 +198,8 @@ class oPress extends Outfit
             $cu['last_ts'],
             $cu['online_date']
         ));
+
+        kPress::fartherData($cu['id']);
 
         f3()->set('breadcrumb_sire', ['title' => '文章', 'slug' => '/presses', 'sire' => ['title' => '首頁', 'slug' => '/home']]);
 
