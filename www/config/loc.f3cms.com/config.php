@@ -6,4 +6,6 @@ $f3->set('theme', 'default');
 
 $f3->set('upload_dir', 'loc/');
 
+$f3->set('configpath', __DIR__);
+
 $f3->set('web_dir', $webRootDir);

@@ -4,6 +4,11 @@ namespace F3CMS;
 
 class Worker extends Helper
 {
+    public $class;
+    public $method;
+    public $cuClass;
+    public $logger;
+
     // ! Instantiate class
     /**
      * @param $module

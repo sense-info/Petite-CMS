@@ -30,7 +30,7 @@ $f3->set('siteBeginDate', 'Dec 21 2021 12:00:00'); // remove this after online
 
 $f3->set('abspath', $rootDir);
 
-$f3->set('fe_version', '180807001');
+$f3->set('feVersion', '250701001');
 
 $f3->set('rows_limit', 12);
 
@@ -95,4 +95,11 @@ $f3->set('smtp_password', ''); //
 $f3->set('smtp_name', 'Trevor Pao');
 $f3->set('smtp_from', 'sense.info.co@gmail.com');
 
-$f3->set('webmaster', 'shuaib25@gmail.com');
+$f3->set('webmaster', 'trevor@sense-info.co');
+
+$f3->set('crontabhost', 'hostname');
+
+// MP
+$f3->set('mp.merchant', '');
+$f3->set('mp.secret', '');
+$f3->set('mp.channel_id', '');
