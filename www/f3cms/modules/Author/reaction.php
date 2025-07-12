@@ -26,8 +26,6 @@ class rAuthor extends Reaction
      */
     public function do_more($f3, $args)
     {
-        $query = 'm.status:' . fPress::ST_PUBLISHED;
-
         $req = parent::_getReq();
 
         $req['page'] = intval($req['page']);

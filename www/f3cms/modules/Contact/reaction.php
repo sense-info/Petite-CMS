@@ -12,16 +12,11 @@ class rContact extends Reaction
     {
         $req = parent::_getReq();
 
-        // have to set async false (operonjs/app/scripts/modules/arena.js function adjustAjax)
         // if (!chkCSRF()) {
         //     return parent::_return(8002, ['msg' => '欄位未填寫，請重新確認! (miss_token)']);
         // }
 
         Validation::return($req, kContact::rule('add_new'));
-
-        if (!empty($req['hours'])) {
-            $req['message'] .= PHP_EOL . '時數要求：' . $req['hours'];
-        }
 
         fContact::insert($req);
 
@@ -43,27 +38,4 @@ class rContact extends Reaction
         return parent::_return(1, ['msg' => '感謝您~~']);
     }
 
-    /**
-     * @param $f3
-     * @param $args
-     */
-    public function do_dl_csv($f3, $args)
-    {
-        kStaff::_chkLogin();
-
-        $rows = $this->_db->exec(
-            'SELECT * FROM `' . self::fmTbl() . '` ORDER BY insert_ts DESC '
-        );
-
-        if (!$rows) {
-            header('Content-Type:text/html; charset=utf-8');
-            echo '無結果';
-        } else {
-            $template = new Template();
-            f3()->set('rows', $rows);
-
-            Outfit::_setXls('contact_' . date('YmdHis'));
-            echo $template->render('contact.dl.html', 'application/vnd.ms-excel');
-        }
-    }
 }
