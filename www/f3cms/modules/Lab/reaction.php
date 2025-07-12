@@ -28,6 +28,16 @@ class rLab extends Reaction
             self::test('isAllowedIP');
         }
 
+        // /api/lab/info?batchDraft=1
+        if (!empty($_GET['batchDraft'])) {
+            self::test('batchDraft');
+        }
+
+        // /api/lab/info?batchAnswer=1
+        if (!empty($_GET['batchAnswer'])) {
+            self::test('batchAnswer');
+        }
+
         if (!empty($_GET['repeat'])) {
             echo '<script type="text/javascript"> setTimeout(function () { location.reload(true); }, 3000); </script>';
         }
@@ -53,6 +63,12 @@ class rLab extends Reaction
                 } else {
                     echo PHP_EOL . 'RTN_SAFEIP';
                 }
+                break;
+            case 'batchDraft':
+                fDraft::cronjob(1);
+                break;
+            case 'batchAnswer':
+                fDraft::cronAnswer(1);
                 break;
             case 'getHashCost':
                 echo 'Appropriate Cost Found: ' . kLab::getHashCost() . PHP_EOL; // 50 milliseconds

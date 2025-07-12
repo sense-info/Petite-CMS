@@ -7,44 +7,80 @@ namespace F3CMS;
  */
 class kDraft extends Kit
 {
-    public static function writing($content, $guideline)
+    public static function writing($intent)
     {
-        return self::_formatRePly(OpenAi::answer([['content' => $fixedPrompt, 'reply' => '']], '', 0, 16384));
+        return self::ask(__FUNCTION__, ['intent' => $intent]);
     }
 
-    public static function layout($content)
+    public static function seohelper($guideline)
     {
-        return self::_formatRePly(OpenAi::answer([['content' => $fixedPrompt, 'reply' => '']], '', 0, 16384));
+        return self::ask(__FUNCTION__, ['intent' => '產生文章 SEO 相關資料', 'guideline' => $guideline]);
     }
 
-    public static function expertDiscussion($content)
+    public static function guideline($intent)
     {
-        return self::_formatRePly(OpenAi::answer([['content' => $fixedPrompt, 'reply' => '']], '', 0, 16384));
+        return self::ask(__FUNCTION__, ['intent' => $intent]);
     }
 
-    public static function guideline($content)
+    public static function translate($lang, $guideline)
     {
-        return self::_formatRePly(OpenAi::answer([['content' => $fixedPrompt, 'reply' => '']], '', 0, 16384));
+        return self::ask(__FUNCTION__, ['intent' => '產生文章 '. $lang .' 翻譯', 'guideline' => $guideline, 'lang' => $lang]);
     }
 
-    public static function seohelper($content)
+    public static function quicktrans($lang, $guideline)
     {
-        return self::_formatRePly(OpenAi::answer([['content' => $fixedPrompt, 'reply' => '']], '', 0, 16384));
+        return self::ask(__FUNCTION__, ['intent' => '產生文案 '. $lang .' 翻譯', 'guideline' => $guideline, 'lang' => $lang]);
     }
 
-    public static function translate($lang, $content)
+    public static function answer($request_id)
     {
-        $reply = OpenAi::answer([['content' => $txt, 'reply' => '']], $format, 0, 16384);
+        $merchant = f3()->get('mp.merchant');
+        $secret   = f3()->get('mp.secret');
 
-        if ($lang == 'ko') {
-            $reply = str_replace([' '], [' '], $reply);
+        $api = new MPThelper($merchant, $secret);
+
+        $action       = 'answer';
+        $request_data = [
+            'request_id' => $request_id,
+        ];
+
+        $result = $api->call($action, $request_data);
+
+        return $result;
+    }
+
+    public static function ask($method, $params)
+    {
+        $merchant = f3()->get('mp.merchant');
+        $secret   = f3()->get('mp.secret');
+
+        $api = new MPThelper($merchant, $secret);
+
+        $action       = 'ask';
+        $request_data = [
+            'method' => $method,
+            'intent' => $params['intent'],
+        ];
+
+        if (isset($params['lang'])) {
+            $request_data['lang'] = $params['lang'];
         }
 
-        return self::_formatRePly($reply);
+        if (isset($params['guideline'])) {
+            $request_data['guideline'] = $params['guideline'];
+        }
+
+        $result = $api->call($action, $request_data);
+
+        return $result;
     }
 
-    private static function _formatRePly($reply = '')
+    public static function toMarkdown($text)
     {
-        return $reply;
+        return $text; // use js markdown convert
+
+        $text = trim($text);
+        $text = \Markdown::instance()->convert($text);
+        return preg_replace('/<br \/>+/', '</p><p>', $text);
     }
 }

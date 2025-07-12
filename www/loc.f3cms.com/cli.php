@@ -9,6 +9,7 @@ $rootDir = __DIR__ . '/../';
 $webRootDir = __DIR__ . '/';
 
 require_once $rootDir .'f3cms/vendor/autoload.php';
+
 require_once $rootDir .'f3cms/libs/Autoload.php';
 require_once $rootDir .'f3cms/libs/Utils.php';
 

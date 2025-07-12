@@ -76,56 +76,6 @@ class S3Helper extends Helper
     }
 
     /**
-     * @param $filePath, start with /
-     *
-     * @return mixed
-     */
-    public function putLF($filePath)
-    {
-        $newPath = str_replace('/upload/', '', $filePath);
-
-        $uploader = new MultipartUploader($this->client, f3()->get('abspath') . substr($filePath, 1), [
-            'Bucket'     => $this->bucket,
-            'Key'        => $newPath,
-        ]);
-
-        $promise = $uploader->promise();
-
-        $promise->then(
-            function ($val) use ($newPath) {
-                $merchant = f3()->get('mp.merchant');
-                $secret   = f3()->get('mp.secret');
-
-                $api = new MPThelper($merchant, $secret);
-
-                $action       = 'transcoder';
-                $request_data = [
-                    'filename'   => $newPath,
-                    'channel_id' => f3()->get('mp.channel_id'),
-                    'title'      => '課程影片',
-                ];
-
-                $result = $api->call($action, $request_data);
-                $logger = new \Log('s3.log');
-                $logger->write(jsonEncode($request_data));
-                $logger->write(jsonEncode($result));
-            },
-            function ($reason) {
-                $logger = new \Log('s3.log');
-                $logger->write('The promise was rejected with ' . $reason);
-            }
-        );
-
-        try {
-            $result = $uploader->upload();
-        } catch (MultipartUploadException $e) {
-            $result = $e->getMessage();
-        }
-
-        return $result;
-    }
-
-    /**
      * 非同步上傳檔案到 S3
      *
      * @param string $filePath

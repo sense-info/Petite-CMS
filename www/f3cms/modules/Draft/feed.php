@@ -56,13 +56,35 @@ class fDraft extends Feed
             // 'fr' => '法語',
         ];
     }
+    public static function cronAnswer($limit = 5)
+    {
+        mh(true)->info();
+
+        $limit = (!empty($limit)) ? max(min($limit * 1, 1), 10) : 5;
+
+        $data = self::limitRows([
+            'm.status' => self::ST_WAITING,
+            'm.request_id[!]' => '',
+            'ORDER' => ['m.id' => 'ASC'],
+        ], 0, $limit, ',m.request_id');
+
+        \__::map($data['subset'], function ($row) {
+
+            $result = self::batchAnswer($row);
+
+            echo $result;
+            usleep(300000); // 0.3s
+        });
+    }
 
     public static function cronjob($limit = 5)
     {
         mh(true)->info();
 
-        $data = fDraft::limitRows([
-            'm.status' => fDraft::ST_NEW,
+        $limit = (!empty($limit)) ? max(min($limit * 1, 1), 10) : 5;
+
+        $data = self::limitRows([
+            'm.status' => self::ST_NEW,
             'ORDER' => ['m.id' => 'ASC'],
         ], 0, $limit, ',m.guideline');
 
@@ -96,116 +118,15 @@ class fDraft extends Feed
     {
         $rtn = PHP_EOL . $row['id'] . ') Writing : ';
 
-        $reply = kDraft::writing($row['intent'], $row['guideline']);
+        $res = kDraft::writing($row['intent'], $row['guideline']);
         usleep(30000); // 0.03s
-
-        return self::_formatAiRtn($row['id'], $reply, $rtn);
-    }
-
-    public static function batchGuideline($row)
-    {
-        $rtn = PHP_EOL . $row['id'] . ') Guideline : ';
-
-        $reply = kDraft::guideline($row['intent']);
-        usleep(30000); // 0.03s
-
-        return self::_formatAiRtn($row['id'], $reply, $rtn);
-    }
-
-    public static function batchLayout($row)
-    {
-        $rtn = PHP_EOL . $row['id'] . ') Guideline : ';
-
-        $reply = kDraft::layout($row['intent']);
-        usleep(30000); // 0.03s
-
-        return self::_formatAiRtn($row['id'], $reply, $rtn);
-    }
-
-    public static function batchExpert($row)
-    {
-        $rtn = PHP_EOL . $row['id'] . ') Expert Discussion : ';
-
-        $reply = kDraft::expertDiscussion($row['intent']);
-        usleep(30000); // 0.03s
-
-        return self::_formatAiRtn($row['id'], $reply, $rtn);
-    }
-
-    public static function batchSeohelper($row)
-    {
-        $rtn = PHP_EOL . $row['id'] . ') Seohelper : ';
-
-        $reply = kDraft::seohelper($row['guideline']);
-        usleep(30000); // 0.03s
-
-        return  self::_formatAiRtn($row['id'], $reply, $rtn);
-    }
-
-    public static function batchTranslate($row)
-    {
-        $rtn = PHP_EOL . $row['id'] . ') Translate : ';
-
-        $reply = kDraft::translate($row['lang'], $row['guideline']);
-        usleep(30000); // 0.03s
-
-        if (stripos($reply, '再問我一次') === 0) {
-            self::reportError($row['id'], 'wrong ai result');
-            $rtn .= 'ai 說再問我一次';
-
-            return $rtn;
-        }
-
-        if (preg_match('/```json/', $reply)) {
-            $reply = str_replace(['```json', '```'], '', $reply);
-        }
-
-        self::saveCol([
-            'col' => 'content',
-            'val' => $reply,
-            'pid' => $row['id'],
-        ]);
-
-        $json = jsonDecode($reply);
-        if (!is_array($json) || empty($json['article_title']) || empty($json['article_info']) || empty($json['article_content'])) {
-
-            $rtn .= '未完成';
-
-            self::saveCol([
-                'col' => 'status',
-                'val' => self::ST_INVALID,
-                'pid' => $row['id'],
-            ]); // don't use self::reportError, keep json in content
-        } else {
-            self::saveCol([
-                'col' => 'status',
-                'val' => self::ST_DONE,
-                'pid' => $row['id'],
-            ]);
-            $rtn .= 'Done';
-        }
-
-        return $rtn;
-    }
-
-    private static function _formatAiRtn($pid, $reply, $rtn = '')
-    {
-        if (stripos($reply, '再問我一次') === 0) {
-            self::reportError($pid, 'wrong ai result');
-            $rtn .= 'ai 說再問我一次';
-
-            return $rtn;
-        }
-
-        if (preg_match('/```json/', $reply)) {
-            $reply = str_replace(['```json', '```'], '', $reply);
-        }
 
         $data = mh()->update(self::fmTbl(), [
             'status' => self::ST_DONE,
-            'content' => $reply,
+            'content' => $res['data']['reply'],
+            'request_id' => $res['request_id'],
         ], [
-            'id' => $pid,
+            'id' => $row['id'],
         ]);
 
         $rtn .= 'Done';
@@ -213,4 +134,98 @@ class fDraft extends Feed
         return $rtn; // TODO: return json
     }
 
+    public static function batchGuideline($row)
+    {
+        $rtn = PHP_EOL . $row['id'] . ') Guideline : ';
+
+        $res = kDraft::guideline($row['intent']);
+        usleep(30000); // 0.03s
+
+        $data = mh()->update(self::fmTbl(), [
+            'status' => self::ST_DONE,
+            'guideline' => $res['data']['reply'],
+            'request_id' => $res['request_id'],
+        ], [
+            'id' => $row['id'],
+        ]);
+
+        $rtn .= 'Done';
+
+        return $rtn; // TODO: return json
+    }
+
+    public static function batchSeohelper($row)
+    {
+        $rtn = PHP_EOL . $row['id'] . ') Seohelper : ';
+
+        $res = kDraft::seohelper($row['guideline']);
+        usleep(30000); // 0.03s
+
+        $data = mh()->update(self::fmTbl(), [
+            'status' => self::ST_DONE,
+            'content' => jsonEncode($res['data']['reply']),
+            'request_id' => $res['request_id'],
+        ], [
+            'id' => $row['id'],
+        ]);
+
+        $rtn .= 'Done';
+
+        return $rtn; // TODO: return json
+    }
+
+    public static function batchTranslate($row)
+    {
+        $rtn = PHP_EOL . $row['id'] . ') Translate : ';
+
+        $res = kDraft::translate($row['lang'], $row['guideline']);
+        usleep(30000); // 0.03s
+
+        $data = mh()->update(self::fmTbl(), [
+            'request_id' => $res['request_id'],
+        ], [
+            'id' => $row['id'],
+        ]);
+
+        $rtn .= 'Done';
+
+        return $rtn; // TODO: return json
+    }
+
+    public static function batchAnswer($row)
+    {
+        $rtn = PHP_EOL . $row['id'] . ') Answer : ';
+
+        $res = kDraft::answer($row['request_id']);
+        usleep(30000); // 0.03s
+
+        if ($res['code'] == 1) {
+            $reply = $res['data']['reply'];
+
+            if (!is_array($reply)) {
+                $status = self::ST_INVALID;
+                $rtn .= '格式錯誤';
+            } elseif (empty($reply['article_title'])
+                || empty($reply['article_info'])
+                || empty($reply['article_content'])
+            ) {
+                $status = self::ST_INVALID;
+                $rtn .= '未完成';
+            } else {
+                $status = self::ST_DONE;
+                $rtn .= 'Done';
+            }
+
+            $data = mh()->update(self::fmTbl(), [
+                'status' => $status,
+                'content' => ((!is_array($reply)) ? $reply : jsonEncode($reply)),
+            ], [
+                'id' => $row['id'],
+            ]);
+        } else {
+            $rtn .= $res['data']['msg'];
+        }
+
+        return $rtn;
+    }
 }

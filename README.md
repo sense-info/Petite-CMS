@@ -7,7 +7,7 @@ Petite CMS 是一個效能卓越且安全可靠的內容管理系統 (CMS)，是
 
 ### LNMP
 + nginx alpine
-+ php 8.1
++ php 8.3
 + maria 10
 
 
@@ -174,18 +174,18 @@ sudo chmod 664 /www/Petite-CMS/www/tmp/logs/*
 ### crontab -e
 ```ini
 
-*/5 * * * * export APP_ENV=stage && php8.1 /www/stage/www/cli/index.php /Minutely/5
-1 * * * * export APP_ENV=stage && php8.1 /www/stage/www/cli/index.php /Hourly/1
-1 0 * * * export APP_ENV=stage && php8.1 /www/stage/www/cli/index.php /Daily/1
-1 0 1 * * export APP_ENV=stage && php8.1 /www/stage/www/cli/index.php /Monthly/1
+*/5 * * * * export APP_ENV=qa && php8.3 /www/Petite-CMS/www/loc.f3cms.com/cli.php /Minutely/5
+1 * * * * export APP_ENV=qa && php8.3 /www/Petite-CMS/www/loc.f3cms.com/cli.php /Hourly/1
+1 0 * * * export APP_ENV=qa && php8.3 /www/Petite-CMS/www/loc.f3cms.com/cli.php /Daily/1
+1 0 1 * * export APP_ENV=qa && php8.3 /www/Petite-CMS/www/loc.f3cms.com/cli.php /Monthly/1
 
 ```
 
 ### Test
 ```sh
-export APP_ENV=stage && php8.1 /www/stage/www/cli/index.php /Hourly/1
+export APP_ENV=qa && php8.3 /www/Petite-CMS/www/loc.f3cms.com/cli.php /Hourly/1
 
-export APP_ENV=stage && php8.1 /www/stage/www/cli/index.php /Daily/1
+export APP_ENV=qa && php8.3 /www/Petite-CMS/www/loc.f3cms.com/cli.php /Daily/1
 
 ```
 

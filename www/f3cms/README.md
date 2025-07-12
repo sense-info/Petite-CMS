@@ -5,20 +5,20 @@ Small CMS by F3.
 
 ## Documentation
 
-### PHP 8.1
+### PHP 8.3
 
 ```bash
-sudo apt install php8.1-fpm php8.1-common php8.1-mysql php8.1-gmp php8.1-curl php8.1-intl php8.1-mbstring php8.1-xmlrpc php8.1-gd php8.1-xml php8.1-cli php8.1-zip php8.1-imagick -y
+sudo apt install php8.3 php8.3-cli php8.3-fpm php8.3-{common,mysql,gmp,curl,intl,mbstring,xmlrpc,gd,xml,zip,bcmath,imagick} -y
 
-sudo service php8.1-fpm status
-sudo service php8.1-fpm restart 
+sudo service php8.3-fpm status
+sudo service php8.3-fpm restart
 
-sudo vim /etc/php/8.1/fpm/php.ini
+sudo vim /etc/php/8.3/fpm/php.ini
 
 
 rm composer.lock
 
-composer install
+php8.3 /usr/local/bin/composer instal
 
 composer require bcosca/fatfree-core ikkez/f3-opauth phpoffice/phpspreadsheet tecnickcom/tcpdf mailgun/mailgun-php symfony/http-client nyholm/psr7 \
     aws/aws-sdk-php intervention/image maciejczyzewski/bottomline catfan/medoo twig/twig rakit/validation
