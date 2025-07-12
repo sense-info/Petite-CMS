@@ -13,6 +13,10 @@ class kStaff extends Kit
      */
     public static function sendInvite($email, $verify_code)
     {
+        if ('production' != f3()->get('APP_ENV')) {
+            $verify_code .= '?qa=' . f3()->get('feVersion');
+        }
+
         f3()->set('verify_code', $verify_code);
         f3()->set('service_mail', fOption::get('service_mail'));
         f3()->set('email', $email);
@@ -20,9 +24,39 @@ class kStaff extends Kit
         Sender::sendmail(f3()->get('site_title') . '-後台帳號開通通知信', Sender::renderBody('invite'), $email);
     }
 
+    public static function _notExistAccount($account)
+    {
+        $currnt = (int) f3()->exists('POST.id') ? f3()->get('POST.id') : 0;
+        $staff = fStaff::one($account, 'account');
+        if (empty($staff)) {
+            return true;
+        } else {
+            if ($currnt == 0) {
+                return '已有此管理員帳號，無法新增資料!!';
+            } else {
+                return ($staff['id'] == $currnt) ? true : '已有此管理員帳號，無法修改資料!!';
+            }
+        }
+    }
+
+    public static function _accountRule()
+    {
+        return [
+            'required',
+            'min:6',
+            function ($value) {
+                return self::_notExistAccount($value);
+            },
+        ];
+    }
+
     public static function rules()
     {
         return [
+            'save'        => [
+                'account' => self::_accountRule(),
+                'pwd'    => 'regex:/^(?=.*\d)(?=.*[a-zA-Z]){2,}(?=.*[a-zA-Z])(?!.*\s).{8,32}/', // 建議長度 8-16 字元，含英數字
+            ],
             'login'        => [
                 'account' => 'required|min:3|max:200', // 建議長度 8-16 字元，含英數字
                                                              // SELECT `id`, `account`, LENGTH(`account`) AS LengthOfString FROM `tbl_member`
