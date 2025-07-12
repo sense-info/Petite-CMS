@@ -52,6 +52,17 @@ class oPress extends Outfit
     /**
      * @param $args
      */
+    public static function search($args)
+    {
+        $req = self::_getReq();
+        _dzv('searchStr', $req['q']);
+
+        parent::render('press/search_results.twig', '搜尋結果：' . $req['q'], '/search?q=' . $req['q']);
+    }
+
+    /**
+     * @param $args
+     */
     public static function show($args)
     {
         $fc = new FCHelper('press');
@@ -190,10 +201,12 @@ class oPress extends Outfit
 
         f3()->set('page', $seo);
 
+        $link = '/' . parent::_lang() . '/p/' . $cu['id'] . '/' . $cu['slug'];
+
         _dzv('ldjson', self::ldjson(
             $cu['title'],
             $seo['desc'],
-            f3()->get('uri') . '/' . parent::_lang() . '/p/' . $cu['id'] . '/' . $cu['slug'],
+            f3()->get('uri') . $link,
             $seo['img'],
             $cu['last_ts'],
             $cu['online_date']
@@ -203,7 +216,7 @@ class oPress extends Outfit
 
         f3()->set('breadcrumb_sire', ['title' => '文章', 'slug' => '/presses', 'sire' => ['title' => '首頁', 'slug' => '/home']]);
 
-        $html = self::render('press/show.twig', $cu['title'], '/p/' . $cu['id'] . '/' . $cu['slug'], true);
+        $html = self::render('press/show.twig', $cu['title'], $link, true);
 
         if ($history) {
             kHistory::save('Press', $cu['id'], $cu['title'], $html);

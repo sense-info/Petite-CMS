@@ -91,7 +91,9 @@ class rPress extends Reaction
      */
     public function do_more($f3, $args)
     {
-        $query = 'm.status:' . fPress::ST_PUBLISHED;
+        $query = [
+            'm.status' => [fPress::ST_PUBLISHED, fPress::ST_CHANGED],
+        ];
 
         $req = parent::_getReq();
 
@@ -107,6 +109,23 @@ class rPress extends Reaction
             }
         } else {
             $tag = null;
+        }
+
+        if (!empty($req['query'])) {
+            if (is_string($req['query'])) {
+                $query['l.title[~]'] = urldecode(str_replace('q=', '', $req['query']));
+            } else {
+                if (!empty($req['query']['sub_tag'])) {
+                    if (!is_array($req['query']['sub_tag'])) {
+                        $req['query']['sub_tag'] = explode(',', $req['query']['sub_tag']);
+                    }
+                    $tags = array_merge($tags, fTag::bySlug($req['query']['sub_tag']));
+                }
+
+                if (!empty($req['query']['q'])) {
+                    $query['l.title[~]'] = $req['query']['q'];
+                }
+            }
         }
 
         if (!empty($tag)) {

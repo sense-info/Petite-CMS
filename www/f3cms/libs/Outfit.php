@@ -650,10 +650,20 @@ class Outfit extends Module
 
         _dzv('page.breadcrumb', self::breadcrumb(['title' => $title, 'slug' => $slug, 'sire' => f3()->get('breadcrumb_sire')]));
 
-        _dzv('setting', f3()->get('themeSetting'));
+        $tmp = FSHelper::openFile(f3()->get('configpath') .'/setting.json');
+        if (empty($tmp)) {
+            $tmp = FSHelper::openFile(dirname(f3()->get('configpath')) .'/themeSetting.json');
+        }
+        $setting = jsonDecode($tmp);
+        $opts = fOption::load('', 'Preload');
 
-        f3()->set('opts', fOption::load('', 'Preload'));
-        _dzv('opts', f3()->get('opts'));
+        if (!empty($opts['default']['color_name'])) {
+            $setting['colorName'] = $opts['default']['color_name'];
+        }
+
+        _dzv('setting', $setting);
+        f3()->set('opts', $opts);
+        _dzv('opts', $opts);
 
         _dzv('feVersion', f3()->get('feVersion'));
         _dzv('theme', f3()->get('theme'));

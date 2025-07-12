@@ -13,9 +13,9 @@ class rTag extends Reaction
      */
     public function do_more($f3, $args)
     {
-        // kMember::_chkLogin();
-
-        $query = 'm.status:' . fPress::ST_PUBLISHED;
+        $query = [
+            'm.status' => [fPress::ST_PUBLISHED, fPress::ST_CHANGED],
+        ];
 
         $req = parent::_getReq();
 
@@ -39,9 +39,9 @@ class rTag extends Reaction
         } else {
             if (!empty($req['columnID'])) {
                 if ('topic' == $req['columnType']) {
-                    $query .= ',m.topic_id:' . intval($req['columnID']);
+                    $query['m.topic_id'] = intval($req['columnID']);
                 } else {
-                    $query .= ',m.column_id:' . intval($req['columnID']);
+                    $query['m.column_id'] = intval($req['columnID']);
                 }
             }
 
