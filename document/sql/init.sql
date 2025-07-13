@@ -392,12 +392,13 @@ CREATE TABLE IF NOT EXISTS `tbl_draft` (
   `id` int NOT NULL AUTO_INCREMENT,
   `press_id` int NOT NULL DEFAULT '0' COMMENT '新聞稿 ID',
   `owner_id` int NOT NULL DEFAULT '0' COMMENT '擁有者 ID',
+  `request_id` VARCHAR(36) NOT NULL DEFAULT '' COMMENT '呼叫 ID';
   `status` enum('New','Waiting','Done','Invalid','Used') CHARACTER SET utf8mb4 DEFAULT 'New' COMMENT '草稿狀態',
   `lang` varchar(5) NOT NULL DEFAULT 'tw' COMMENT '語言',
   `method` varchar(50) NOT NULL DEFAULT '' COMMENT 'LLM 函式',
-  `intent` text COMMENT '意圖',
-  `guideline` text COMMENT '指導方針/原文',
-  `content` mediumtext CHARACTER SET utf8mb4 COMMENT '內容',
+  `intent` text DEFAULT '' COMMENT '意圖',
+  `guideline` text DEFAULT '' COMMENT '指導方針/原文',
+  `content` mediumtext CHARACTER SET utf8mb4 DEFAULT '' COMMENT '內容',
   `insert_ts` timestamp NULL DEFAULT CURRENT_TIMESTAMP COMMENT '插入時間',
   `last_ts` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '最後更新時間',
   `insert_user` int DEFAULT '0' COMMENT '新增的使用者 ID',
@@ -529,8 +530,9 @@ CREATE TABLE IF NOT EXISTS `tbl_genus` (
 DROP TABLE IF EXISTS `tbl_media`;
 CREATE TABLE IF NOT EXISTS `tbl_media` (
   `id` int NOT NULL AUTO_INCREMENT,
-  `target` enum('Normal','Project') NOT NULL DEFAULT 'Normal',
+  `target` enum('Normal','Press') NOT NULL DEFAULT 'Normal',
   `parent_id` int NOT NULL DEFAULT '0',
+  `sorter` INT NOT NULL DEFAULT '0',
   `status` enum('Disabled','Enabled') DEFAULT 'Disabled',
   `slug` varchar(255) NOT NULL,
   `title` varchar(255) CHARACTER SET utf8mb4 DEFAULT NULL,
@@ -668,6 +670,7 @@ DROP TABLE IF EXISTS `tbl_meta_tag`;
 CREATE TABLE IF NOT EXISTS `tbl_meta_tag` (
   `meta_id` int NOT NULL,
   `tag_id` int NOT NULL,
+  `sorter` tinyint NOT NULL DEFAULT '0',
   PRIMARY KEY (`meta_id`,`tag_id`) USING BTREE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
@@ -987,7 +990,9 @@ CREATE TABLE IF NOT EXISTS `tbl_staff` (
   `role_id` int NOT NULL,
   `account` varchar(45) DEFAULT NULL,
   `pwd` varchar(72) DEFAULT NULL,
+  `verify_code` VARCHAR(64) NOT NULL DEFAULT '',
   `email` varchar(250) DEFAULT NULL,
+  `note` VARCHAR(255) NOT NULL DEFAULT '',
   `last_ts` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   `last_user` int DEFAULT NULL,
   `insert_ts` timestamp NULL DEFAULT NULL,
@@ -1301,7 +1306,7 @@ INSERT INTO `tbl_option` (`id`, `status`, `loader`, `group`, `name`, `content`, 
 (4, 'Enabled', 'Demand', 'page', 'img', 'https://lifetrainee.org/media/social-img', '2018-11-06 03:20:47', 1, '2015-12-29 06:46:44', 1),
 (5, 'Enabled', 'Preload', 'social', 'facebook_page', 'https://www.facebook.com/', '2015-12-29 10:35:46', 1, '2015-12-29 10:35:46', 1),
 (8, 'Enabled', 'Preload', 'default', 'contact_mail', 'support@lifetrainee.org', '2025-03-03 03:55:48', 1, '2016-02-02 02:08:41', 1),
-(12, 'Enabled', 'Demand', 'page', 'ga', 'G-8PNTJRQXKR', '2025-03-03 03:11:39', 1, '2016-05-03 23:51:12', 1),
+(12, 'Enabled', 'Demand', 'page', 'ga', 'G-', '2025-03-03 03:11:39', 1, '2016-05-03 23:51:12', 1),
 (26, 'Enabled', 'Preload', 'default', 'contact_phone', '+971', '2025-03-03 03:56:05', 1, '2016-02-02 02:08:41', 1),
 (27, 'Enabled', 'Preload', 'default', 'contact_address', 'Dubai', '2025-03-03 03:56:17', 1, '2016-02-02 02:08:41', 1),
 (28, 'Enabled', 'Preload', 'social', 'linkedin_page', 'https://www.linkedin.com/', '2015-12-29 10:35:46', 1, '2015-12-29 10:35:46', 1),
@@ -1325,6 +1330,32 @@ INSERT INTO `tbl_staff` (`id`, `status`, `needReset`, `role_id`, `account`, `pwd
 (1, 'Verified', 0, 1, 'trevor', '$2y$10$c2cRVuh4wXIkaFP7l/mR8O4v49LT8.Q//5ujmxupkc2dprf7HQmxq', 'trevor@sense-ino.co', '2017-04-02 02:01:05', 1, '2015-08-04 12:41:20', 1);
 
 
+
+--
+-- 資料表結構 `tbl_crontab`
+--
+
+CREATE TABLE IF NOT EXISTS `tbl_crontab` (
+  `id` int UNSIGNED NOT NULL AUTO_INCREMENT,
+  `freq` enum('Yearly','Monthly','Daily','Hourly','Minutely') NOT NULL DEFAULT 'Yearly',
+  `tally` tinyint NOT NULL,
+  `module` varchar(50) DEFAULT NULL,
+  `method` varchar(50) DEFAULT NULL,
+  `status` enum('Enabled','Disabled') NOT NULL DEFAULT 'Disabled',
+  `last_ts` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `last_user` int DEFAULT NULL,
+  `insert_ts` timestamp NULL DEFAULT NULL,
+  `insert_user` int DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4;
+
+--
+-- 傾印資料表的資料 `tbl_crontab`
+--
+
+INSERT INTO `tbl_crontab` (`freq`, `tally`, `module`, `method`, `status`, `last_ts`, `last_user`, `insert_ts`, `insert_user`) VALUES
+('Minutely', 2, '\\F3CMS\\fPress', 'cronjob', 'Enabled', CURRENT_TIMESTAMP, 0, CURRENT_TIMESTAMP, 0),
+('Minutely', 2, '\\F3CMS\\fDraft', 'cronjob', 'Enabled', CURRENT_TIMESTAMP, 0, CURRENT_TIMESTAMP, 0),
+('Minutely', 2, '\\F3CMS\\fDraft', 'cronAnswer', 'Enabled', CURRENT_TIMESTAMP, 0, CURRENT_TIMESTAMP, 0);
+
 COMMIT;
-
-
