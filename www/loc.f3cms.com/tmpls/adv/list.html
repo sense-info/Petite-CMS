@@ -65,7 +65,7 @@
           <div class="column is-3">
             <div class="card">
               {{if prop.cover != '' }}<div class="card-image">
-                <figure class="image is-marginless" style="max-height: 20vh; overflow: hidden;"> <img pre-src="{{:~loadPic(prop.cover, 'sm')}}" alt="{{:prop.title}}"> </figure>
+                <figure class="image is-marginless" style="max-height: 20vh; overflow: hidden;"> <img pre-src="{{:~loadPic(prop.cover, 'sm')}}" onerror="app.defaultPic()" alt="{{:prop.title}}"> </figure>
               </div>{{/if}}
               <div class="card-content">
                 {{:prop.title}} <a href="{{:prop.uri}}" target="_blank"><span class="icon"><i class="fa fa-share-square-o"></i></span></a> <br>

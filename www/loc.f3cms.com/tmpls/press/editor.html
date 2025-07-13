@@ -13,18 +13,18 @@
           <div class="columns">
             <div class="column is-6">
               <div class="field">
-                <label class="label">文章封面(上封面)</label>
+                <label class="label">文章列表封面</label>
                 <gee-upload module-name="press" data-param="cover" info-text="400x400"></gee-upload>
               </div>
             </div>
             <div class="column is-6">
               <div class="field">
-                <label class="label">文章封面(下橫幅)</label>
+                <label class="label">文章單頁大圖</label>
                 <gee-upload module-name="press" data-param="banner" info-text="1600x900"></gee-upload>
               </div>
             </div>
           </div>
-          {{if item.id }}{{if item.lang.tw.title != '' }}
+          {{if item.id }}{{if item.lang.tw.info != '' }}{{if item.lang.tw.content != '' }}
           <div class="field"><div class="control">
             {{if item.lang.en.content == '' }}
               <button type="button" class="button is-warning pre-gee m-2 pull-right" data-gene="click:arena/touch"
@@ -39,7 +39,7 @@
                 data-confirm="點擊【確定】後翻譯，請至草稿區查看結果!!" data-endpoint="draft/translate" data-params='{"press_id":"{{:item.id}}","target":"jp"}'>翻為日文</button>
             {{/if}}
           </div></div>
-          {{/if}}{{/if}}
+          {{/if}}{{/if}}{{/if}}
           <div class="field">
             <p class="control">
               <input class="input" name="lang[tw][title]" type="text" placeholder="Title">
@@ -50,6 +50,7 @@
             <label class="radio" for="press-fromai-tw-yes">由 AI 翻譯</label>
             <input type="radio" class="is-checkradio" name="lang[tw][from_ai]" value="No" checked="checked" id="press-fromai-tw-no">
             <label class="radio" for="press-fromai-tw-no">非</label>
+            {{if item.lang.tw.content != '' }} <a href="/tw/preview/p/{{:item.id}}" target="_blank" class="button is-info pull-right">預覽</a> {{/if}}
           </div>
           <div class="field">
             <p class="control">
@@ -60,13 +61,6 @@
             <p class="control">
               <gee:editor data-param="lang[tw][content]" data-inline="0"></gee:editor>
             </p>
-          </div>
-
-          <div class="field">
-            <label class="label">推薦書籍</label>
-            <div class="control is-block">
-              <input type="text" multiple class="multipleSelect" data-sortable="1" name="books" placeholder="請輸入字詞查詢" data-url='book/get_opts' />
-            </div>
           </div>
 
           <div class="field">
@@ -88,6 +82,7 @@
             <label class="radio" for="press-fromai-en-yes">由 AI 翻譯</label>
             <input type="radio" class="is-checkradio" name="lang[en][from_ai]" value="No" checked="checked" id="press-fromai-en-no">
             <label class="radio" for="press-fromai-en-no">非</label>
+            {{if item.lang.en.content }} <a href="/en/preview/p/{{:item.id}}" target="_blank" class="button is-info pull-right">預覽</a> {{/if}}
           </div>
           <div class="field">
             <p class="control">
@@ -111,6 +106,7 @@
             <label class="radio" for="press-fromai-jp-yes">由 AI 翻譯</label>
             <input type="radio" class="is-checkradio" name="lang[jp][from_ai]" value="No" checked="checked" id="press-fromai-jp-no">
             <label class="radio" for="press-fromai-jp-no">非</label>
+            {{if item.lang.jp.content }} <a href="/jp/preview/p/{{:item.id}}" target="_blank" class="button is-info pull-right">預覽</a> {{/if}}
           </div>
           <div class="field">
             <p class="control">
@@ -134,6 +130,7 @@
             <label class="radio" for="press-fromai-ko-yes">由 AI 翻譯</label>
             <input type="radio" class="is-checkradio" name="lang[ko][from_ai]" value="No" checked="checked" id="press-fromai-ko-no">
             <label class="radio" for="press-fromai-ko-no">非</label>
+            {{if item.lang.ko.content }} <a href="/ko/preview/p/{{:item.id}}" target="_blank" class="button is-info pull-right">預覽</a> {{/if}}
           </div>
           <div class="field">
             <p class="control">
@@ -146,17 +143,23 @@
             </p>
           </div>
         </div>
-        <div class="tab-box only-af-save" title="圖集">
-          <div class="field has-text-right"><a class="button is-primary modal-btn pre-gee" data-gene="click:showModal" data-tmpl="subMediaForm" data-src="media" data-size="nor" data-id="0" data-silence="1">新增圖片</a><br /> <small>  <!-- <i class="fa fa-question-circle"></i> 請先儲存後，再上傳圖檔 --></small></div>
-          <div class="columns is-multiline">
-            <div class="column is-12">
-              <gee-uploadDnD module-name="press" multiple="true" data-param="banner" info-text="1440"></gee-uploadDnD>
+        <div class="tab-box" title="圖集">
+          <div class="field only-bf-save">
+            <label class="label">儲存內容後，才可設定圖集資訊</label>
+          </div>
+          <div class="columns only-af-save is-multiline">
+            <div class="column is-9">
+              <gee-uploadDnD module-name="press" multiple="true" data-param="banner" info-text="最大寬度 1440px"></gee-uploadDnD>
+            </div>
+            <div class="divider is-vertical">OR</div>
+            <div class="column is-2">
+              <div class="is-vertical-middle"><div class="field has-text-centered"><a class="button is-primary modal-btn pre-gee" data-gene="click:showModal" data-tmpl="subMediaForm" data-src="media" data-size="nor" data-id="0" data-silence="1">新增圖片</a><br /> <small>  <!-- <i class="fa fa-question-circle"></i> 請先儲存後，再上傳圖檔 --></small></div></div>
             </div>
             <div class="column">
               <div class="gee" data-gene="init:media.loadList,click:reactList" data-tmpl="subMediaList" data-nopde="1" >
                 <div class="columns is-multiline">
               {{props data}}<div class="column is-4 sub-media-item loop-item" data-id="{{:prop.id}}">
-                <div class="card">
+                <div class="card lighter-shadow">
                   <div class="card-image">
                     <figure class="image is-1by1"> <img pre-src="{{:~loadPic(prop.pic, 600, 600)}}" alt="{{:prop.title}}"> </figure>
                   </div>
@@ -189,77 +192,70 @@
             </div>
           </div>
         </div>
-        <div class="tab-box only-af-save" title="其它">
-          <gee:meta-editor data-module="press"></gee:meta-editor>
-        </div>
       </div>
     </div>
     <div class="column is-4">
-      <div class="box">
-        <div class="field is-grouped">
-          <p class="control">
-            <button type="button" class="button is-primary pre-gee" data-gene="click:press.setRow" data-tmpl="pressForm">儲存內容變動</button>
-          </p>
-          <p class="control js-published-f only-af-save">
-            <!-- <button type="button" class="button is-primary pre-gee" data-gene="click:press.online" data-force="1">發佈新版本</button> -->
-            <a href="/preview/p/{{:item.id}}" target="_blank" class="button is-info">預覽</a>
-          </p>
-        </div>
+      <div class="tabs-content box">
+        <div class="tab-box" title="管理">
+          <div class="field is-grouped">
+            <p class="control">
+              <button type="button" class="button is-primary pre-gee" data-gene="click:press.setRow" data-tmpl="pressForm">儲存內容變動</button>
+            </p>
+            <p class="control js-published-f only-af-save">
+              <!-- <button type="button" class="button is-primary pre-gee" data-gene="click:press.online" data-force="1">發布新版本</button> -->
+              <!-- <a href="/preview/p/{{:item.id}}" target="_blank" class="button is-info">預覽</a> -->
+            </p>
+          </div>
 
-        <div class="field">
-          <label class="label">版型</label>
-          <p class="control">
-            <span class="select"><gee:set-option module="genus" name="layout" params='{"group":"press"}'></gee:set-option></span>
-          </p>
-        </div>
+          <div class="field">
+            <label class="label">版型</label>
+            <p class="control">
+              <span class="select"><gee:set-option module="genus" name="layout" params='{"group":"press"}'></gee:set-option></span>
+            </p>
+          </div>
 
-        <div class="field">
-          <label class="label">分類</label>
-          <p class="control">
-            <span class="select"><gee:set-option module="category" name="cate_id" params='{"group":"press"}'></gee:set-option></span>
-          </p>
-        </div>
+          <div class="field">
+            <label class="label">分類</label>
+            <p class="control">
+              <span class="select"><gee:set-option module="category" name="cate_id" params='{"group":"press"}'></gee:set-option></span>
+            </p>
+          </div>
 
-        <div class="field">
-          <label class="label">排序</label>
-          <p class="control">
-            <input class="input" name="sorter" type="text" placeholder="排序：預設 99">
-          </p>
-        </div>
+          <div class="field">
+            <label class="label">排序</label>
+            <p class="control">
+              <input class="input" name="sorter" type="text" placeholder="排序：預設 99">
+            </p>
+          </div>
 
-        <div class="field no-kol">
-          <label class="label">作者</label>
-          <div class="control">
-            <input type="text" multiple class="multipleSelect" data-sortable="1" name="authors" placeholder="請輸入字詞查詢" data-url="author/get_opts" />
+          <div class="field no-kol">
+            <label class="label">作者</label>
+            <div class="control">
+              <input type="text" multiple class="multipleSelect" data-sortable="1" name="authors" placeholder="請輸入字詞查詢" data-url="author/get_opts" />
+            </div>
+          </div>
+
+          <div class="field">
+            <label class="label">標籤</label>
+            <div class="control">
+              <input type="text" multiple class="multipleSelect" data-sortable="1" name="tags" placeholder="請輸入字詞查詢" data-url='tag/get_opts' />
+            </div>
+          </div>
+
+          <div class="field">
+            <label class="label">相關字詞</label>
+            <div class="control is-block">
+              <input type="text" multiple class="multipleSelect" data-sortable="1" name="terms" placeholder="請輸入字詞查詢" data-url='dictionary/get_opts' />
+            </div>
           </div>
         </div>
-
-        <div class="field">
-          <label class="label">標籤</label>
-          <div class="control">
-            <input type="text" multiple class="multipleSelect" data-sortable="1" name="tags" placeholder="請輸入字詞查詢" data-url='tag/get_opts' />
+        <div class="tab-box" title="發布設定">
+          <div class="only-bf-save">
+            <div class="field js-published-f">
+              <label class="label">儲存內容後，才可設定發布資訊</label>
+            </div>
           </div>
-        </div>
-
-        <div class="field">
-          <label class="label">相關字詞</label>
-          <div class="control is-block">
-            <input type="text" multiple class="multipleSelect" data-sortable="1" name="terms" placeholder="請輸入字詞查詢" data-url='dictionary/get_opts' />
-          </div>
-        </div>
-      </div>
-      <input type="hidden" name="id">
-    </div>
-  </div>
-  <div class="quickview press-quickview pid-{{:item.id}}-">
-    <header class="quickview-header">
-      <p class="title">發佈設定</p>
-      <span class="delete pre-gee" data-gene="click:hideQuickview"></span>
-    </header>
-    <div class="quickview-body">
-      <div class="quickview-block section">
-        <div class="columns is-multiline">
-          <div class="column is-12 only-af-save">
+          <div class="only-af-save">
             <div class="field js-published-f">
               <label class="label">目前狀態：<span class="j-press-status">{{:item.status}}</span></label>
             </div>
@@ -267,15 +263,15 @@
             <div class="field js-published-f">
               <p class="control">
                 <input type="radio" class="is-checkradio" name="status" value="Published" id="status-published">
-                <label class="radio" for="status-published">立即發佈</label>
+                <label class="radio" for="status-published">立即發布</label>
                 <input type="radio" class="is-checkradio" name="status" value="Scheduled" id="status-scheduled">
-                <label class="radio" for="status-scheduled">排程發佈</label>
+                <label class="radio" for="status-scheduled">排程發布</label>
                 <br>
               </p>
             </div>
             <div class="field js-published-t hidden">
               <p class="control">
-                已發佈於 <span class="js-published-time"></span>
+                已發布於 <span class="js-published-time"></span>
                 <br>
               </p>
             </div>
@@ -288,9 +284,8 @@
               </p>
             </div>
 
-
             <div class="field js-published-f">
-              <label class="label">發佈時間</label>
+              <label class="label">發布時間</label>
               <p class="control">
                 <input type="datetime-local" class="datetime-local" name="online_date">
               </p>
@@ -301,23 +296,15 @@
                 <button type="button" class="button pre-gee" data-gene="click:press.reset">重設</button>
               </p>
               <p class="control">
-                <button type="button" class="button is-primary pre-gee" data-gene="click:press.online">儲存發佈設定</button>
+                <button type="button" class="button is-primary pre-gee" data-gene="click:press.online">儲存發布設定</button>
               </p>
             </div>
-            <div class="is-divider" data-content="History"></div>
-            <ul id="history-list"></ul>
-          </div>
-          <div class="column is-12 only-bf-save">
-            <div class="field js-published-f">
-              <label class="label">請先儲存內容，再進行發佈</label>
-            </div>
+            <!-- <div class="is-divider" data-content="History"></div>
+            <ul id="history-list"></ul> -->
           </div>
         </div>
       </div>
+      <input type="hidden" name="id">
     </div>
-    <!-- <footer class="quickview-footer">
-
-    </footer> -->
   </div>
-  <a  class="navbar-item btn-quickview pre-gee" data-gene="click:showQuickview" href="javascript:;"><label style="padding-right: 5px;"></label><span class="icon"><i class="fa fa-cogs fa-lg"></i></span></a>
 </form>

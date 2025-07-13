@@ -46,7 +46,6 @@
 <div class="columns is-multiline">
   <div class="column is-10 is-offset-1 b-table">
     <div class="content box-shadow table-wrapper has-mobile-cards">
-      <!-- LIST -->
       <table class="list-body table is-striped is-hoverable">
         <thead>
           <tr>
@@ -69,8 +68,11 @@
             <td data-label="角色">{{:prop.role}}</td>
             <td data-label="Email">{{:prop.email}}</td>
             <td class="is-actions-cell">
+
+              <a class="button is-danger" href="javascript:;"
+                data-func="arena/touch" data-confirm="重送認證信？ 點擊【確定】後寄出!!" data-endpoint="staff/resend" data-params='{"pid":"{{:prop.id}}"}'>重送認證信</a>
+
               <a href="javascript:;" class="button is-info" data-func="loadRow" data-src="editor" data-tmpl="staffForm" data-id="{{:prop.id}}"> 編輯 </a>
-              <!-- <a href="javascript:;" class="button is-danger" data-func="delRow" data-id="{{:prop.id}}"> 刪除 </a> -->
             </td>
           </tr>
         </tbody>

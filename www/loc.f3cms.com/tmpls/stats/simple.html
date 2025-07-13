@@ -37,7 +37,7 @@
       </div>
       <div class="message-body">
         <div class="chart-box mb-2 chart-line" type="line" source="date" id="line-date-state"><canvas class="chart"></canvas></div>
-        <p class="has-text-right"><a href="https://analytics.google.com/analytics/web/" target="_blank" >前往 GA 報表 <span class="icon"><i class="fa fa-share-square-o"></i></span> </a></p>
+        <p class="has-text-right"><a href="https://analytics.google.com/analytics/web/#/p480384517/reports/explorer?params=_u..nav%3Dmaui&collectionId=user&r=all-pages-and-screens" target="_blank" >前往 GA 報表 <span class="icon"><i class="fa fa-share-square-o"></i></span> </a></p>
       </div>
     </article>
   </div>
@@ -48,7 +48,35 @@
       </div>
       <div class="message-body">
         <div class="chart-box mb-2 chart-bar" type="bar" source="country" id="line-country-state"><canvas class="chart"></canvas></div>
-        <p class="has-text-right"><a href="https://analytics.google.com/analytics/web/" target="_blank" >前往 GA 報表 <span class="icon"><i class="fa fa-share-square-o"></i></span> </a></p>
+        <p class="has-text-right"><a href="https://analytics.google.com/analytics/web/#/p480384517/reports/explorer?params=_u..nav%3Dmaui&collectionId=user&r=all-pages-and-screens" target="_blank" >前往 GA 報表 <span class="icon"><i class="fa fa-share-square-o"></i></span> </a></p>
+      </div>
+    </article>
+  </div>
+  <div class="column is-3">
+    <article class="message is-info">
+      <div class="message-header">
+        <p>系統聯絡窗口</p>
+      </div>
+      <div class="message-body">
+        <ul>
+          <li>聯絡人： Trevor Pao</li>
+          <li>Email： trevor@sense-info.co</li>
+        </ul>
+      </div>
+    </article>
+  </div>
+  <div class="column is-6">
+    <article class="message is-info">
+      <div class="message-header">
+        <p>文章草稿</p>
+      </div>
+      <div class="message-body">
+        {{props data.presses}}
+          <div>
+            <a href="/backend/cms/press/list/editor/{{:prop.id}}" class="is-pulled-right" >編輯 <span class="icon"><i class="fa fa-share-square-o"></i></span></a>
+            <div class="ellipsis">{{:prop.title}}</div>
+          </div>
+        {{/props}}
       </div>
     </article>
   </div>

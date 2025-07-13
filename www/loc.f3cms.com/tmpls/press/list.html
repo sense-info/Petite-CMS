@@ -12,11 +12,11 @@
       <div class="control">
         <div class="select">
           <select class="dropdownQuery gee" data-gene="change:dropdownQuery">
-            <option value="">全部類型</option>
-                <option value="m.cate_id=1">雜談</option>
-                <option value="m.cate_id=2">新手村</option>
-                <option value="m.cate_id=3">史詩探索</option>
-                <option value="m.cate_id=4">遊戲假說</option>
+            <option value="">全部狀態</option>
+            <option value="m.status=Published">已發佈</option>
+            <option value="m.status=Draft">草稿</option>
+            <option value="m.status=Scheduled">排程中</option>
+            <option value="m.status=Offlined">已下架</option>
           </select>
         </div>
       </div>
@@ -27,16 +27,17 @@
           <select name="query" class="gee" data-gene="change:checkOption">
             <optgroup label="資料">
               <option value="l.title~">文章標題</option>
+              <option value="l.content~">文章內文</option>
               <option value="m.id:">文章編號</option>
               <option value="tag:">標籤</option>
               <option value="author:">作者</option>
             </optgroup>
-            <optgroup label="狀態">
+            <!-- <optgroup label="狀態">
                 <option value="m.status=Published">已發佈</option>
                 <option value="m.status=Draft">草稿</option>
                 <option value="m.status=Scheduled">排程中</option>
                 <option value="m.status=Offlined">已下架</option>
-            </optgroup>
+            </optgroup> -->
           </select>
         </div>
       </p>
@@ -70,7 +71,7 @@
         <tfoot></tfoot>
         <tbody class="gee" data-gene="init:loadList,click:reactList" data-tmpl="pressList" data-nopde="1">
           <tr>
-            <td><figure class="image is-marginless"> <img pre-src="{{:~loadPic(prop.cover, 'sm')}}"> </figure></td>
+            <td><figure class="image is-marginless"> <img pre-src="{{:~loadPic(prop.cover, 'sm')}}" onerror="app.defaultPic()" > </figure></td>
             <td>
               <div>
                 <a href="javascript:;" data-func="press.loadRow" data-tmpl="pressForm" data-src="editor" data-id="{{:prop.id}}" class="line-clamp press-title engrossed-btn" title="{{:prop.title}}">#{{:prop.id}} {{:prop.title}} <span class="icon"><i class="fa fa-pencil"></i></span></a>
@@ -95,11 +96,8 @@
 
                   <div class="navbar-dropdown is-boxed is-right is-arrow">
                     <!-- <a class="navbar-item" href="javascript:;"
-                data-func="arena/touch" data-confirm="清空翻譯？ 點擊【確定】後清空!!"
-                data-endpoint="draft/resetI18n" data-params='{"pid":"{{:prop.id}}"}'> 清空翻譯 </a> -->
-                    <a class="navbar-item" href="javascript:;"
                 data-func="arena/touch" data-confirm="建立社群貼文？ 點擊【確定】後請至草稿頁查看!!"
-                data-endpoint="draft/adv" data-params='{"pid":"{{:prop.id}}"}'> 行銷助手 </a>
+                data-endpoint="draft/adv" data-params='{"pid":"{{:prop.id}}"}'> 行銷助手 </a> -->
                     <a class="navbar-item" href="javascript:;"
                 data-func="arena/touch" data-confirm="建文章廣告？ 點擊【確定】後請至廣告頁完成設定!!"
                 data-endpoint="adv/push" data-params='{"pid":"{{:prop.id}}"}'> 廣告推播 </a>
@@ -109,8 +107,6 @@
                     <a class="navbar-item" href="javascript:;"
                 data-func="arena/touch" data-confirm="建立翻譯草稿？ 點擊【確定】後請至草稿頁查看!!"
                 data-endpoint="draft/genI18n" data-params='{"pid":"{{:prop.id}}","original":"tw"}'> 翻譯助手 </a>
-
-
                   </div>
                 </div>
               </nav>
