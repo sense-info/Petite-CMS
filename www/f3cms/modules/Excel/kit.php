@@ -7,6 +7,22 @@ namespace F3CMS;
  */
 class kExcel extends Kit
 {
+
+    public static function loadCsv($filename) {
+        $root    = f3()->get('ROOT') . f3()->get('BASE');
+        // load the CSV file
+        $csv = array_map('str_getcsv', file($root . $filename));
+        // handle each row
+        foreach ($csv as $row) {
+            // handle each column
+            foreach ($row as $idx => $column) {
+                // do something with the column
+            }
+        }
+
+        return $csv;
+    }
+
     /**
      * @param $filename
      * @param $rows
@@ -30,19 +46,14 @@ class kExcel extends Kit
      * @param $filename
      * @param $rows
      */
-    public static function renderCSV($filename, $rows)
+    public static function dumpFile($filename, $rows, $path)
     {
         // TODO: record current staff data
 
-        if (!$rows) {
-            header('Content-Type:text/html; charset=utf-8');
-            echo '無結果';
-        } else {
-            f3()->set('rows', $rows);
+        f3()->set('rows', $rows);
+        $tp = \Template::instance();
+        $content = $tp->render('xls/' . $filename . '.html');
 
-            header('Content-Disposition:filename=' . $filename . '_' . date('YmdHis') . '.csv');
-
-            echo Outfit::_origin()->render('csv/' . $filename . '.html', 'text/csv');
-        }
+        FSHelper::dumpFile(f3()->get('abspath') . $path, $content);
     }
 }
