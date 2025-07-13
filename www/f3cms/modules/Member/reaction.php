@@ -364,7 +364,7 @@ class rMember extends Reaction
      */
     public function do_resend($f3, $args)
     {
-        kStaff::_chkLogin(); // chkAuth(fMember::PV_U);
+        chkAuth(fMember::PV_R);
         $req = parent::_getReq();
 
         if (!isset($req['id'])) {
@@ -531,20 +531,6 @@ class rMember extends Reaction
         }
 
         return self::_return(1, ['id' => $id]);
-    }
-
-    /**
-     * @param $f3
-     * @param $args
-     */
-    public function do_exhibs($f3, $args)
-    {
-        kStaff::_chkLogin(); // chkAuth(fMember::PV_U);
-        $req = parent::_getReq();
-
-        $rtn = fExhib::limitRows($req['query'] . ',ORDER:m.last_ts!', 0, 500);
-
-        return self::_return(1, $rtn);
     }
 
     public static function get_msgs()

@@ -14,22 +14,6 @@ class oPress extends Outfit
      */
     public static function list($args)
     {
-        // $req = parent::_getReq();
-
-        // $req['page'] = ($req['page']) ? ($req['page'] - 1) : 0;
-
-        // $subset = fPress::limitRows('status:' . fPress::ST_PUBLISHED, $req['page']);
-
-        // $subset['subset'] = \__::map($subset['subset'], function ($cu) {
-        //     $cu['tags'] = fPress::lotsTag($cu['id']);
-        //     $cu['authors'] = fPress::lotsAuthor($cu['id']);
-        //     $cu['metas'] = fPress::lotsMeta($cu['id']);
-
-        //     return $cu;
-        // });
-
-        // _dzv('rows', $subset);
-        //
         $langTxts = [
             'tw' => '文章清單',
             'en' => 'Articles',
@@ -37,11 +21,7 @@ class oPress extends Outfit
             'ko' => '기사 목록',
         ];
 
-        if (f3()->get('theme') == 'senseinfo') {
-            $title = '專案實蹟';
-        } else {
-            $title = $langTxts[Module::_lang()]; // '文章清單';
-        }
+        $title = $langTxts[Module::_lang()]; // '文章清單';
 
         _dzv('cu', ['title' => $title, 'id' => 0]);
         _dzv('srcType', 'tag');

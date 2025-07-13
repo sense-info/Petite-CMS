@@ -8,19 +8,6 @@ class rSubscription extends Reaction
      * @param $f3
      * @param $args
      */
-    public function do_load_all($f3, $args)
-    {
-        kStaff::_chkLogin();
-
-        $rows = fSubscription::getEnabled();
-
-        return self::_return(1, $rows);
-    }
-
-    /**
-     * @param $f3
-     * @param $args
-     */
     public function do_add_new($f3, $args)
     {
         $req = parent::_getReq();
@@ -44,29 +31,5 @@ class rSubscription extends Reaction
         // $sent = Sender::send('Confirmation Email', $content, $req['email']);
 
         return self::_return(1, ['msg' => 'thanks']); // 'Please click the link in the confirmation email'));
-    }
-
-    /**
-     * @param $f3
-     * @param $args
-     */
-    public function do_dl_csv($f3, $args)
-    {
-        kStaff::_chkLogin();
-
-        $req = parent::_getReq();
-
-        $subset = fSubscription::limitRows($req['query'], 0, 5000);
-
-        if (!$rows) {
-            header('Content-Type:text/html; charset=utf-8');
-            echo '無結果';
-        } else {
-            $template = new Template();
-            f3()->set('rows', $subset['subset']);
-
-            Outfit::_setXls('subscrition_' . date('YmdHis'));
-            echo $template->render('excel/subscrition.html', 'application/vnd.ms-excel');
-        }
     }
 }

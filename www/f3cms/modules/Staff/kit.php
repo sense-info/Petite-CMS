@@ -13,7 +13,7 @@ class kStaff extends Kit
      */
     public static function sendInvite($email, $verify_code)
     {
-        if ('production' != f3()->get('APP_ENV')) {
+        if ('qa' == f3()->get('APP_ENV')) {
             $verify_code .= '?qa=' . f3()->get('feVersion');
         }
 

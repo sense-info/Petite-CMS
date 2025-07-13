@@ -25,14 +25,17 @@ class rOption extends Reaction
         $req['page'] = (isset($req['page'])) ? ($req['page'] - 1) : 0;
 
         $rtn    = fOption::limitRows($req['query'], $req['page'], 200);
-        $groups = [];
 
-        foreach ($rtn['subset'] as $row) {
-            $groups[$row['group']]['title']  = $row['group'];
-            $groups[$row['group']]['rows'][] = $row;
-        }
+        $rtn['subset'] = array_reduce($rtn['subset'], function ($carry, $row) {
+            // 初始化分组中的 'title'
+            if (!isset($carry[$row['group']]['title'])) {
+                $carry[$row['group']]['title'] = $row['group'];
+            }
+            // 添加行到 'rows'
+            $carry[$row['group']]['rows'][] = $row;
 
-        $rtn['subset'] = $groups;
+            return $carry;
+        }, []);
 
         return parent::_return(1, $rtn);
     }
@@ -100,37 +103,5 @@ class rOption extends Reaction
         }
 
         return self::_return(1, $rtn);
-    }
-
-    /**
-     * 1. 史前時代-1367年
-     * 2. 1368年-1682年 (明)
-     * 3. 1683年-1894年 (清)
-     * 4. 1895年-1944年 (日治)
-     * 5. 1945年-1959年
-     * 6. 1960年-1969年
-     * 7. 1970年-1979年
-     * 8. 1980年-1989年
-     * 9. 1990年-1999年
-     * 10. 2000年-2009年
-     * 11. 2010年-迄今
-     *
-     **/
-
-    // old, for gee.getChainOption v1
-    function do_get_zipcodes($f3, $args)
-    {
-        $req = parent::_getReq();
-
-        $zipcodes = fOption::loadZipcodes($req['pid']);
-
-        $rtn = [];
-        $rtn = '<option value="">請選擇</option>';
-        foreach ($zipcodes as $value) {
-            $rtn .= '<option value="' . $value['zipcode'] . '">' . $value['town'] . ' ' . $value['zipcode'] . '</option>';
-        }
-
-        echo $rtn;
-        exit;
     }
 }

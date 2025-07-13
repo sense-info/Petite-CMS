@@ -103,18 +103,16 @@ class rAdv extends Reaction
         $idArray = array_column($origAry, 'id');
         $positions = array_combine($idArray, $origAry);
 
-        foreach ($rtn['subset'] as $row) {
-            if (!isset($positions[$row['position_id']])) { // for the unknown position
-                $positions[$row['position_id']] = [
-                    'id'    => $row['position_id'],
-                    'title' => '未知分類 #' . $row['position_id'],
-                ];
+        $rtn['subset'] = array_reduce($rtn['subset'], function ($carry, $row) use ($positions) {
+            // 初始化分组中的 'title'
+            if (!isset($carry[$row['position_id']]['title'])) {
+                $carry[$row['position_id']]['title'] = $positions[$row['position_id']]['title'];
             }
-            $groups[$row['position_id']]['title']  = $positions[$row['position_id']]['title'];
-            $groups[$row['position_id']]['rows'][] = $row;
-        }
+            // 添加行到 'rows'
+            $carry[$row['position_id']]['rows'][] = $row;
 
-        $rtn['subset'] = $groups;
+            return $carry;
+        }, []);
 
         return parent::_return(1, $rtn);
     }

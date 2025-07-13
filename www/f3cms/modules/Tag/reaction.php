@@ -48,10 +48,9 @@ class rTag extends Reaction
             $rtn = fPress::limitRows($query, $req['page'], $req['limit']);
         }
 
-        foreach ($rtn['subset'] as $k => $row) {
-            $rtn['subset'][$k]['tags']    = fPress::lotsTag($row['id']);
-            $rtn['subset'][$k]['authors'] = fPress::lotsAuthor($row['id']);
-        }
+        $rtn['subset'] = \__::map($rtn['subset'], function ($row) {
+            return rPress::handleIteratee($row);
+        });
 
         return self::_return(1, $rtn);
     }
@@ -64,7 +63,7 @@ class rTag extends Reaction
      */
     function do_getDetail($f3, $args)
     {
-        kStaff::_chkLogin();
+        chkAuth(fTag::PV_R);
 
         $req = parent::_getReq();
 
@@ -96,7 +95,6 @@ class rTag extends Reaction
         }
         $req['page'] = (isset($req['page'])) ? ($req['page'] - 1) : 0;
         $rtn    = fTag::limitRows($req['query'], $req['page']);
-        $groups = [];
 
         $origAry = fGenus::getOpts('tag', 'm.group');
         $origAry = array_merge([
@@ -109,18 +107,24 @@ class rTag extends Reaction
         $idArray = array_column($origAry, 'id');
         $positions = array_combine($idArray, $origAry);
 
-        foreach ($rtn['subset'] as $row) {
+        $rtn['subset'] = array_reduce($rtn['subset'], function ($carry, $row) use ($positions) {
+
             if (!isset($positions[$row['cate_id']])) { // for the unknown genus
                 $positions[$row['cate_id']] = [
                     'id'    => $row['cate_id'],
                     'title' => '未知分類 #' . $row['cate_id'],
                 ];
             }
-            $groups[$row['cate_id']]['title']  = $positions[$row['cate_id']]['title'];
-            $groups[$row['cate_id']]['rows'][] = $row;
-        }
 
-        $rtn['subset'] = $groups;
+            // 初始化分组中的 'title'
+            if (!isset($carry[$row['cate_id']]['title'])) {
+                $carry[$row['cate_id']]['title'] = $positions[$row['cate_id']]['title'];
+            }
+            // 添加行到 'rows'
+            $carry[$row['cate_id']]['rows'][] = $row;
+
+            return $carry;
+        }, []);
 
         return parent::_return(1, $rtn);
     }
@@ -133,7 +137,7 @@ class rTag extends Reaction
      */
     function do_saveDetail($f3, $args)
     {
-        kStaff::_chkLogin();
+        chkAuth(fTag::PV_D);
 
         $req = parent::_getReq();
 

@@ -18,7 +18,7 @@ class rRole extends Reaction
 
         $rtn = fRole::limitRows($req['query'], $req['page'], $req['limit']);
 
-        foreach ($rtn['subset'] as $k => $row) {
+        $rtn['subset'] = \__::map($rtn['subset'], function ($row) use ($auths) {
             $chkPriv = [];
             $priv    = fRole::parseAuth(fRole::parseAuthIdx(fRole::reverseAuth($row['priv'])));
 
@@ -28,8 +28,10 @@ class rRole extends Reaction
                 }
             }
 
-            $rtn['subset'][$k]['priv'] = implode('<br/>', $chkPriv);
-        }
+            $row['priv'] = implode('<br/>', $chkPriv);
+
+            return $row;
+        });
 
         return self::_return(1, $rtn);
     }

@@ -5,50 +5,6 @@ namespace F3CMS;
 class rPress extends Reaction
 {
     /**
-     * @param array $row
-     *
-     * @return mixed
-     */
-    public static function handleRow($row = [])
-    {
-        $row['tags']      = fPress::lotsTag($row['id']);
-        $row['authors']   = fPress::lotsAuthor($row['id']);
-        $row['relateds']  = fPress::lotsRelated($row['id']);
-        $row['meta']      = fPress::lotsMeta($row['id']);
-        $row['terms']     = fPress::lotsTerm($row['id']);
-        $row['books']     = fPress::lotsBook($row['id']);
-
-        // read history file
-        // $fc = new FCHelper('press');
-        $row['history']        = []; // $fc->getLog('press_' . $row['id']);
-        $row['status_publish'] = $row['status'];
-
-        return $row;
-    }
-
-    /**
-     * @param $f3
-     * @param $args
-     */
-    public function do_list($f3, $args)
-    {
-        kStaff::_chkLogin();
-
-        $req = parent::_getReq();
-
-        $req['page'] = ($req['page']) ? ($req['page'] - 1) : 1;
-
-        $rtn = fPress::limitRows($req['query'], $req['page']);
-
-        foreach ($rtn['subset'] as $k => $row) {
-            $rtn['subset'][$k]['tags']    = fPress::lotsTag($row['id']);
-            $rtn['subset'][$k]['authors'] = fPress::lotsAuthor($row['id']);
-        }
-
-        return self::_return(1, $rtn);
-    }
-
-    /**
      * @param $f3
      * @param $args
      */
@@ -131,21 +87,48 @@ class rPress extends Reaction
         if (!empty($tag)) {
             $rtn = fPress::lotsByTag($tag['id'], $req['page'], $req['limit']);
         } else {
-            // if (!empty($req['columnID'])) {
-            //     if ($req['columnType'] == 'topic') {
-            //         $query .= ',m.topic_id:' . intval($req['columnID']);
-            //     } else {
-            //         $query .= ',m.column_id:' . intval($req['columnID']);
-            //     }
-            // }
             $rtn = fPress::limitRows($query, $req['page'], $req['limit']);
         }
 
-        foreach ($rtn['subset'] as $k => $row) {
-            $rtn['subset'][$k]['tags'] = fPress::lotsTag($row['id']);
-            $rtn['subset'][$k]['authors'] = fPress::lotsAuthor($row['id']);
-        }
+        $rtn['subset'] = \__::map($rtn['subset'], function ($row) {
+            return self::handleIteratee($row);
+        });
 
         return self::_return(1, $rtn);
+    }
+    /**
+     * @param array $row
+     *
+     * @return mixed
+     */
+    public static function handleRow($row = [])
+    {
+        $row['tags']      = fPress::lotsTag($row['id']);
+        $row['authors']   = fPress::lotsAuthor($row['id']);
+        $row['relateds']  = fPress::lotsRelated($row['id']);
+        $row['meta']      = fPress::lotsMeta($row['id']);
+        $row['terms']     = fPress::lotsTerm($row['id']);
+
+        // read history file
+        // $fc = new FCHelper('press');
+        $row['history']        = []; // $fc->getLog('press_' . $row['id']);
+        $row['status_publish'] = $row['status'];
+
+        return $row;
+    }
+
+    /**
+     * @param array $row
+     *
+     * @return mixed
+     */
+    public static function handleIteratee($row = [])
+    {
+        $row['tags']    = fPress::lotsTag($row['id']);
+        $row['authors'] = fPress::lotsAuthor($row['id']);
+
+        // $row['metas']   = fPress::lotsMeta($row['id']);
+
+        return $row;
     }
 }

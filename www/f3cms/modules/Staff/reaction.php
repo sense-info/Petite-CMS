@@ -24,37 +24,6 @@ class rStaff extends Reaction
      * @param $f3
      * @param $args
      */
-    public function do_get_one($f3, $args)
-    {
-        kStaff::_chkLogin();
-
-        $req = parent::_getReq();
-
-        if (!isset($req['pid'])) {
-            return self::_return(8004);
-        }
-
-        if (0 == $req['pid']) {
-            return self::_return(1, [
-                'id' => 0,
-            ]);
-        }
-
-        $cu = fStaff::one($req['pid']);
-
-        if (null == $cu) {
-            return self::_return(8106);
-        }
-
-        unset($cu['pwd']);
-
-        return self::_return(1, $cu);
-    }
-
-    /**
-     * @param $f3
-     * @param $args
-     */
     public function do_login($f3, $args)
     {
         $rtn = self::RTN_LOGINED;
@@ -231,7 +200,7 @@ class rStaff extends Reaction
      */
     public function do_resend($f3, $args)
     {
-        chkAuth(fStaff::PV_U); // kStaff::_chkLogin();
+        chkAuth(fStaff::PV_U);
         $req = parent::_getReq();
 
         if (!isset($req['pid'])) {
@@ -263,7 +232,7 @@ class rStaff extends Reaction
      */
     public function do_sudo($f3, $args)
     {
-        chkAuth(fStaff::PV_U); // kStaff::_chkLogin();
+        chkAuth(fStaff::PV_U);
 
         $member = fMember::one($args['UID']);
 
@@ -287,8 +256,7 @@ class rStaff extends Reaction
 
     public function do_get_opts($f3, $args)
     {
-        kStaff::_chkLogin();
-        // chkAuth(fRole::PV_R);
+        chkAuth(fRole::PV_R);
 
         return self::_return(1, fRole::getAuthOpts());
     }

@@ -49,10 +49,9 @@ class rAuthor extends Reaction
 
         $rtn = fPress::lotsByAuthor($author['id'], $req['page'], $req['limit']);
 
-        foreach ($rtn['subset'] as $k => $row) {
-            $rtn['subset'][$k]['tags']    = fPress::lotsTag($row['id']);
-            $rtn['subset'][$k]['authors'] = fPress::lotsAuthor($row['id']);
-        }
+        $rtn['subset'] = \__::map($rtn['subset'], function ($row) {
+            return rPress::handleIteratee($row);
+        });
 
         return self::_return(1, $rtn);
     }

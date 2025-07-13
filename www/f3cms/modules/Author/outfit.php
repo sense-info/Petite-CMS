@@ -15,17 +15,6 @@ class oAuthor extends Outfit
             f3()->error(404);
         }
 
-        // $subset = fPress::lotsByAuthor($author['id']);
-
-        // $subset['subset'] = \__::map($subset['subset'], function ($cu) {
-        //     $cu['tags'] = fPress::lotsTag($cu['id']);
-        //     // $cu['authors'] = fPress::lotsAuthor($cu['id']);
-        //     // $cu['metas'] = fPress::lotsMeta($cu['id']);
-
-        //     return $cu;
-        // });
-        //
-
         $author['title'] = $author['title'] . '的所有文章';
 
         $seo = [
@@ -34,8 +23,6 @@ class oAuthor extends Outfit
         ];
 
         _dzv('page', $seo);
-
-        // _dzv('rows', $subset);
         _dzv('cu', $author);
         _dzv('srcType', 'author');
 

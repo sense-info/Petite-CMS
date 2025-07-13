@@ -18,6 +18,8 @@ class fMenu extends Feed
 
     const PAGELIMIT = 1000;
 
+    const HARD_DEL = 1;
+
     /**
      * @param $query
      * @param $page

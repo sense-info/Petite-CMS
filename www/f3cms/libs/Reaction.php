@@ -61,13 +61,18 @@ class Reaction extends Module
         chkAuth($feed::PV_R);
 
         $req['page']  = (isset($req['page'])) ? ($req['page'] - 1) : 0;
-        $req['limit'] = (!empty($req['limit'])) ? max(min($req['limit'] * 1, 24), 12) : $feed::PAGELIMIT;
+        $maxLimit     = ($feed::PAGELIMIT > 24) ? $feed::PAGELIMIT : 24;
+        $req['limit'] = (!empty($req['limit'])) ? max(min($req['limit'] * 1, $maxLimit), 12) : $maxLimit;
 
         if (!isset($req['query'])) {
             $req['query'] = '';
         }
 
-        $rtn = $feed::limitRows($req['query'], $req['page']);
+        $rtn = $feed::limitRows($req['query'], $req['page'], $req['limit']);
+
+        $rtn['subset'] = \__::map($rtn['subset'], function ($row) use ($that) {
+            return $that::handleIteratee($row);
+        });
 
         return self::_return(1, $rtn);
     }
@@ -239,6 +244,16 @@ class Reaction extends Module
     public static function beforeSave($params = [])
     {
         return $params;
+    }
+
+    /**
+     * @param array $row
+     *
+     * @return mixed
+     */
+    public static function handleIteratee($row = [])
+    {
+        return $row;
     }
 
     /**
