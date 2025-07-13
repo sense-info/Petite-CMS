@@ -146,28 +146,6 @@ class Reaction extends Module
     }
 
     /**
-     * save one column
-     *
-     * @param object $f3   - $f3
-     * @param array  $args - uri params
-     */
-    public function do_save_col($f3, $args)
-    {
-        $req  = parent::_getReq();
-        $feed = parent::_shift(get_called_class(), 'feed');
-
-        chkAuth($feed::PV_U);
-
-        if (!isset($req['id'])) {
-            return self::_return(8004);
-        }
-
-        $id = $feed::save_col($req);
-
-        return self::_return(1, ['id' => $id]);
-    }
-
-    /**
      * delete one row
      *
      * @param object $f3   - $f3
@@ -184,6 +162,10 @@ class Reaction extends Module
 
         if (!isset($req['id'])) {
             return self::_return(8004);
+        }
+
+        if (1 != $feed::HARD_DEL) {
+            return self::_return(8008);
         }
 
         $feed::delRow($req['id']);

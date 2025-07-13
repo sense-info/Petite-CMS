@@ -151,7 +151,7 @@ class rMenu extends Reaction
      */
     public function do_update_sorter($f3, $args)
     {
-        kStaff::_chkLogin(); // chkAuth($feed::PV_U);
+        chkAuth(fMenu::PV_U);
 
         $req = parent::_getReq();
 

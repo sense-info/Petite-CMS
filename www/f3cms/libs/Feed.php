@@ -18,6 +18,8 @@ class Feed extends Module
     const PV_U = 'base.cms';
     const PV_D = 'mgr.cms';
 
+    const HARD_DEL = 0;
+
     /**
      * save whole form for backend
      *
