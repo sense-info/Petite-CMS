@@ -56,7 +56,8 @@ class Reaction extends Module
     public function do_list($f3, $args)
     {
         $req  = parent::_getReq();
-        $feed = parent::_shift(get_called_class(), 'feed');
+        $that = get_called_class();
+        $feed = parent::_shift($that, 'feed');
 
         chkAuth($feed::PV_R);
 

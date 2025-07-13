@@ -15,7 +15,8 @@ class rGenus extends Reaction
     {
         chkAuth(fGenus::PV_R);
 
-        $req       = self::_getReq();
+        $req   = self::_getReq();
+        $query = '';
 
         if (!empty($req['group'])) {
             $condition = 'm.group';
