@@ -24,12 +24,12 @@ class kDraft extends Kit
 
     public static function translate($lang, $guideline)
     {
-        return self::ask(__FUNCTION__, ['intent' => '產生文章 '. $lang .' 翻譯', 'guideline' => $guideline, 'lang' => $lang]);
+        return self::ask(__FUNCTION__, ['intent' => '產生文章 ' . $lang . ' 翻譯', 'guideline' => $guideline, 'lang' => $lang]);
     }
 
     public static function quicktrans($lang, $guideline)
     {
-        return self::ask(__FUNCTION__, ['intent' => '產生文案 '. $lang .' 翻譯', 'guideline' => $guideline, 'lang' => $lang]);
+        return self::ask(__FUNCTION__, ['intent' => '產生文案 ' . $lang . ' 翻譯', 'guideline' => $guideline, 'lang' => $lang]);
     }
 
     public static function answer($request_id)
@@ -81,6 +81,7 @@ class kDraft extends Kit
 
         $text = trim($text);
         $text = \Markdown::instance()->convert($text);
+
         return preg_replace('/<br \/>+/', '</p><p>', $text);
     }
 }

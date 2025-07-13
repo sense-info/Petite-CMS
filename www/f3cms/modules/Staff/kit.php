@@ -27,11 +27,11 @@ class kStaff extends Kit
     public static function _notExistAccount($account)
     {
         $currnt = (int) f3()->exists('POST.id') ? f3()->get('POST.id') : 0;
-        $staff = fStaff::one($account, 'account');
+        $staff  = fStaff::one($account, 'account');
         if (empty($staff)) {
             return true;
         } else {
-            if ($currnt == 0) {
+            if (0 == $currnt) {
                 return '已有此管理員帳號，無法新增資料!!';
             } else {
                 return ($staff['id'] == $currnt) ? true : '已有此管理員帳號，無法修改資料!!';
@@ -55,13 +55,13 @@ class kStaff extends Kit
         return [
             'save'        => [
                 'account' => self::_accountRule(),
-                'pwd'    => 'regex:/^(?=.*\d)(?=.*[a-zA-Z]){2,}(?=.*[a-zA-Z])(?!.*\s).{8,32}/', // 建議長度 8-16 字元，含英數字
+                'pwd'     => 'regex:/^(?=.*\d)(?=.*[a-zA-Z]){2,}(?=.*[a-zA-Z])(?!.*\s).{8,32}/', // 建議長度 8-16 字元，含英數字
             ],
             'login'        => [
                 'account' => 'required|min:3|max:200', // 建議長度 8-16 字元，含英數字
-                                                             // SELECT `id`, `account`, LENGTH(`account`) AS LengthOfString FROM `tbl_member`
-                                                             //     WHERE 1 HAVING LengthOfString > 16 OR  LengthOfString < 4;
-                                                             // 526, 1062, 61, 415
+                // SELECT `id`, `account`, LENGTH(`account`) AS LengthOfString FROM `tbl_member`
+                //     WHERE 1 HAVING LengthOfString > 16 OR  LengthOfString < 4;
+                // 526, 1062, 61, 415
 
                 'pwd'  => 'required|min:4|max:32', // 建議長度 8-16 字元，含英數字
             ],

@@ -26,17 +26,17 @@ class rStats extends Reaction
         $req['query'] = fStats::_handleQuery($req['query']);
 
         if (!empty($req['query']['insert_ts[<>]'])) {
-            $start = $req['query']['insert_ts[<>]'][0];
-            $end = $req['query']['insert_ts[<>]'][1];
-            $dateLabel = $start .' ~ '. $end;
+            $start     = $req['query']['insert_ts[<>]'][0];
+            $end       = $req['query']['insert_ts[<>]'][1];
+            $dateLabel = $start . ' ~ ' . $end;
         } else {
-            $start = '28daysAgo'; // '7daysAgo';
-            $end = 'today'; // 'today';
+            $start     = '28daysAgo'; // '7daysAgo';
+            $end       = 'today'; // 'today';
             $dateLabel = '近 28 天';
         }
 
         $fc  = new FCHelper('stats');
-        $idx = 'stats_default_' . $start .'_'. $end;
+        $idx = 'stats_default_' . $start . '_' . $end;
         $rtn = $fc->get($idx, 60); // 60 mins
 
         if (empty($rtn)) {
@@ -48,17 +48,17 @@ class rStats extends Reaction
             $data1 = $ga->byDate($start, $end);
             $data2 = $ga->byCountry($start, $end);
 
-            $swappedData = array_map(fn($i) => ["x" => $i["y"], "y" => $i["x"]], $data2);
+            $swappedData = array_map(fn ($i) => ['x' => $i['y'], 'y' => $i['x']], $data2);
 
             $rtn = [
                 'date' => [
                     'subset' => $data1,
-                    'label' => $dateLabel
+                    'label'  => $dateLabel,
                 ],
                 'country' => [
                     'subset' => $swappedData,
-                    'label' => $dateLabel
-                ]
+                    'label'  => $dateLabel,
+                ],
             ];
 
             $fc->save($idx, jsonEncode($rtn));

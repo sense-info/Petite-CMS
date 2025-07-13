@@ -191,8 +191,8 @@ class FSHelper extends Helper
             $old_fn     = $path_parts['filename'];
             $ext        = $path_parts['extension'];
 
-            if ($root == '') {
-                $root = rtrim(f3()->get('abspath') . 'upload/' . f3()->get('upload_dir') , '/');
+            if ('' == $root) {
+                $root = rtrim(f3()->get('abspath') . 'upload/' . f3()->get('upload_dir'), '/');
             }
 
             $tmpl = $root . $filename . '%s.' . $ext;
@@ -248,7 +248,7 @@ class FSHelper extends Helper
                 }
             }
 
-            $new_fn = '/upload' . $filename. '.' . $ext;
+            $new_fn = '/upload' . $filename . '.' . $ext;
             if ($webpable && 'develop' != f3()->get('APP_ENV')) {
                 $new_fn = str_replace('.' . $ext, '.webp', $new_fn);
                 $new_fn .= '?' . $ext;

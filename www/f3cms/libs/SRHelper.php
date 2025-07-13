@@ -1,4 +1,5 @@
 <?php
+
 namespace F3CMS;
 
 /**
@@ -7,9 +8,11 @@ namespace F3CMS;
 class SRHelper extends Helper
 {
     const NOT_LOG_HISTORY = false;
+
     /**
-     * @param  $filename
-     * @param  $html
+     * @param $filename
+     * @param $html
+     *
      * @return mixed
      */
     public static function save($staticPath, $content, $follow = true)
@@ -28,7 +31,7 @@ class SRHelper extends Helper
 
             FSHelper::appendToFile(
                 f3()->get('UPLOAD_PATH') . $staticPath . '/history.log',
-                '|'. date('Y-m-d H:i:s') .PHP_EOL.'變動人：' . (($staff) ?: f3()->IP) .PHP_EOL. $bakname .PHP_EOL
+                '|' . date('Y-m-d H:i:s') . PHP_EOL . '變動人：' . (($staff) ?: f3()->IP) . PHP_EOL . $bakname . PHP_EOL
             );
         }
 
@@ -56,15 +59,16 @@ class SRHelper extends Helper
     }
 
     /**
-     * @param  $staticPath
-     * @param  $maxLifetime
+     * @param $staticPath
+     * @param $maxLifetime
+     *
      * @return mixed
      */
     public static function get($staticPath, $maxLifetime = 0)
     {
         $filename = self::getFilename($staticPath);
 
-        if ($maxLifetime != 0 && self::needRebuild($filename, $maxLifetime)) {
+        if (0 != $maxLifetime && self::needRebuild($filename, $maxLifetime)) {
             return null;
             // return self::requestSet($staticPath);
         }
@@ -80,10 +84,11 @@ class SRHelper extends Helper
     public static function getLog($staticPath)
     {
         $filename = self::getFilename($staticPath);
-        $content = @file_get_contents(f3()->get('UPLOAD_PATH') . self::path . '/history.log');
+        $content  = @file_get_contents(f3()->get('UPLOAD_PATH') . self::path . '/history.log');
 
-        if ($content !== false) {
+        if (false !== $content) {
             $rtn = preg_split("/\|/u", $content);
+
             return array_filter(array_map('trim', $rtn));
         } else {
             return '';
@@ -94,23 +99,23 @@ class SRHelper extends Helper
     {
         $curl = curl_init();
 
-        curl_setopt_array($curl, array(
-            CURLOPT_URL => f3()->get('uri') . '/' . self::action,
+        curl_setopt_array($curl, [
+            CURLOPT_URL            => f3()->get('uri') . '/' . self::action,
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_SSL_VERIFYPEER => false,
             CURLOPT_SSL_VERIFYHOST => false,
-            CURLOPT_ENCODING => '',
-            CURLOPT_MAXREDIRS => 10,
-            CURLOPT_TIMEOUT => 30,
-            CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
-            CURLOPT_CUSTOMREQUEST => 'GET',
-            CURLOPT_HTTPHEADER => array(
+            CURLOPT_ENCODING       => '',
+            CURLOPT_MAXREDIRS      => 10,
+            CURLOPT_TIMEOUT        => 30,
+            CURLOPT_HTTP_VERSION   => CURL_HTTP_VERSION_1_1,
+            CURLOPT_CUSTOMREQUEST  => 'GET',
+            CURLOPT_HTTPHEADER     => [
                 'cache-control: no-cache',
-            ),
-        ));
+            ],
+        ]);
 
         $response = curl_exec($curl);
-        $err = curl_error($curl);
+        $err      = curl_error($curl);
 
         curl_close($curl);
 
@@ -124,14 +129,15 @@ class SRHelper extends Helper
     /**
      * Returns cache filename.
      *
-     * @param  string   $staticPath
+     * @param string $staticPath
+     *
      * @return string
      */
     protected static function getFilename($staticPath)
     {
         FSHelper::mkdir(f3()->get('UPLOAD_PATH') . $staticPath);
 
-        return $staticPath .'/index.html';
+        return $staticPath . '/index.html';
     }
 
     /**
@@ -141,7 +147,7 @@ class SRHelper extends Helper
      */
     protected static function getBackupFilename($staticPath)
     {
-        return $staticPath .'/'. date('ymdHis') .'.html';
+        return $staticPath . '/' . date('ymdHis') . '.html';
     }
 
     /**
@@ -154,7 +160,7 @@ class SRHelper extends Helper
         // TODO: lang ary
         $files = FSHelper::ls(f3()->get('UPLOAD_PATH') . $path);
         foreach ($files as $file) {
-            if (basename($file) == 'index.html') {
+            if ('index.html' == basename($file)) {
                 if (file_exists($file)) {
                     unlink($file);
                 }
@@ -165,9 +171,10 @@ class SRHelper extends Helper
     /**
      * Determines wheater the cache needs to be rebuild or not.
      *
-     * @param  string    $filename
-     * @param  integer   $maxLifetime
-     * @return boolean
+     * @param string $filename
+     * @param int    $maxLifetime
+     *
+     * @return bool
      */
     protected static function needRebuild($filename, $maxLifetime)
     {
@@ -187,7 +194,7 @@ class SRHelper extends Helper
         }
 
         // maxlifetime expired
-        if ($maxLifetime > 0 && (time() - $mtime) > $maxLifetime*60) {
+        if ($maxLifetime > 0 && (time() - $mtime) > $maxLifetime * 60) {
             return true;
         }
 
@@ -198,13 +205,13 @@ class SRHelper extends Helper
     /**
      * Loads the file of a cached resource.
      *
-     * @param  string  $staticPath
-     * @param  string  $filename
+     * @param string $staticPath
+     * @param string $filename
+     *
      * @return mixed
      */
     protected static function readCache($staticPath, $filename)
     {
-
         if (!file_exists(f3()->get('UPLOAD_PATH') . $filename)) {
             return '';
         }
@@ -214,7 +221,7 @@ class SRHelper extends Helper
 
         // find first newline
         $position = strpos($content, PHP_EOL);
-        if ($position === false) {
+        if (false === $position) {
             throw new \Exception('Unable to load cache resource "' . $staticPath . '"');
         }
 
@@ -227,7 +234,8 @@ class SRHelper extends Helper
     /**
      * Loads the file of a cached resource.
      *
-     * @param  string  $filename
+     * @param string $filename
+     *
      * @return mixed
      */
     public static function readHistory($filename)
@@ -237,7 +245,7 @@ class SRHelper extends Helper
 
         // find first newline
         $position = strpos($content, PHP_EOL);
-        if ($position === false) {
+        if (false === $position) {
             throw new \Exception('Unable to load cache resource "' . $filename . '"');
         }
 
@@ -246,23 +254,24 @@ class SRHelper extends Helper
 
     /**
      * @param $buffer
+     *
      * @return mixed
      */
     public static function minify($buffer)
     {
-        //return $buffer;
+        // return $buffer;
 
-        $search = array(
+        $search = [
             '/\>[^\S ]+/s', // strip whitespaces after tags, except space
             '/[^\S ]+\</s', // strip whitespaces before tags, except space
             '/(\s)+/s', // shorten multiple whitespace sequences
-        );
+        ];
 
-        $replace = array(
+        $replace = [
             '>',
             '<',
             '\\1',
-        );
+        ];
 
         $buffer = preg_replace($search, $replace, $buffer);
 

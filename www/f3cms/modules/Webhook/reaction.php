@@ -4,7 +4,6 @@ namespace F3CMS;
 
 class rWebhook extends Reaction
 {
-
     /**
      * @param $f3
      * @param $args
@@ -76,9 +75,9 @@ class rWebhook extends Reaction
         }
 
         self::_rtn([
-            'code' => 200,
-            'msg'=> 'success',
-            'payload' => $cwm->_encrypt($rtn)
+            'code'    => 200,
+            'msg'     => 'success',
+            'payload' => $cwm->_encrypt($rtn),
         ]);
     }
 

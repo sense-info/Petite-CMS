@@ -255,13 +255,15 @@ class Outfit extends Module
         return $newpath;
     }
 
-    public static function convertUrlsToLinks($text) {
+    public static function convertUrlsToLinks($text)
+    {
         // 正則表達式匹配模式，用於識別 https 開頭的 URL
         $regex = '@(?<!["\'])((https)://[^\s/$.].([\w./])*\??[\w&=-]*)@';
 
         // 使用 preg_replace_callback 來替換匹配的 URL 為 HTML <a> 標籤
         $textWithLinks = preg_replace_callback($regex, function ($matches) {
             $url = $matches[1];
+
             // 返回替換後的 <a> 標籤
             return '<a href="' . htmlspecialchars($url) . '">' . htmlspecialchars($url) . '</a>';
         }, $text);
@@ -650,12 +652,12 @@ class Outfit extends Module
 
         _dzv('page.breadcrumb', self::breadcrumb(['title' => $title, 'slug' => $slug, 'sire' => f3()->get('breadcrumb_sire')]));
 
-        $tmp = FSHelper::openFile(f3()->get('configpath') .'/setting.json');
+        $tmp = FSHelper::openFile(f3()->get('configpath') . '/setting.json');
         if (empty($tmp)) {
-            $tmp = FSHelper::openFile(dirname(f3()->get('configpath')) .'/themeSetting.json');
+            $tmp = FSHelper::openFile(dirname(f3()->get('configpath')) . '/themeSetting.json');
         }
         $setting = jsonDecode($tmp);
-        $opts = fOption::load('', 'Preload');
+        $opts    = fOption::load('', 'Preload');
 
         if (!empty($opts['default']['color_name'])) {
             $setting['colorName'] = $opts['default']['color_name'];

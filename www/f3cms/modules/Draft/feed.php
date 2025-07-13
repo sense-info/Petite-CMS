@@ -37,7 +37,7 @@ class fDraft extends Feed
     public static function reportError($pid, $error)
     {
         $data = mh()->update(self::fmTbl(), [
-            'status' => self::ST_INVALID,
+            'status'  => self::ST_INVALID,
             'content' => $error,
         ], [
             'id' => $pid,
@@ -56,6 +56,7 @@ class fDraft extends Feed
             // 'fr' => '法語',
         ];
     }
+
     public static function cronAnswer($limit = 5)
     {
         mh(true)->info();
@@ -63,13 +64,12 @@ class fDraft extends Feed
         $limit = (!empty($limit)) ? max(min($limit * 1, 1), 10) : 5;
 
         $data = self::limitRows([
-            'm.status' => self::ST_WAITING,
+            'm.status'        => self::ST_WAITING,
             'm.request_id[!]' => '',
-            'ORDER' => ['m.id' => 'ASC'],
+            'ORDER'           => ['m.id' => 'ASC'],
         ], 0, $limit, ',m.request_id');
 
         \__::map($data['subset'], function ($row) {
-
             $result = self::batchAnswer($row);
 
             echo $result;
@@ -85,7 +85,7 @@ class fDraft extends Feed
 
         $data = self::limitRows([
             'm.status' => self::ST_NEW,
-            'ORDER' => ['m.id' => 'ASC'],
+            'ORDER'    => ['m.id' => 'ASC'],
         ], 0, $limit, ',m.guideline');
 
         if ($data['count'] > 0) {
@@ -98,7 +98,7 @@ class fDraft extends Feed
 
         \__::map($data['subset'], function ($row) {
             $method   = 'batch' . ucfirst($row['method']);
-            $class  = '\F3CMS\fDraft';
+            $class    = '\F3CMS\fDraft';
 
             if (method_exists($class, $method)) {
                 $result = call_user_func($class . '::' . $method, $row);
@@ -122,8 +122,8 @@ class fDraft extends Feed
         usleep(30000); // 0.03s
 
         $data = mh()->update(self::fmTbl(), [
-            'status' => self::ST_DONE,
-            'content' => $res['data']['reply'],
+            'status'     => self::ST_DONE,
+            'content'    => $res['data']['reply'],
             'request_id' => $res['request_id'],
         ], [
             'id' => $row['id'],
@@ -142,8 +142,8 @@ class fDraft extends Feed
         usleep(30000); // 0.03s
 
         $data = mh()->update(self::fmTbl(), [
-            'status' => self::ST_DONE,
-            'guideline' => $res['data']['reply'],
+            'status'     => self::ST_DONE,
+            'guideline'  => $res['data']['reply'],
             'request_id' => $res['request_id'],
         ], [
             'id' => $row['id'],
@@ -162,8 +162,8 @@ class fDraft extends Feed
         usleep(30000); // 0.03s
 
         $data = mh()->update(self::fmTbl(), [
-            'status' => self::ST_DONE,
-            'content' => jsonEncode($res['data']['reply']),
+            'status'     => self::ST_DONE,
+            'content'    => jsonEncode($res['data']['reply']),
             'request_id' => $res['request_id'],
         ], [
             'id' => $row['id'],
@@ -199,7 +199,7 @@ class fDraft extends Feed
         $res = kDraft::answer($row['request_id']);
         usleep(30000); // 0.03s
 
-        if ($res['code'] == 1) {
+        if (1 == $res['code']) {
             $reply = $res['data']['reply'];
 
             if (!is_array($reply)) {
@@ -217,7 +217,7 @@ class fDraft extends Feed
             }
 
             $data = mh()->update(self::fmTbl(), [
-                'status' => $status,
+                'status'  => $status,
                 'content' => ((!is_array($reply)) ? $reply : jsonEncode($reply)),
             ], [
                 'id' => $row['id'],

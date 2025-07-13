@@ -611,7 +611,7 @@ class Feed extends Module
                 $filter['ORDER'] = $order;
             }
 
-            $count = ceil((int)$total / (int)$limit);
+            $count = ceil((int) $total / (int) $limit);
             $page  = max(0, min($page, $count - 1));
 
             $filter['LIMIT'] = [$page * $limit, $limit];

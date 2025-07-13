@@ -7,8 +7,8 @@ namespace F3CMS;
  */
 class kExcel extends Kit
 {
-
-    public static function loadCsv($filename) {
+    public static function loadCsv($filename)
+    {
         $root    = f3()->get('ROOT') . f3()->get('BASE');
         // load the CSV file
         $csv = array_map('str_getcsv', file($root . $filename));
@@ -51,7 +51,7 @@ class kExcel extends Kit
         // TODO: record current staff data
 
         f3()->set('rows', $rows);
-        $tp = \Template::instance();
+        $tp      = \Template::instance();
         $content = $tp->render('xls/' . $filename . '.html');
 
         FSHelper::dumpFile(f3()->get('abspath') . $path, $content);

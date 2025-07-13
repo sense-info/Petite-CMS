@@ -19,12 +19,12 @@ class rGenus extends Reaction
 
         if (!empty($req['group'])) {
             $condition = 'm.group';
-            $query = $req['group'];
+            $query     = $req['group'];
         }
 
         if (!empty($req['query'])) {
             $condition = 'm.name';
-            $query = $req['query'];
+            $query     = $req['query'];
         }
 
         $opts = fGenus::getOpts($query, $condition);

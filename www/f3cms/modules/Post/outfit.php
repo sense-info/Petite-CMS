@@ -13,14 +13,14 @@ class oPost extends Outfit
     public static function sitemap($args)
     {
         $subset = fPress::limitRows([
-            'm.status' => [fPress::ST_PUBLISHED, fPress::ST_CHANGED]
+            'm.status' => [fPress::ST_PUBLISHED, fPress::ST_CHANGED],
         ], 0, 1000);
 
         f3()->set('rows', $subset);
         f3()->set('page', fOption::load('page'));
 
         $categories = fCategory::limitRows([
-            'm.status' => fCategory::ST_ON
+            'm.status' => fCategory::ST_ON,
         ], 0, 20, ',m.insert_ts');
 
         f3()->set('categories', $categories);
@@ -34,7 +34,7 @@ class oPost extends Outfit
     public static function rss($args)
     {
         $subset = fPress::limitRows([
-            'm.status' => [fPress::ST_PUBLISHED, fPress::ST_CHANGED]
+            'm.status' => [fPress::ST_PUBLISHED, fPress::ST_CHANGED],
         ], 0, 1000);
 
         $subset['subset'] = \__::map($subset['subset'], function ($cu) {
@@ -63,13 +63,13 @@ class oPost extends Outfit
     public static function lineXml($args)
     {
         if (!f3()->get('connectLineXml')) {
-            die('403 Forbidden');
+            exit('403 Forbidden');
         }
 
         // TODO: is LINE connention?
 
         $subset = fPress::limitRows([
-            'm.status' => [fPress::ST_PUBLISHED, fPress::ST_CHANGED]
+            'm.status' => [fPress::ST_PUBLISHED, fPress::ST_CHANGED],
         ], 0, 100, ',l.content');
 
         $subset['subset'] = \__::map($subset['subset'], function ($cu) {

@@ -1,4 +1,5 @@
 <?php
+
 namespace F3CMS;
 
 /**
@@ -21,6 +22,6 @@ class oDictionary extends Outfit
 
         f3()->set('breadcrumb_sire', ['title' => '首頁', 'slug' => '/home']);
 
-         parent::render('post.twig', $cu['title'] . ' - 小知識', '/d/' . $cu['id'] . '/' . $cu['slug']);
+        parent::render('post.twig', $cu['title'] . ' - 小知識', '/d/' . $cu['id'] . '/' . $cu['slug']);
     }
 }

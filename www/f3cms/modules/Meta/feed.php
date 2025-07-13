@@ -114,5 +114,4 @@ class fMeta extends Feed
     {
         return ['m.sorter' => 'ASC', 'm.fence' => 'ASC'];
     }
-
 }

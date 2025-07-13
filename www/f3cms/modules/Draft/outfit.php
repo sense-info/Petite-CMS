@@ -36,7 +36,7 @@ class oDraft extends Outfit
         if (!empty($row['content'])) {
             $json = jsonDecode($row['content']);
 
-            if ($json != 'Syntax error, malformed JSON') {
+            if ('Syntax error, malformed JSON' != $json) {
                 $row['content'] = $json;
             }
 
@@ -44,7 +44,7 @@ class oDraft extends Outfit
                 $row['content']['article_content'] = kDraft::toMarkdown($row['content']['article_content']);
             } else {
                 $row['content'] = [
-                    'article_content' => $row['content']
+                    'article_content' => $row['content'],
                 ];
             }
 

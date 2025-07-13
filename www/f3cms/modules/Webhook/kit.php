@@ -12,7 +12,7 @@ class kWebhook extends Kit
         return [
             'getCode'  => [
                 'payload'   => 'required',
-            ]
+            ],
         ];
     }
 }

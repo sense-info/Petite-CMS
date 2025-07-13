@@ -124,11 +124,12 @@ class Module
         $acceptLang = f3()->get('acceptLang');
         if (1 == count($acceptLang)) {
             return f3()->get('defaultLang');
-        } else if (isset($_SERVER['HTTP_X_BACKEND_LANG'])) {
+        } elseif (isset($_SERVER['HTTP_X_BACKEND_LANG'])) {
             $lang = $_SERVER['HTTP_X_BACKEND_LANG'];
             if (!in_array($lang, $acceptLang)) {
                 $lang = f3()->get('defaultLang');
             }
+
             return $lang;
         } else {
             if (!f3()->exists('lang') || !empty($args)) {

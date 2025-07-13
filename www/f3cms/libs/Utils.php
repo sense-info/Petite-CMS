@@ -221,7 +221,8 @@ function removeZH($string)
     return preg_replace($ascii, '', $string);
 }
 
-function containsCJK($string) {
+function containsCJK($string)
+{
     // 定義包含中、日、韓文字符的Unicode範圍的正則表達式
     $cjkPattern = '/[\x{4E00}-\x{9FFF}\x{3040}-\x{30FF}\x{AC00}-\x{D7AF}]/u';
 
@@ -415,8 +416,9 @@ function getCaller()
     return $caller;
 }
 
-function safeCount($ary) {
-    return  (!is_countable($ary)) ? 0 : count($ary);
+function safeCount($ary)
+{
+    return (!is_countable($ary)) ? 0 : count($ary);
 }
 
 /**
@@ -465,8 +467,8 @@ function getCookie($idx)
 function secure_random_string($length, $characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ')
 {
     $charactersLength = strlen($characters);
-    $randomString = '';
-    for ($i = 0; $i < $length; $i++) {
+    $randomString     = '';
+    for ($i = 0; $i < $length; ++$i) {
         $randomIndex = random_int(0, $charactersLength - 1);
         $randomString .= $characters[$randomIndex];
     }
@@ -480,6 +482,7 @@ function secure_random_string($length, $characters = '0123456789abcdefghijklmnop
 function uuid()
 {
     $chars = secure_random_string(40, '0123456789abcdefghijklmnopqrstuvwxyz');
+
     return substr($chars, 0, 8) . '-'
     . substr($chars, 8, 4) . '-'
     . substr($chars, 12, 4) . '-'

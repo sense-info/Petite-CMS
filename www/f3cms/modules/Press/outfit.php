@@ -160,8 +160,8 @@ class oPress extends Outfit
         $cu['content'] = parent::convertUrlsToLinks($cu['content']);
 
         $subset = fMedia::limitRows([
-            'm.status' => fMedia::ST_ON,
-            'm.target' => 'Press',
+            'm.status'    => fMedia::ST_ON,
+            'm.target'    => 'Press',
             'm.parent_id' => $cu['id'],
         ], 0, 30);
 
@@ -224,15 +224,15 @@ class oPress extends Outfit
 
         // TODO: use @graph, add ImageObject, BreadcrumbList, Person
         return '<script type="application/ld+json">' . jsonEncode([
-          '@context'         => 'https://schema.org',
-          '@type'            => 'NewsArticle',
-          'headline'         => parent::safeRaw($title),
-          'description'      => parent::safeRaw($desc),
-          'contentUrl'       => $link,
-          'image'            => [$img],
-          'dateModified'     => date('c', strtotime($last_ts)),
-          'datePublished'    => date('c', strtotime($online_date)),
-          'inLanguage'       => $lang,
+            '@context'         => 'https://schema.org',
+            '@type'            => 'NewsArticle',
+            'headline'         => parent::safeRaw($title),
+            'description'      => parent::safeRaw($desc),
+            'contentUrl'       => $link,
+            'image'            => [$img],
+            'dateModified'     => date('c', strtotime($last_ts)),
+            'datePublished'    => date('c', strtotime($online_date)),
+            'inLanguage'       => $lang,
         ]) . '</script>';
     }
 }

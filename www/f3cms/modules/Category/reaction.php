@@ -15,7 +15,7 @@ class rCategory extends Reaction
     {
         $req = parent::_getReq();
 
-        $req['page'] = ($req['page']) ? (intval($req['page']) - 1) : 1;
+        $req['page']  = ($req['page']) ? (intval($req['page']) - 1) : 1;
         $req['limit'] = max(min($req['limit'] * 1, 24), 3);
 
         if (!empty($req['pid'])) {
@@ -30,7 +30,7 @@ class rCategory extends Reaction
 
         $filter = [
             'm.cate_id' => $cate['id'],
-            'm.status' => [fPress::ST_PUBLISHED, fPress::ST_CHANGED]
+            'm.status'  => [fPress::ST_PUBLISHED, fPress::ST_CHANGED],
         ];
 
         if (!empty($args['tag'])) {
@@ -47,7 +47,7 @@ class rCategory extends Reaction
             }
         }
 
-        $rtn = fPress::limitRows($filter, $req['page'], $req['limit']);
+        $rtn           = fPress::limitRows($filter, $req['page'], $req['limit']);
         $rtn['subset'] = \__::map($rtn['subset'], function ($row) {
             return rPress::handleIteratee($row);
         });
@@ -57,6 +57,7 @@ class rCategory extends Reaction
 
     /**
      * @param array $row
+     *
      * @return mixed
      */
     public static function handleRow($row = [])
@@ -74,9 +75,9 @@ class rCategory extends Reaction
     {
         // chkAuth(fCategory::PV_R);
 
-        $req = self::_getReq();
+        $req       = self::_getReq();
         $condition = [
-            'm.status' => fCategory::ST_ON
+            'm.status' => fCategory::ST_ON,
         ];
 
         if (!empty($req['group'])) {
@@ -88,13 +89,12 @@ class rCategory extends Reaction
         }
 
         $opts = fCategory::limitRows($condition, 0, 20);
-        $rtn = [];
+        $rtn  = [];
 
         foreach ($opts['subset'] as &$row) {
-            $rtn[] = ['id' => $row['id'], 'title' => $row['title'] .' / '. $row['slug']];
+            $rtn[] = ['id' => $row['id'], 'title' => $row['title'] . ' / ' . $row['slug']];
         }
 
         return self::_return(1, $rtn);
     }
-
 }

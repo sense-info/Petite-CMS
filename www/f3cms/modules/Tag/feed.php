@@ -91,8 +91,8 @@ class fTag extends Feed
 
     public static function setPressCnt($pid)
     {
-        $cnt = self::exec('SELECT COUNT(r.`press_id`) AS `cnt` FROM `'. fPress::fmTbl('tag') .'` AS `r` '.
-            ' INNER JOIN `' . fPress::fmTbl() . '` AS `m` ON `r`.`press_id` = `m`.`id` AND `m`.`status` IN (\'' . fPress::ST_PUBLISHED . '\', \'' . fPress::ST_CHANGED . '\') '.
+        $cnt = self::exec('SELECT COUNT(r.`press_id`) AS `cnt` FROM `' . fPress::fmTbl('tag') . '` AS `r` ' .
+            ' INNER JOIN `' . fPress::fmTbl() . '` AS `m` ON `r`.`press_id` = `m`.`id` AND `m`.`status` IN (\'' . fPress::ST_PUBLISHED . '\', \'' . fPress::ST_CHANGED . '\') ' .
             'WHERE `r`.`tag_id` = :pid LIMIT 1', [':pid' => $pid], true);
         $cnt = ($cnt) ? $cnt['cnt'] * 1 : 0;
 

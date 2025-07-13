@@ -24,7 +24,7 @@ class oContact extends Outfit
         _dzv('cu', $row);
         f3()->set('breadcrumb_sire', ['title' => '首頁', 'slug' => '/home']);
 
-        parent::render(parent::_lang() .'/contact.twig', $row['title'], '/contact');
+        parent::render(parent::_lang() . '/contact.twig', $row['title'], '/contact');
     }
 
     public function do_captcha($f3, $args)
@@ -36,7 +36,7 @@ class oContact extends Outfit
         } else {
             $f3->set('SESSION.captchaExpired', time() + 10);
             $phraseBuilder = new PhraseBuilder(6, '3456789ACDFGHJKLMNPQRSTWXY');
-            $captcha = new CaptchaBuilder(null, $phraseBuilder);
+            $captcha       = new CaptchaBuilder(null, $phraseBuilder);
             $captcha->setImageType('png');
             $f3->set('SESSION.captcha', strtolower($captcha->getPhrase()));
         }

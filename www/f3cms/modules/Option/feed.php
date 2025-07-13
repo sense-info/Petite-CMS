@@ -20,7 +20,7 @@ class fOption extends Feed
     const PV_U = 'mgr.site';
     const PV_D = 'mgr.site';
 
-    const BE_COLS = 'id,group,loader,status,name,content';
+    const BE_COLS   = 'id,group,loader,status,name,content';
     const PAGELIMIT = 100;
 
     /**

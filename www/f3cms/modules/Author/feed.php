@@ -29,5 +29,4 @@ class fAuthor extends Feed
     {
         return ['m.sorter' => 'ASC', 'm.insert_ts' => 'DESC'];
     }
-
 }

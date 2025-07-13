@@ -7,7 +7,7 @@ class rCrontab extends Reaction
     public static function do_job()
     {
         if (PHP_SAPI != 'cli') {
-            die('Only in cli mode');
+            exit('Only in cli mode');
         }
 
         $freq  = f3()->get('PARAMS.freq');
@@ -50,7 +50,7 @@ class rCrontab extends Reaction
             return self::_return(8201, ['msg' => 'Bearer authorization Failed']);
         }
 
-        $data = fCrontab::many($args['freq'], $args['tally']);
+        $data   = fCrontab::many($args['freq'], $args['tally']);
         $result = [];
 
         if (!empty($data)) {

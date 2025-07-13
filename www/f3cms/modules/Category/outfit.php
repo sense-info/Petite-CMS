@@ -1,4 +1,5 @@
 <?php
+
 namespace F3CMS;
 
 /**
@@ -8,11 +9,12 @@ class oCategory extends Outfit
 {
     /**
      * @param $args
+     *
      * @return mixed
      */
     public static function show($args)
     {
-        if (is_numeric($args['slug']) && f3()->get('theme') != 'chunyichang') {
+        if (is_numeric($args['slug']) && 'chunyichang' != f3()->get('theme')) {
             $cate = fCategory::one($args['slug'], 'id', ['status' => fCategory::ST_ON], false);
         } else {
             $cate = fCategory::one(parent::_slugify($args['slug']), 'slug', ['status' => fCategory::ST_ON], false);

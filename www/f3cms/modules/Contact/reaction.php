@@ -37,5 +37,4 @@ class rContact extends Reaction
 
         return parent::_return(1, ['msg' => '感謝您~~']);
     }
-
 }

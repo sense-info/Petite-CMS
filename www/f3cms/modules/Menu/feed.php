@@ -133,8 +133,9 @@ class fMenu extends Feed
     }
 
     /**
-     * @param  object $menu
-     * @param  int $parent_id
+     * @param object $menu
+     * @param int    $parent_id
+     *
      * @return int new menu id
      */
     public static function cloneMenu($menu, $parent_id)
@@ -163,6 +164,7 @@ class fMenu extends Feed
 
         if (self::chkErr($data->rowCount()) > 0) {
             self::removeOrphanNode();
+
             return 1;
         } else {
             return 0;

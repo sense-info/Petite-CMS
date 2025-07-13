@@ -7,7 +7,6 @@ namespace F3CMS;
  */
 class kContact extends Kit
 {
-
     public static function _captchaRule()
     {
         return [

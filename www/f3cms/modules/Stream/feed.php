@@ -18,7 +18,7 @@ class fStream extends Feed
     const PV_U = 'mgr.site';
     const PV_D = 'mgr.site';
 
-    const BE_COLS = 'm.id,s.email(staff),s.account,m.content,m.status,m.insert_ts,m.target';
+    const BE_COLS   = 'm.id,s.email(staff),s.account,m.content,m.status,m.insert_ts,m.target';
     const PAGELIMIT = 50;
 
     /**

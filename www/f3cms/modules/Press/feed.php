@@ -28,10 +28,10 @@ class fPress extends Feed
     public static function genJoin()
     {
         return [
-            '[>]' . fStaff::fmTbl() . '(s)'     => ['m.insert_user' => 'id'],
-            '[>]' . self::fmTbl('lang') . '(l)' => ['m.id' => 'parent_id', 'l.lang' => '[SV]' . Module::_lang()],
+            '[>]' . fStaff::fmTbl() . '(s)'           => ['m.insert_user' => 'id'],
+            '[>]' . self::fmTbl('lang') . '(l)'       => ['m.id' => 'parent_id', 'l.lang' => '[SV]' . Module::_lang()],
             '[>]' . fCategory::fmTbl('lang') . '(cl)' => ['m.cate_id' => 'parent_id', 'cl.lang' => '[SV]' . Module::_lang()],
-            '[>]' . fCategory::fmTbl() . '(c)' => ['m.cate_id' => 'id', 'c.status' => '[SV]' . fCategory::ST_ON],
+            '[>]' . fCategory::fmTbl() . '(c)'        => ['m.cate_id' => 'id', 'c.status' => '[SV]' . fCategory::ST_ON],
         ];
     }
 
@@ -86,23 +86,23 @@ class fPress extends Feed
     public static function neighbor($cu, $type = 'next')
     {
         $filter = [
-            'm.status' => [self::ST_PUBLISHED, self::ST_CHANGED],
+            'm.status'  => [self::ST_PUBLISHED, self::ST_CHANGED],
             'm.cate_id' => $cu['cate_id'],
-            'm.id[!]' => $cu['id'],
-            'ORDER' => self::genOrder(),
+            'm.id[!]'   => $cu['id'],
+            'ORDER'     => self::genOrder(),
         ];
 
         if ('next' == $type) {
-            $filter['m.sorter[<=]'] = $cu['sorter'];
+            $filter['m.sorter[<=]']      = $cu['sorter'];
             $filter['m.online_date[>=]'] = $cu['online_date'];
-            $filter['ORDER'] = array_map(fn($order)  => (strtoupper($order) === 'ASC' ? 'DESC' : 'ASC'), $filter['ORDER']);
+            $filter['ORDER']             = array_map(fn ($order) => 'ASC' === strtoupper($order) ? 'DESC' : 'ASC', $filter['ORDER']);
         } else {
-            $filter['m.sorter[>=]'] = $cu['sorter'];
+            $filter['m.sorter[>=]']      = $cu['sorter'];
             $filter['m.online_date[<=]'] = $cu['online_date'];
         }
 
         $row = mh()->get(self::fmTbl() . '(m)', self::genJoin(), [
-            'm.id', 'm.cover', 'm.slug', 'l.title'
+            'm.id', 'm.cover', 'm.slug', 'l.title',
         ], $filter);
 
         if (empty($row)) {
@@ -121,9 +121,9 @@ class fPress extends Feed
             INNER JOIN `' . self::fmTbl('lang') . '` AS `l` ON `t`.`press_id` = `l`.`parent_id` AND `l`.`lang` = \'' . Module::_lang() . '\'
             LEFT JOIN `' . fCategory::fmTbl('lang') . '` AS `cl` ON `m`.`cate_id` = `cl`.`parent_id` AND `cl`.`lang` = \'' . Module::_lang() . '\'
             WHERE 1 GROUP BY `t`.`press_id`, `l`.`title`, `l`.`info` ORDER BY `cnt` DESC LIMIT :limit ;', [
-                ':press_id' => $press_id,
-                ':limit'    => $limit,
-            ]);
+            ':press_id' => $press_id,
+            ':limit'    => $limit,
+        ]);
     }
 
     /**
@@ -143,13 +143,13 @@ class fPress extends Feed
     public static function fromDraft($pid, $lang, $data)
     {
         $data = mh()->update(self::fmTbl('lang'), [
-            'title' => $data['title'],
-            'info' => $data['info'],
+            'title'   => $data['title'],
+            'info'    => $data['info'],
             'from_ai' => 'Yes',
             'content' => $data['content'],
         ], [
             'parent_id' => $pid,
-            'lang' => $lang
+            'lang'      => $lang,
         ]);
 
         return parent::chkErr($data->rowCount());
@@ -161,8 +161,8 @@ class fPress extends Feed
             'content' => '',
         ], [
             'parent_id' => $pid,
-            'lang' => $lang,
-            'from_ai' => 'Yes',
+            'lang'      => $lang,
+            'from_ai'   => 'Yes',
         ]);
 
         return parent::chkErr($data->rowCount());
@@ -199,9 +199,9 @@ class fPress extends Feed
         [$data, $other] = self::_handleColumn($req);
 
         $other['relateds'] = $relateds;
-        $other['authors'] = $authors;
-        $other['terms'] = $terms;
-        $other['books'] = $books;
+        $other['authors']  = $authors;
+        $other['terms']    = $terms;
+        $other['books']    = $books;
 
         $rtn = null;
 
@@ -238,7 +238,7 @@ class fPress extends Feed
     {
         [$data, $other] = parent::_handleColumn($req);
 
-        if ($data['sorter'] == 0) {
+        if (0 == $data['sorter']) {
             $data['sorter'] = 99;
         }
 
@@ -286,10 +286,10 @@ class fPress extends Feed
         ];
 
         return mh()->select(self::fmTbl('related') . '(r)', [
-            '[>]' . self::fmTbl('lang') . '(t)' => ['r.related_id' => 'parent_id', 't.lang' => '[SV]' . Module::_lang()],
-            '[>]' . self::fmTbl() . '(m)'       => ['r.related_id' => 'id'],
+            '[>]' . self::fmTbl('lang') . '(t)'       => ['r.related_id' => 'parent_id', 't.lang' => '[SV]' . Module::_lang()],
+            '[>]' . self::fmTbl() . '(m)'             => ['r.related_id' => 'id'],
             '[>]' . fCategory::fmTbl('lang') . '(cl)' => ['m.cate_id' => 'parent_id', 'cl.lang' => '[SV]' . Module::_lang()],
-            '[>]' . fCategory::fmTbl() . '(c)' => ['m.cate_id' => 'id', 'c.status' => '[SV]' . fCategory::ST_ON],
+            '[>]' . fCategory::fmTbl() . '(c)'        => ['m.cate_id' => 'id', 'c.status' => '[SV]' . fCategory::ST_ON],
         ], ['t.parent_id(id)', 't.title', 'm.slug', 'm.cover', 'm.online_date', 'cl.title(category)', 'c.slug(category_slug)'], $filter);
     }
 

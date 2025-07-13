@@ -11,10 +11,10 @@ class Upload extends Helper
      */
     public static function savePhoto($files, $thumbnails = [], $column = 'photo', $acceptable = [])
     {
-        $root    = rtrim(f3()->get('abspath') . 'upload/' . f3()->get('upload_dir') , '/');
+        $root        = rtrim(f3()->get('abspath') . 'upload/' . f3()->get('upload_dir'), '/');
         $linkPath    = f3()->get('webpath') . 'upload';
-        $path    = '/img/' . date('Y/m') . '/';
-        $current = $files[$column];
+        $path        = '/img/' . date('Y/m') . '/';
+        $current     = $files[$column];
 
         $acceptable = (!empty($acceptable)) ? $acceptable : f3()->get('photo_acceptable');
 

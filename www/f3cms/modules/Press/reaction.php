@@ -96,6 +96,7 @@ class rPress extends Reaction
 
         return self::_return(1, $rtn);
     }
+
     /**
      * @param array $row
      *

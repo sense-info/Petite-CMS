@@ -1,4 +1,5 @@
 <?php
+
 namespace F3CMS;
 
 /**
@@ -12,7 +13,7 @@ class fCategory extends Feed
     const PV_U = 'mgr.site';
     const PV_D = 'mgr.site';
 
-    const ST_ON = 'Enabled';
+    const ST_ON  = 'Enabled';
     const ST_OFF = 'Disabled';
 
     public const BE_COLS = 'm.id,m.slug,m.sorter,m.group,m.status,l.title,l.info';

@@ -16,7 +16,7 @@ class fAdv extends Feed
     public static function getPositions()
     {
         $positions = fGenus::getOpts('adv', 'm.group');
-        $idArray = array_column($positions, 'id');
+        $idArray   = array_column($positions, 'id');
 
         return array_combine($idArray, $positions);
     }

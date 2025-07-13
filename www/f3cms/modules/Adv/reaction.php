@@ -97,10 +97,10 @@ class rAdv extends Reaction
             [
                 'id'    => '0',
                 'title' => '未選擇',
-            ]
+            ],
         ], $origAry);
 
-        $idArray = array_column($origAry, 'id');
+        $idArray   = array_column($origAry, 'id');
         $positions = array_combine($idArray, $origAry);
 
         $rtn['subset'] = array_reduce($rtn['subset'], function ($carry, $row) use ($positions) {
@@ -130,23 +130,23 @@ class rAdv extends Reaction
 
         $adv = [
             'position_id' => 0,
-            'weight' => 1,
-            'cover' => $press['cover'],
-            'uri' => '/p/' . $press['id'] . '/' . $press['slug'],
-            'start_date' => date('Y-m-d H:i:s'),
-            'end_date' => date('Y-m-d H:i:s', strtotime('+ 30 days')),
-            'meta' => [
+            'weight'      => 1,
+            'cover'       => $press['cover'],
+            'uri'         => '/p/' . $press['id'] . '/' . $press['slug'],
+            'start_date'  => date('Y-m-d H:i:s'),
+            'end_date'    => date('Y-m-d H:i:s', strtotime('+ 30 days')),
+            'meta'        => [
                 'press_id' => $press['id'],
-                'cate_id' => $press['cate_id']
-            ]
+                'cate_id'  => $press['cate_id'],
+            ],
         ];
 
         foreach ($press['lang'] as $idx => $row) {
             if (isset($press['lang'][$idx]['title'])) {
                 $adv['lang'][$idx] = [
-                    'title' => $press['lang'][$idx]['title'],
+                    'title'    => $press['lang'][$idx]['title'],
                     'subtitle' => $press['online_date'],
-                    'content' => (!empty($press['lang'][$idx]['exposure'])) ? $press['lang'][$idx]['exposure'] : $press['lang'][$idx]['info']
+                    'content'  => (!empty($press['lang'][$idx]['exposure'])) ? $press['lang'][$idx]['exposure'] : $press['lang'][$idx]['info'],
                 ];
             }
         }

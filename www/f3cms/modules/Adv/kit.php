@@ -13,7 +13,7 @@ class kAdv extends Kit
         $key .= '_' . Module::_lang();
         $cache = $fc->get($key);
 
-        if ($force == 1 || empty($cache)) {
+        if (1 == $force || empty($cache)) {
             foreach ($ary as $idx => $row) {
                 $data = fAdv::getResources($row['pid'], $row['limit'], ' m.position_id, m.`weight` DESC ');
 
@@ -24,9 +24,9 @@ class kAdv extends Kit
                     unset($cu['uri']);
 
                     if (!empty($cu['meta']) && !empty($cu['meta']['press_id'])) {
-                        $cu['tags'] = fPress::lotsTag($cu['meta']['press_id']);
+                        $cu['tags']     = fPress::lotsTag($cu['meta']['press_id']);
                         $cu['authors']  = fPress::lotsAuthor($cu['meta']['press_id']);
-                        $cu['cate'] = fCategory::onlyColumns(
+                        $cu['cate']     = fCategory::onlyColumns(
                             fCategory::one($cu['meta']['cate_id'], 'id',
                                 ['status' => fCategory::ST_ON], 0),
                             ['id', 'slug', 'title']
@@ -49,7 +49,7 @@ class kAdv extends Kit
 
     public static function clearCache($key)
     {
-        $fc  = new FCHelper('board');
+        $fc         = new FCHelper('board');
         $acceptLang = f3()->get('acceptLang');
         foreach ($acceptLang as $val) {
             $fc->flush($key . '_' . $val);

@@ -2,7 +2,6 @@
 
 namespace F3CMS;
 
-
 /**
  * for render page
  */

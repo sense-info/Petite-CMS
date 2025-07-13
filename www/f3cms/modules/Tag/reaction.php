@@ -94,21 +94,20 @@ class rTag extends Reaction
             $req['query'] = [];
         }
         $req['page'] = (isset($req['page'])) ? ($req['page'] - 1) : 0;
-        $rtn    = fTag::limitRows($req['query'], $req['page']);
+        $rtn         = fTag::limitRows($req['query'], $req['page']);
 
         $origAry = fGenus::getOpts('tag', 'm.group');
         $origAry = array_merge([
             [
                 'id'    => '0',
                 'title' => '未選擇',
-            ]
+            ],
         ], $origAry);
 
-        $idArray = array_column($origAry, 'id');
+        $idArray   = array_column($origAry, 'id');
         $positions = array_combine($idArray, $origAry);
 
         $rtn['subset'] = array_reduce($rtn['subset'], function ($carry, $row) use ($positions) {
-
             if (!isset($positions[$row['cate_id']])) { // for the unknown genus
                 $positions[$row['cate_id']] = [
                     'id'    => $row['cate_id'],

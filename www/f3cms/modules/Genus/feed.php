@@ -28,9 +28,9 @@ class fGenus extends Feed
     public static function load($group = '')
     {
         $filter = [
-            'LIMIT' => 100,
+            'LIMIT'  => 100,
             'status' => self::ST_ON,
-            'ORDER' => self::genOrder(),
+            'ORDER'  => self::genOrder(),
         ];
 
         if ('' != $group) {
@@ -62,9 +62,9 @@ class fGenus extends Feed
     public static function getOpts($query = '', $column = 'm.name')
     {
         $filter = [
-            'LIMIT' => 100,
+            'LIMIT'  => 100,
             'status' => self::ST_ON,
-            'ORDER' => self::genOrder(),
+            'ORDER'  => self::genOrder(),
         ];
 
         if ('' != $query) {
