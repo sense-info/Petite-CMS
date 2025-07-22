@@ -1,11 +1,11 @@
 ### Init ######
 # 
-# cp bin/sample_env ~/.env_okbom
+# cp bin/sample_env ~/.env
 # 
 
 ### Folder ######
 BAS_DIR=/var/www
-WRK_DIR=/loc.f3cms
+WRK_DIR=/loc.f3cms.com
 
 BACKUP_DIR=/backup
 
