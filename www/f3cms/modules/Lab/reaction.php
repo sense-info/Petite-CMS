@@ -65,10 +65,19 @@ class rLab extends Reaction
                 }
                 break;
             case 'batchDraft':
+                // 增加 PHP 腳本的最大執行時間
+                set_time_limit(0);
                 fDraft::cronjob(1);
                 break;
             case 'batchAnswer':
+                // 增加 PHP 腳本的最大執行時間
+                set_time_limit(0);
                 fDraft::cronAnswer(1);
+                break;
+            case 'batchImport':
+                // 增加 PHP 腳本的最大執行時間
+                set_time_limit(0);
+                fDraft::cronImport(1);
                 break;
             case 'getHashCost':
                 echo 'Appropriate Cost Found: ' . kLab::getHashCost() . PHP_EOL; // 50 milliseconds

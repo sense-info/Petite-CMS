@@ -343,6 +343,18 @@ class Outfit extends Module
      * @param $val
      * @param $format
      */
+    public static function gmapI18n($val, $lang1, $lang2)
+    {
+        if ($lang2 == f3()->get('defaultLang')) {
+            return $val;
+        }
+        return str_replace($lang1, $lang2, $val);
+    }
+
+    /**
+     * @param $val
+     * @param $format
+     */
     public static function date($val, $format)
     {
         return date($format, strtotime($val));
@@ -761,6 +773,9 @@ class Outfit extends Module
         $filter = new \Twig\TwigFilter('repathUri', '\F3CMS\Outfit::repathUri');
         $twig->addFilter($filter);
 
+        $filter = new \Twig\TwigFilter('gmapI18n', '\F3CMS\Outfit::gmapI18n');
+        $twig->addFilter($filter);
+
         $filter = new \Twig\TwigFilter('str2hashtag', '\F3CMS\Outfit::str2hashtag');
         $twig->addFilter($filter);
 
@@ -790,6 +805,10 @@ class Outfit extends Module
         $page = fOption::load('page');
 
         f3()->set('page.site_name', $page['title']);
+        if (empty($page['subtitle'])) {
+            $page['subtitle'] = '';
+        }
+        f3()->set('page.site_subtitle', $page['subtitle']);
 
         if (f3()->exists('page')) {
             $new  = f3()->get('page', $page);

@@ -323,8 +323,6 @@ function getCSRF()
 {
     if ('database' == f3()->get('sessionBase')) {
         return f3()->get('sess')->csrf();
-    } elseif ('redis' == f3()->get('sessionBase')) {
-        return f3()->get('sess')->csrf();
     } else {
         return f3()->CSRF;
     }

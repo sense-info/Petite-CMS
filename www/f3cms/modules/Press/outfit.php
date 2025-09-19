@@ -17,7 +17,7 @@ class oPress extends Outfit
         $langTxts = [
             'tw' => '文章清單',
             'en' => 'Articles',
-            'jp' => '記事一覧',
+            'ja' => '記事一覧',
             'ko' => '기사 목록',
         ];
 
@@ -129,7 +129,6 @@ class oPress extends Outfit
         $tags     = fPress::lotsTag($cu['id'], true);
         $authors  = fPress::lotsAuthor($cu['id']);
         $relateds = fPress::lotsRelated($cu['id']);
-        // $books    = fPress::lotsBook($cu['id']);
         $terms    = fPress::lotsTerm($cu['id']);
         $metas    = fPress::lotsMeta($cu['id']);
 
@@ -144,10 +143,9 @@ class oPress extends Outfit
             $seo['keyword'] .= implode(',', \__::pluck($tags, 'title'));
         }
 
-        if (safeCount($relateds) < 5 && safeCount($tags) > 0) {
-            $limit    =  (5 - safeCount($relateds));
-            $suffix   = fPress::relatedTag($cu['id'], \__::pluck($tags, 'id'), $limit);
-            $relateds = (is_countable($relateds)) ? array_merge($relateds, $suffix) : $suffix;
+        $recommends = [];
+        if (safeCount($tags) > 0) {
+            $recommends = fPress::relatedTag($cu['id'], \__::pluck($tags, 'id'), 5);
         }
 
         if (safeCount($relateds) > 0) {
@@ -173,7 +171,7 @@ class oPress extends Outfit
         _dzv('tags', $tags);
         _dzv('authors', $authors);
         _dzv('relateds', $relateds);
-        // _dzv('books', $books);
+        _dzv('recommends', $recommends);
         _dzv('terms', $terms);
 
         _dzv('next', fPress::neighbor($cu, 'next'));
@@ -181,7 +179,7 @@ class oPress extends Outfit
 
         f3()->set('page', $seo);
 
-        $link = '/' . parent::_lang() . '/p/' . $cu['id'] . '/' . $cu['slug'];
+        $link = '/p/' . $cu['id'] . '/' . $cu['slug'];
 
         _dzv('ldjson', self::ldjson(
             $cu['title'],
@@ -211,7 +209,7 @@ class oPress extends Outfit
             case 'en':
                 $lang = 'en-US';
                 break;
-            case 'jp':
+            case 'ja':
                 $lang = 'ja-JP';
                 break;
             case 'ko':

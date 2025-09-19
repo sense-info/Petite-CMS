@@ -24,6 +24,8 @@ class rPress extends Reaction
             case fPress::ST_PUBLISHED:
                 // TODO: add config to control this
                 // $req['online_date'] = date('Y-m-d H:i:00', time() - 60); // DONT use local datetime
+                //
+                // TODO: 新增欄位檢查
 
                 if (0 === f3()->get('cache.press')) {
                     oPress::buildPage(['slug' => $cu['id']]);

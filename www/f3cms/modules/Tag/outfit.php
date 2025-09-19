@@ -24,17 +24,8 @@ class oTag extends Outfit
             f3()->error(404);
         }
 
-        // $subset = fPress::lotsByTag($tag['id']);
+        $tag['title'] = (empty($tag['title'])) ? '' : $tag['title'];
 
-        // $subset['subset'] = \__::map($subset['subset'], function ($cu) {
-        //     $cu['tags'] = fPress::lotsTag($cu['id']);
-        //     $cu['authors'] = fPress::lotsAuthor($cu['id']);
-        //     $cu['metas'] = fPress::lotsMeta($cu['id']);
-
-        //     return $cu;
-        // });
-
-        // _dzv('rows', $subset);
         _dzv('cu', $tag);
         _dzv('srcType', 'tag');
 

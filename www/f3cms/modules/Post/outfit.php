@@ -10,6 +10,14 @@ class oPost extends Outfit
     /**
      * @param $args
      */
+    public function do_robots($f3, $args)
+    {
+        echo \Template::instance()->render('robots.html');
+    }
+
+    /**
+     * @param $args
+     */
     public static function sitemap($args)
     {
         $subset = fPress::limitRows([
@@ -117,13 +125,11 @@ class oPost extends Outfit
 
         _dzv('cu', $row);
 
-        if ('about' == $row['slug']) {
-            $subset = fAuthor::limitRows('m.status:' . fAuthor::ST_ON . ',m.sorter<20', 1, 24);
-
-            _dzv('authors', $subset['subset']);
-        }
-
         f3()->set('breadcrumb_sire', ['title' => '首頁', 'slug' => '/home']);
+
+        if ($row['layout'] == 'na') {
+            die('此頁面非一般單頁，無法開啟');
+        }
 
         $args['layout'] = (isset($args['layout'])) ? $args['layout'] : $row['layout'];
         // $args['slug']   = (isset($args['slug'])) ? $args['slug'] : 's/' . $row['slug'];

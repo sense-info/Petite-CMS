@@ -41,7 +41,11 @@ class fPress extends Feed
      */
     public static function lotsByID($ids, $page = 0, $limit = 6, $cols = '')
     {
-        $filter['m.id'] = $ids;
+        if (!empty($ids)) {
+            $filter['m.id'] = $ids;
+        } else {
+            $filter['m.id'] = -1;
+        }
 
         $filter['m.status'] = [self::ST_PUBLISHED, self::ST_CHANGED];
 
@@ -140,12 +144,35 @@ class fPress extends Feed
 
     public static function fromDraft($pid, $lang, $data)
     {
-        $data = mh()->update(self::fmTbl('lang'), [
-            'title'   => $data['title'],
-            'info'    => $data['info'],
+        $old = mh()->get(self::fmTbl('lang'), ['id'], [
+            'parent_id' => $pid,
+            'lang'      => $lang,
+        ]);
+
+        if (empty($old)) {
+            mh()->insert(self::fmTbl('lang'), [
+                'parent_id' => $pid,
+                'lang'      => $lang,
+            ]);
+        }
+
+        $updates = [
             'from_ai' => 'Yes',
-            'content' => $data['content'],
-        ], [
+        ];
+
+        if (!empty($data['title'])) {
+            $updates['title'] = $data['title'];
+        }
+
+        if (!empty($data['info'])) {
+            $updates['info'] = $data['info'];
+        }
+
+        if (!empty($data['content'])) {
+            $updates['content'] = $data['content'];
+        }
+
+        $data = mh()->update(self::fmTbl('lang'), $updates, [
             'parent_id' => $pid,
             'lang'      => $lang,
         ]);
@@ -403,14 +430,14 @@ class fPress extends Feed
         }
 
         if (array_key_exists('author', $oldFilter)) {
-            if (is_string($oldFilter['author'])) {
+            if (is_numeric($oldFilter['author'])) {
                 $filter = [
-                    'l.title[~]' => $oldFilter['author'],
+                    'm.id'       => $oldFilter['author'],
                     'm.status'   => fAuthor::ST_ON,
                 ];
             } else {
                 $filter = [
-                    'm.id'       => $oldFilter['author'],
+                    'l.title[~]' => $oldFilter['author'],
                     'm.status'   => fAuthor::ST_ON,
                 ];
             }
