@@ -11,10 +11,6 @@ class fTag extends Feed
     const ST_ON  = 'Enabled';
     const ST_OFF = 'Disabled';
 
-    const PV_R = 'mgr.cms';
-    const PV_U = 'mgr.cms';
-    const PV_D = 'mgr.cms';
-
     const PAGELIMIT = 1000;
 
     const BE_COLS = 'm.id,l.title,m.slug,m.cate_id,m.counter';

@@ -10,6 +10,10 @@ class fContact extends Feed
     const MTB       = 'contact';
     const MULTILANG = 0;
 
+    const PV_R = 'base.member';
+    const PV_U = 'base.member';
+    const PV_D = 'mgr.member';
+
     const ST_NEW     = 'New';
     const ST_Process = 'Process';
     const ST_DONE    = 'Done';

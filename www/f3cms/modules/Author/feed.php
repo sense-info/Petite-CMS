@@ -11,10 +11,6 @@ class fAuthor extends Feed
     const ST_ON  = 'Enabled';
     const ST_OFF = 'Disabled';
 
-    const PV_R = 'mgr.cms';
-    const PV_U = 'mgr.cms';
-    const PV_D = 'mgr.cms';
-
     const BE_COLS = 'm.id,l.title,m.status,m.slug,l.jobtitle,l.slogan,l.summary,m.cover,m.last_ts';
 
     public static function genJoin()

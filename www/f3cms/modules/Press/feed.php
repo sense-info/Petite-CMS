@@ -16,8 +16,6 @@ class fPress extends Feed
     const ST_CHANGED   = 'Changed';
     const ST_OFFLINED  = 'Offlined';
 
-    const PV_SOP = 'mgr.cms';
-
     const BE_COLS = 'm.id,l.title,l.info,m.last_ts,m.cover,m.status,m.slug,m.online_date,s.account,cl.title(category),c.slug(category_slug)';
 
     public static function genOrder()

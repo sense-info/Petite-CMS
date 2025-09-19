@@ -20,24 +20,6 @@ class fRole extends Feed
     const BE_COLS = 'id,status,priv,title,info';
 
     /**
-     * get one row by title
-     *
-     * @param int $title - role title
-     *
-     * @return array
-     */
-    public static function get($title)
-    {
-        $rows = db()->exec('SELECT * FROM `' . self::fmTbl() . "` WHERE `title`=? AND `status`='" . self::ST_ON . "' LIMIT 1 ", $title);
-
-        if (1 != count($rows)) {
-            return null;
-        } else {
-            return $rows[0]['info'];
-        }
-    }
-
-    /**
      * @param $queryStr
      *
      * @return mixed
@@ -71,11 +53,10 @@ class fRole extends Feed
         if (!f3()->exists('AUTH_LIST')) {
             $auth_list = [
                 ['idx' => 1, 'name' => 'base.cms', 'title' => '基本管理'],                // 1
-                ['idx' => 2, 'name' => 'mgr.market', 'title' => '行銷管理'],              // 2
-                ['idx' => 3, 'name' => 'mgr.cms', 'title' => '進階內容管理'],              // 4
-                ['idx' => 4, 'name' => 'base.member', 'title' => '基本會員管理'],          // 8
-                ['idx' => 5, 'name' => 'mgr.member', 'title' => '進階會員管理'],           // 16
-                ['idx' => 6, 'name' => 'mgr.site', 'title' => '完整網站管理'],             // 32
+                ['idx' => 2, 'name' => 'mgr.cms', 'title' => '進階內容管理'],              // 2
+                ['idx' => 3, 'name' => 'base.member', 'title' => '基本客戶管理'],          // 4
+                ['idx' => 4, 'name' => 'mgr.member', 'title' => '進階客戶管理'],           // 8
+                ['idx' => 5, 'name' => 'mgr.site', 'title' => '完整網站管理'],             // 16
             ];
 
             foreach ($auth_list as $auth) {
