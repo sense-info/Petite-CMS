@@ -12,11 +12,7 @@ class fMedia extends Feed
     const ST_ON  = 'Enabled';
     const ST_OFF = 'Disabled';
 
-    const PV_SOP = 'mgr.cms';
-
-    const MULTILANG = 0;
-
-    const BE_COLS = 'm.id,m.title,m.target,m.slug,m.status,m.pic,info,m.last_ts';
+    const BE_COLS = 'm.id,l.title,m.target,m.slug,m.status,m.pic,l.info,m.last_ts';
 
     /**
      * @param $req
@@ -38,16 +34,24 @@ class fMedia extends Feed
 
         mh()->insert(self::fmTbl(), $data);
 
-        return self::chkErr(mh()->id());
+        $pid = self::chkErr(mh()->id());
+
+        if ($pid) {
+            mh()->insert(self::fmTbl('lang'), [
+                'parent_id' => $pid,
+                'from_ai'   => 'No',
+                'lang'      => Module::_lang(),
+                'title'     => $req['title'],
+                'last_ts'   => $now,
+                'insert_ts' => $now,
+            ]);
+        }
+
+        return $pid;
     }
 
     public static function genOrder()
     {
         return ['m.sorter' => 'ASC', 'm.insert_ts' => 'DESC'];
-    }
-
-    public static function genJoin()
-    {
-        return ['[>]' . fStaff::fmTbl() . '(s)' => ['m.insert_user' => 'id']];
     }
 }

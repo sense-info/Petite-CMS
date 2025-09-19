@@ -15,6 +15,11 @@ class Mession extends MHelper
     // ! Suspect callback
     protected $onsuspect;
 
+    protected $tbl;
+    protected $logger;
+    protected $debug;
+    protected $rtn;
+
     /**
      *   Open session
      *

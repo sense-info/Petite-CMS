@@ -96,9 +96,22 @@ class rMedia extends Reaction
     {
         kStaff::_chkLogin();
 
+        $files = f3()->get('FILES');
+        if (empty($files)) {
+            return parent::_return(8004);
+        }
+
         [$filename, $width, $height, $title] = Upload::savePhoto(
-            f3()->get('FILES'), [f3()->get('all_thn')]
+            $files, [f3()->get('all_thn')]
         );
+
+        fMedia::insert([
+            'title'     => $title,
+            'target'    => 'Normal',
+            'parent_id' => 0,
+            'slug'      => fMedia::renderUniqueNo(16),
+            'pic'       => $filename,
+        ]);
 
         $response       = new \stdClass();
         $response->link = f3()->get('uri') . $filename;

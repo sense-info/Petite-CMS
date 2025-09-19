@@ -85,7 +85,8 @@
               <label class="label">推薦標題</label>
               <ul class="control mb-3">
               {{for item.meta.titles}}
-                <li>{{:text}}</li>
+                <li>{{:text}}
+                </li>
               {{/for}}
               </ul>
 
@@ -97,7 +98,13 @@
               </ul>
 
               <label class="label">文章引言</label>
-              <p class="control mb-3">{{:item.meta.introduction}}</p>
+              <p class="control mb-3">{{:item.meta.introduction}}
+
+              <button class="button is-warning pre-gee pull-right" data-gene="click:arena/touch" data-confirm="匯入文章引言？ 點擊【確定】後匯入!!"
+                data-endpoint="draft/nextstep" data-params='{"pid":"{{:item.id}}","method":"importIntro"}'>匯入</button>
+              </p>
+
+              <hr>
 
               <label class="label">推薦大圖生成提示</label>
               <p class="control">{{:item.meta.prompt}}</p>

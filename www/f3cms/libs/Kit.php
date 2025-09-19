@@ -28,6 +28,16 @@ class Kit extends Module
         return $rtn;
     }
 
+    public static function strWidth($str = '')
+    {
+        $mblen = mb_strlen($str);
+        $len   = strlen($str);
+
+        $clen = ($len - $mblen) / 2;
+
+        return $clen + $mblen;
+    }
+
     public static function rules()
     {
         return [
