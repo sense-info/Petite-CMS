@@ -79,12 +79,16 @@
               <div>
                 {{props prop.authors}}
                   {{if #getIndex() != 0 }} & {{/if}}
-                  <a href="javascript:;" data-func="loadQuery" data-query="author_id:{{:prop.id}}" data-mode="Add" class="author-id"> {{:prop.title}} <!-- ({{:prop.role}}) --> </a>
+                  <a href="javascript:;" data-func="loadQuery" data-query="author:{{:prop.id}}" data-mode="Add" class="author-id"> {{:prop.title}} <!-- ({{:prop.role}}) --> </a>
                 {{/props}}
               </div>
               <div>{{:~formatDate(prop.online_date, 'YY-MM-DD HH:mm')}}
                 <span class="tag {{if prop.status == 'Offlined' || prop.status == 'Draft' }}is-warning{{else}}is-success{{/if}}">{{:prop.status}}</span>
+                {{if prop.status == 'Published' }}
                 <a href="{{:~fixLink('p/'+prop.id+'/'+prop.slug)}}" target="_blank" class="is-pulled-right"> <span class="icon"><i class="fa fa-share-square-o"></i></span> </a>
+                {{else}}
+                <a href="{{:~fixLink('tw/preview/p/'+prop.id)}}" target="_blank" class="is-pulled-right"> <span class="icon"><i class="fa fa-share-square-o"></i></span> </a>
+                {{/if}}
               </div>
             </td>
             <td class="is-hidden-mobile"><div class="ellipsis" style=" width: 70px;">{{:prop.account}}</span></div></td>

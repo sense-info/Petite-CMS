@@ -94,32 +94,32 @@
       <div class="tab-box" title="日文資訊">
         <div class="field">
 
-        {{if item.id }}{{if item.lang.tw.title != '' }}{{if item.lang.jp.title == '' }}
-          <a data-column="title" data-target="jp"
+        {{if item.id }}{{if item.lang.tw.title != '' }}{{if item.lang.ja.title == '' }}
+          <a data-column="title" data-target="ja"
           href="javascript:;" class="pre-gee pull-right" title="翻譯此欄位" data-gene="editor.translate">翻譯 <span class="icon"><i class="fa fa-language"></i></span></a>
         {{/if }}{{/if }}{{/if }}
 
           <label class="label">標題</label>
           <p class="control">
-            <input class="input" name="lang[jp][title]" type="text" placeholder="標題">
+            <input class="input" name="lang[ja][title]" type="text" placeholder="標題">
           </p>
         </div>
         <div class="field">
-          <input type="radio" class="is-checkradio" name="lang[jp][from_ai]" value="Yes" id="post-fromai-jp-yes">
-          <label class="radio" for="post-fromai-jp-yes">由 AI 翻譯</label>
-          <input type="radio" class="is-checkradio" name="lang[jp][from_ai]" value="No" checked="checked" id="post-fromai-jp-no">
-          <label class="radio" for="post-fromai-jp-no">非</label>
+          <input type="radio" class="is-checkradio" name="lang[ja][from_ai]" value="Yes" id="post-fromai-ja-yes">
+          <label class="radio" for="post-fromai-ja-yes">由 AI 翻譯</label>
+          <input type="radio" class="is-checkradio" name="lang[ja][from_ai]" value="No" checked="checked" id="post-fromai-ja-no">
+          <label class="radio" for="post-fromai-ja-no">非</label>
         </div>
         <div class="field">
 
-        {{if item.id }}{{if item.lang.tw.content != '' }}{{if item.lang.jp.content == '' }}
-          <a data-column="content" data-target="jp"
+        {{if item.id }}{{if item.lang.tw.content != '' }}{{if item.lang.ja.content == '' }}
+          <a data-column="content" data-target="ja"
           href="javascript:;" class="pre-gee pull-right" title="翻譯此欄位" data-gene="editor.translate">翻譯 <span class="icon"><i class="fa fa-language"></i></span></a>
         {{/if }}{{/if }}{{/if }}
 
           <label class="label">內容</label>
           <p class="control">
-            <gee:editor data-param="lang[jp][content]" data-inline="0"></gee:editor>
+            <gee:editor data-param="lang[ja][content]" data-inline="0"></gee:editor>
           </p>
         </div>
       </div>

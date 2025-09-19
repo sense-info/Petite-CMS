@@ -14,18 +14,18 @@
   </div>
 </nav>
 
-<div class="columns is-multiline">
-  <div class="column">
+<div class="columns content is-multiline">
+  <div class="column is-9">
     <div class="gee" data-gene="init:loadList,click:reactList,dblclick:reactList" data-tmpl="optionList" data-nopde="1">
       {{props data}}
       <h3 class="title is-3 is-caps has-text-info is-capitalized">{{:prop.title}}</h3>
-      <div class="box">
+      <div class="box list-body">
         <div class="columns is-multiline">
         {{props prop.rows}}
           <div class="column is-3">{{:prop.name}} 
             <a href="javascript:;" class="is-pulled-right" data-func="loadRow" data-tmpl="optionForm" data-id="{{:prop.id}}">{{:prop.title}} <span class="icon"><i class="fa fa-pencil"></i></span></a>
           </div>
-          <div class="column is-9" data-func="editor.switchField" data-event="dblclick" data-pid="{{:prop.id}}" data-column="content">
+          <div class="column is-9 line-clamp" style="max-width: 72%;" data-func="editor.switchField" data-event="dblclick" data-pid="{{:prop.id}}" data-column="content">
             {{if prop.content }}{{:~nl2br(prop.content)}}{{else}}<p class="empty-hit"></p>{{/if}}</div>
         {{/props}}
         </div>
