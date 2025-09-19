@@ -227,7 +227,7 @@ class FCHelper extends Reaction
      */
     protected function getFilename($cacheName)
     {
-        $this->path = '/' . $this->action . '/' . md5($cacheName);
+        $this->path = '/' . $this->action . '/' . md5($cacheName . f3()->get('upload_dir'));
 
         if (!file_exists($this->base . $this->path)) {
             mkdir($this->base . $this->path, 0770, true);
