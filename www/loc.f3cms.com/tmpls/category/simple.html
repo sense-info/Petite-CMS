@@ -23,10 +23,10 @@
             <optgroup label="資料">
               <option value="name~">名稱</option>
             </optgroup>
-            <optgroup label="群組">
+            <!-- <optgroup label="群組">
               <option value="group=press">文章分類</option>
               <option value="group=course">課程分類</option>
-            </optgroup>
+            </optgroup> -->
             <optgroup label="狀態">
               <option value="status=Enabled">啟用</option>
               <option value="status=Disabled">未啟用</option>
@@ -94,7 +94,7 @@
       <form class="gee" data-gene="init:initForm" data-tmpl="categoryForm" id="categoryForm">
         <div class="tabs-content box">
           <div class="tab-box" title="基本資訊">
-            <div class="field">
+            <!-- <div class="field">
               <label class="label">群組</label>
               <p class="control">
                 <div class="select is-fullwidth">
@@ -104,7 +104,8 @@
                   </select>
                 </div>
               </p>
-            </div>
+            </div> -->
+            <input type="hidden" name="group" data-val="press" class="static-val">
             <div class="field">
               <label class="label">排序</label>
               <p class="control">
@@ -164,13 +165,13 @@
             <div class="field">
               <label class="label">名稱</label>
               <p class="control">
-                <input class="input" name="lang[jp][title]" type="text" placeholder="名稱">
+                <input class="input" name="lang[ja][title]" type="text" placeholder="名稱">
               </p>
             </div>
             <div class="field">
               <label class="label">描述</label>
               <p class="control">
-                <textarea class="textarea" placeholder="描述" name="lang[jp][info]"></textarea>
+                <textarea class="textarea" placeholder="描述" name="lang[ja][info]"></textarea>
               </p>
             </div>
           </div>
