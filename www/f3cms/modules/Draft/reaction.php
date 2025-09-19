@@ -91,6 +91,10 @@ class rDraft extends Reaction
             return self::_return(8106, ['msg' => '原文無內容']);
         }
 
+        if (kDraft::strWidth($oriContent['content']) < 100) {
+            return self::_return(8106, ['msg' => '文章內文不足 100 字']);
+        }
+
         $content = trim($oriContent['content']);
         if (empty($content)) {
             return self::_return(8106, ['msg' => '無法取得原文內容']);
@@ -114,7 +118,7 @@ class rDraft extends Reaction
             'method'    => 'seohelper',
         ]);
 
-        return self::_return(1, ['msg' => '已建立 SEO 草稿，稍後由排程執行翻譯，可至草稿區查看結果。']);
+        return self::_return(1, ['msg' => '已建立 SEO 草稿，稍後由排程執行，可至草稿區查看結果。']);
     }
 
     /**
@@ -136,6 +140,28 @@ class rDraft extends Reaction
 
         if (empty($old['intent'])) {
             return self::_return(8106, ['msg' => '來源意圖為空']);
+        }
+
+        if ('importIntro' == $req['method']) {
+            if (empty($old['press_id'])) {
+                return self::_return(8106, ['msg' => '無來源文章']);
+            }
+
+            if (empty($old['content'])) {
+                return self::_return(8106, ['msg' => '無引言']);
+            }
+
+            $tmp = jsonDecode($old['content']);
+
+            $affected = fPress::fromDraft($old['press_id'], 'tw', [
+                'info'    => $tmp['introduction'],
+            ]);
+
+            if ($affected) {
+                return self::_return(1);
+            } else {
+                return self::_return(8106, ['msg' => '匯入失敗']);
+            }
         }
 
         if ('guideline' == $old['method']) {
@@ -341,20 +367,28 @@ class rDraft extends Reaction
             return self::_return(8106, ['msg' => '已有相同的草稿']);
         }
 
-        $content = trim(kDraft::dig($oriContent['content']));
+        $content = trim($oriContent['content']);
         if (empty($content)) {
             return self::_return(8106, ['msg' => '無法取得原文內容']);
         }
 
-        $content = '-- 標題開始 --' . PHP_EOL . $oriContent['title'] . PHP_EOL . '-- 標題結束 --' . PHP_EOL .
-            '-- 引言開始 --' . PHP_EOL . $oriContent['info'] . PHP_EOL . '-- 引言結束 --' . PHP_EOL .
-            '-- 文本開始 --' . PHP_EOL . $content . PHP_EOL . '-- 文本結束 --';
+        $tmp = [
+            'article_title' => $oriContent['title'],
+            'article_info' => $oriContent['info'],
+            'article_content' => $content,
+        ];
+
+        $guideline = jsonEncode($tmp);
+
+        // $guideline = '-- 標題開始 --' . PHP_EOL . $oriContent['title'] . PHP_EOL . '-- 標題結束 --' . PHP_EOL .
+        //     '-- 引言開始 --' . PHP_EOL . $oriContent['info'] . PHP_EOL . '-- 引言結束 --' . PHP_EOL .
+        //     '-- 文本開始 --' . PHP_EOL . $content . PHP_EOL . '-- 文本結束 --';
 
         $pid = fDraft::add([
             'lang'      => $req['target'],
             'press_id'  => $req['press_id'],
             'intent'    => '翻譯文章 (' . $req['press_id'] . ') 為 ' . $targetLang,
-            'guideline' => $content,
+            'guideline' => $guideline,
             'method'    => 'translate',
         ]);
 
@@ -362,39 +396,89 @@ class rDraft extends Reaction
             return self::_return(8106);
         }
 
-        $reply = kDraft::translate($req['target'], $content);
+        return self::_return(1, ['msg' => '已建立翻譯任務，稍後由排程執行，可至草稿區查看結果。']);
+    }
 
-        if (0 === stripos($reply, '再問我一次')) {
-            return self::_return(8106, ['msg' => 'wrong ai result']);
+    /**
+     * @param $f3
+     * @param $args
+     */
+    public function do_genI18n($f3, $args)
+    {
+        chkAuth(fDraft::PV_U);
+        $req = parent::_getReq();
+
+        $acceptLang = fDraft::acceptLang();
+
+        $original = (isset($req['original'])) ? $req['original'] : 'tw';
+        if (!array_key_exists($original, $acceptLang)) {
+            return self::_return(8106, ['msg' => '無來源語系參數']);
+        }
+        $cu = fPress::one($req['pid']);
+        $oriContent = $cu['lang'][$original];
+
+        if (empty($cu) || empty($oriContent['title']) || empty($oriContent['info']) || empty($oriContent['content'])) {
+            return self::_return(8106, ['msg' => '原文中應有標題、引言、內文等資訊']);
         }
 
-        if (preg_match('/```json/', $reply)) {
-            $reply = str_replace(['```json', '```'], '', $reply);
+        $content = trim($oriContent['content']);
+        if (empty($content)) {
+            return self::_return(8106, ['msg' => '無法取得原文內容']);
         }
 
-        fDraft::saveCol([
-            'col' => 'content',
-            'val' => $reply,
-            'pid' => $pid,
-        ]);
+        $tmp = [
+            'article_title' => $oriContent['title'],
+            'article_info' => $oriContent['info'],
+            'article_content' => $content,
+        ];
 
-        $json = jsonDecode($reply);
-        if (!is_array($json) || empty($json['article_title']) || empty($json['article_info']) || empty($json['article_content'])) {
-            fDraft::saveCol([
-                'col' => 'status',
-                'val' => fDraft::ST_INVALID,
-                'pid' => $pid,
+        $guideline = jsonEncode($tmp);
+
+        // $guideline = '-- 標題開始 --'. PHP_EOL . $oriContent['title'] . PHP_EOL .'-- 標題結束 --'. PHP_EOL .
+        //     '-- 引言開始 --'. PHP_EOL . $oriContent['info'] . PHP_EOL .'-- 引言結束 --'. PHP_EOL .
+        //     '-- 文本開始 --'. PHP_EOL . $content . PHP_EOL .'-- 文本結束 --';
+
+        $error = '';
+
+        foreach ($acceptLang as $idx => $label) {
+            if ($idx == $original) {
+                continue;
+            }
+            $tmp = '';
+
+            $targetLang = $acceptLang[$idx];
+
+            if (!empty($cu['lang'][$idx]) && !empty($cu['lang'][$idx]['content'])) {
+                $tmp .= '已有'. $targetLang .'的內容';
+            }
+
+            $old = fDraft::one($cu['id'], 'press_id', [
+                'status[!]' => fDraft::ST_INVALID,
+                'method' => 'translate',
+                'lang' => $idx,
             ]);
 
-            return self::_return(8106, ['msg' => 'wrong ai json', 'data' => $json]);
+            if (!empty($old)) {
+                $tmp .= '已有相同的'. $targetLang .'草稿';
+            }
+
+            if ($tmp == '') {
+                $pid = fDraft::add([
+                    'lang' => $idx,
+                    'press_id' => $cu['id'],
+                    'intent' => '翻譯文章 (' . $cu['id'] . ') 為 ' . $targetLang,
+                    'guideline' => $guideline,
+                    'method' => 'translate'
+                ]);
+            }
+
+            $error .= $tmp;
+        }
+
+        if ($error == '') {
+            return self::_return(1, ['msg' => '已建立多語系翻譯任務，稍後由排程執行翻譯，可至草稿區查看結果。']);
         } else {
-            fDraft::saveCol([
-                'col' => 'status',
-                'val' => fDraft::ST_DONE,
-                'pid' => $pid,
-            ]);
+            return self::_return(1, ['msg' => $error]);
         }
-
-        return self::_return(1, ['msg' => '已翻譯為' . $targetLang . '，請至草稿區查看結果。']);
     }
 }

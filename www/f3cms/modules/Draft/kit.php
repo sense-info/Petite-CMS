@@ -12,9 +12,9 @@ class kDraft extends Kit
         return self::ask(__FUNCTION__, ['intent' => $intent]);
     }
 
-    public static function seohelper($guideline)
+    public static function seohelper($guideline, $pid = 0)
     {
-        return self::ask(__FUNCTION__, ['intent' => '產生文章 SEO 相關資料', 'guideline' => $guideline]);
+        return self::ask(__FUNCTION__, ['intent' => '產生文章 SEO 相關資料', 'guideline' => $guideline, 'pid' => $pid]);
     }
 
     public static function guideline($intent)
@@ -22,9 +22,9 @@ class kDraft extends Kit
         return self::ask(__FUNCTION__, ['intent' => $intent]);
     }
 
-    public static function translate($lang, $guideline)
+    public static function translate($lang, $guideline, $pid = 0)
     {
-        return self::ask(__FUNCTION__, ['intent' => '產生文章 ' . $lang . ' 翻譯', 'guideline' => $guideline, 'lang' => $lang]);
+        return self::ask(__FUNCTION__, ['intent' => '產生文章 ' . $lang . ' 翻譯', 'guideline' => $guideline, 'lang' => $lang, 'pid' => $pid]);
     }
 
     public static function quicktrans($lang, $guideline)
@@ -59,6 +59,7 @@ class kDraft extends Kit
         $action       = 'ask';
         $request_data = [
             'method' => $method,
+            'channel_id' => f3()->get('mp.channel_id'),
             'intent' => $params['intent'],
         ];
 
@@ -68,6 +69,10 @@ class kDraft extends Kit
 
         if (isset($params['guideline'])) {
             $request_data['guideline'] = $params['guideline'];
+        }
+
+        if (isset($params['pid'])) {
+            $request_data['pid'] = $params['pid'];
         }
 
         $result = $api->call($action, $request_data);

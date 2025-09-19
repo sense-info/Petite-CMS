@@ -51,17 +51,38 @@ class fDraft extends Feed
         return [
             'tw' => '中文',
             'en' => '英語',
-            'jp' => '日本語',
+            'ja' => '日本語',
             'ko' => '韓語',
             // 'fr' => '法語',
         ];
+    }
+
+    public static function cronImport($limit = 5)
+    {
+        mh(true)->info();
+
+        $limit = (!empty($limit)) ? max(min($limit * 1, 10), 1) : 5;
+
+        $data = self::limitRows([
+            'm.status'        => self::ST_DONE,
+            'm.method'        => 'translate',
+            'm.request_id[!]' => '',
+            'ORDER'           => ['m.id' => 'ASC'],
+        ], 0, $limit, ',m.request_id,m.content');
+
+        \__::map($data['subset'], function ($row) {
+            $result = self::batchImport($row);
+
+            echo $result;
+            usleep(300000); // 0.3s
+        });
     }
 
     public static function cronAnswer($limit = 5)
     {
         mh(true)->info();
 
-        $limit = (!empty($limit)) ? max(min($limit * 1, 1), 10) : 5;
+        $limit = (!empty($limit)) ? max(min($limit * 1, 10), 1) : 5;
 
         $data = self::limitRows([
             'm.status'        => self::ST_WAITING,
@@ -81,7 +102,7 @@ class fDraft extends Feed
     {
         mh(true)->info();
 
-        $limit = (!empty($limit)) ? max(min($limit * 1, 1), 10) : 5;
+        $limit = (!empty($limit)) ? max(min($limit * 1, 10), 1) : 5;
 
         $data = self::limitRows([
             'm.status' => self::ST_NEW,
@@ -158,7 +179,7 @@ class fDraft extends Feed
     {
         $rtn = PHP_EOL . $row['id'] . ') Seohelper : ';
 
-        $res = kDraft::seohelper($row['guideline']);
+        $res = kDraft::seohelper($row['guideline'], $row['press_id']);
         usleep(30000); // 0.03s
 
         $data = mh()->update(self::fmTbl(), [
@@ -174,11 +195,58 @@ class fDraft extends Feed
         return $rtn; // TODO: return json
     }
 
+    public static function batchImport($row)
+    {
+        $rtn = PHP_EOL . $row['id'] . ') Import : ';
+        $err = '';
+        $json = jsonDecode($row['content']);
+
+        if ('Syntax error, malformed JSON' == $json || empty($json['article_title']) || empty($json['article_info']) || empty($json['article_content'])) {
+            $err = '格式錯誤';
+        }
+
+        if (mb_strlen($json['article_title']) > 255 || mb_strlen($json['article_info']) > 700) {
+            $err = '標題或引言過長!';
+        }
+
+        $cu = fPress::one($row['press_id']);
+
+        if (empty($cu)) {
+            $err = '無對應文章!';
+        }
+
+        if (!empty($cu['lang'][$row['lang']]['content'])) {
+            $err = '文章中已有內容，請先清空!';
+        }
+
+        if ($err == '') {
+            $affected = fPress::fromDraft($row['press_id'], $row['lang'], [
+                'title'   => $json['article_title'],
+                'info'    => $json['article_info'],
+                'content' => $json['article_content'],
+            ]);
+
+            if ($affected) {
+                self::saveCol([
+                    'col' => 'status',
+                    'val' => self::ST_USED,
+                    'pid' => $row['id'],
+                ]);
+
+                $err = '0';
+            } else {
+                $err = '無法寫入!';
+            }
+        }
+
+        return $rtn . $err;
+    }
+
     public static function batchTranslate($row)
     {
         $rtn = PHP_EOL . $row['id'] . ') Translate : ';
 
-        $res = kDraft::translate($row['lang'], $row['guideline']);
+        $res = kDraft::translate($row['lang'], $row['guideline'], $row['press_id']);
         usleep(30000); // 0.03s
 
         $data = mh()->update(self::fmTbl(), [

@@ -38,6 +38,11 @@ class rLab extends Reaction
             self::test('batchAnswer');
         }
 
+        // /api/lab/info?batchImport=1
+        if (!empty($_GET['batchImport'])) {
+            self::test('batchImport');
+        }
+
         if (!empty($_GET['repeat'])) {
             echo '<script type="text/javascript"> setTimeout(function () { location.reload(true); }, 3000); </script>';
         }
