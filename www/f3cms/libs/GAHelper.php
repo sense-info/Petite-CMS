@@ -92,7 +92,7 @@ class GAHelper extends Helper
             return $result;
         } catch (ApiException $e) {
             // log error
-            // error_log('API Error: ' . $e->getMessage());
+            error_log('API Error: ' . $e->getMessage());
             return [];
         }
     }
