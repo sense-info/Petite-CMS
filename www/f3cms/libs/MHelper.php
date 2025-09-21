@@ -4,20 +4,30 @@ namespace F3CMS;
 
 use Medoo\Medoo;
 
+/**
+ * MHelper class extends Medoo to provide additional database-related utilities
+ * and custom SQL handling for the Petite CMS.
+ */
 class MHelper extends Medoo
 {
     /**
+     * Singleton instance of the MHelper class.
+     *
      * @var mixed
      */
     private static $_instance = false;
 
+    /**
+     * Constructor initializes the database connection using configuration
+     * values from the framework (f3).
+     */
     public function __construct()
     {
         $port = 3306;
         if (f3()->exists('db_port')) {
             $port = f3()->get('db_port');
         }
-        // $this->pdo = f3()->get('DB')->pdo();
+
         parent::__construct([
             'database_type' => 'mysql',
             'database_name' => f3()->get('db_name'),
@@ -29,6 +39,12 @@ class MHelper extends Medoo
         ]);
     }
 
+    /**
+     * Initializes or retrieves the singleton instance of the MHelper class.
+     *
+     * @param bool $force Whether to force reinitialization of the instance.
+     * @return MHelper The singleton instance.
+     */
     public static function init($force = false)
     {
         if (!self::$_instance || $force) {
@@ -39,15 +55,20 @@ class MHelper extends Medoo
     }
 
     /**
-     * @param      $table
-     * @param      $map
-     * @param      $join
-     * @param      $columns
-     * @param null $where
-     * @param null $column_fn
+     * Constructs a SQL SELECT query with support for joins, aliases, and custom
+     * column functions.
+     *
+     * @param string $table The table name or alias.
+     * @param array $map Reference to the map for query parameters.
+     * @param mixed $join Join conditions or columns.
+     * @param mixed|null $columns Columns to select.
+     * @param mixed|null $where WHERE conditions.
+     * @param mixed|null $columnFn Custom column function (e.g., COUNT, SUM).
+     * @return string The constructed SQL SELECT query.
      */
     protected function selectContext(string $table, array &$map, $join, &$columns = null, $where = null, $columnFn = null): string
     {
+        // Parse table and alias
         preg_match('/(?<table>[a-zA-Z0-9_]+)\s*\((?<alias>[a-zA-Z0-9_]+)\)/i', $table, $table_match);
         if (isset($table_match['table'], $table_match['alias'])) {
             $table       = $this->tableQuote($table_match['table']);
@@ -56,12 +77,11 @@ class MHelper extends Medoo
             $table       = $this->tableQuote($table);
             $table_query = $table;
         }
+
+        // Handle joins
         $is_join  = false;
         $join_key = is_array($join) ? array_keys($join) : null;
-        if (
-            isset($join_key[0])
-            && 0 === strpos($join_key[0], '[')
-        ) {
+        if (isset($join_key[0]) && 0 === strpos($join_key[0], '[')) {
             $is_join    = true;
             $table_join = [];
             $join_array = [
@@ -71,13 +91,12 @@ class MHelper extends Medoo
                 '><' => 'INNER',
             ];
             foreach ($join as $sub_table => $relation) {
-                preg_match('/(\[(?<join>\<\>?|\>\<?)\])?(?<table>[a-zA-Z0-9_]+)\s?(\((?<alias>[a-zA-Z0-9_]+)\))?/', $sub_table, $match);
+                preg_match('/(\[(?<join><\>?|>\<?)\])?(?<table>[a-zA-Z0-9_]+)\s?(\((?<alias>[a-zA-Z0-9_]+)\))?/', $sub_table, $match);
                 if ('' !== $match['join'] && '' !== $match['table']) {
                     if (is_string($relation)) {
                         $relation = 'USING ("' . $relation . '")';
                     }
                     if (is_array($relation)) {
-                        // For ['column1', 'column2']
                         if (isset($relation[0])) {
                             $relation = 'USING ("' . implode('", "', $relation) . '")';
                         } else {
@@ -85,9 +104,7 @@ class MHelper extends Medoo
                             foreach ($relation as $key => $value) {
                                 $joins[] = (
                                     strpos($key, '.') > 0 ?
-                                    // For ['tableB.column' => 'column']
                                     $this->columnQuote($key) :
-                                    // For ['column1' => 'column2']
                                     $table . '."' . $key . '"'
                                 ) .
                                 ' = ' . (('[SV]' == substr($value, 0, 4)) ? $this->pdo->quote(substr($value, 4)) :
@@ -106,10 +123,7 @@ class MHelper extends Medoo
             $table_query .= ' ' . implode(' ', $table_join);
         } else {
             if (is_null($columns)) {
-                if (
-                    !is_null($where)
-                    || (is_array($join) && isset($column_fn))
-                ) {
+                if (!is_null($where) || (is_array($join) && isset($columnFn))) {
                     $where   = $join;
                     $columns = null;
                 } else {
@@ -121,20 +135,22 @@ class MHelper extends Medoo
                 $columns = $join;
             }
         }
-        if (isset($column_fn)) {
-            if (1 === $column_fn) {
+
+        // Handle column functions
+        if (isset($columnFn)) {
+            if (1 === $columnFn) {
                 $column = '1';
                 if (is_null($where)) {
                     $where = $columns;
                 }
-            } elseif ($raw = $this->buildRaw($column_fn, $map)) {
+            } elseif ($raw = $this->buildRaw($columnFn, $map)) {
                 $column = $raw;
             } else {
                 if (empty($columns) || $this->isRaw($columns)) {
                     $columns = '*';
                     $where   = $join;
                 }
-                $column = $column_fn . '(' . $this->columnPush($columns, $map, true) . ')';
+                $column = $columnFn . '(' . $this->columnPush($columns, $map, true) . ')';
             }
         } else {
             $column = $this->columnPush($columns, $map, true, $is_join);
@@ -144,9 +160,9 @@ class MHelper extends Medoo
     }
 
     /**
-     *   Begin SQL transaction
+     * Begins an SQL transaction.
      *
-     * @return bool
+     * @return bool True if the transaction begins successfully.
      */
     public function begin()
     {
@@ -156,9 +172,9 @@ class MHelper extends Medoo
     }
 
     /**
-     *   Rollback SQL transaction
+     * Rolls back the current SQL transaction.
      *
-     * @return bool
+     * @return bool True if the rollback is successful.
      */
     public function rollback()
     {
@@ -168,9 +184,9 @@ class MHelper extends Medoo
     }
 
     /**
-     *   Commit SQL transaction
+     * Commits the current SQL transaction.
      *
-     * @return bool
+     * @return bool True if the commit is successful.
      */
     public function commit()
     {
@@ -179,6 +195,11 @@ class MHelper extends Medoo
         return $out;
     }
 
+    /**
+     * Retrieves the last error information from the database connection.
+     *
+     * @return array|null Error information or null if no error exists.
+     */
     public function error()
     {
         if ($this->error) {

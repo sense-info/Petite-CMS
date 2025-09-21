@@ -2,16 +2,29 @@
 
 namespace F3CMS;
 
+// The Belong trait provides methods for managing relationships between tables.
+// It includes functionalities like binding, counting, and saving related data.
+
 trait Belong
 {
+    /**
+     * Binds a sub-table to a target ID and optionally a member ID.
+     *
+     * @param string $subTbl   The name of the sub-table.
+     * @param int    $target_id The ID of the target to bind.
+     * @param int    $member_id The ID of the member (optional).
+     */
     public static function bind($subTbl, $target_id, $member_id = 0)
     {
+        // Initialize the current class and sub-table details.
         [$that, $sub, $pk, $fk] = self::_init(get_called_class(), $subTbl);
 
+        // If no member ID is provided, use a default value.
         if (0 == $member_id) {
             $member_id = fMember::_CMember();
         }
 
+        // Fetch related data from the database.
         $related = mh()->get($that::fmTbl($subTbl) . '(r)', [
             '[>]' . $that::fmTbl() . '(t)'       => ['r.' . $pk => 'id'],
         ], ['t.id', 'r.status'], [
@@ -19,6 +32,7 @@ trait Belong
             'r.' . $pk    => $target_id,
         ]);
 
+        // Handle the case where related data exists or does not exist.
         if ($related) {
             if ('claps' == $subTbl) {
                 mh()->update($that::fmTbl($subTbl), [
@@ -54,42 +68,58 @@ trait Belong
             ]);
         }
 
+        // Additional logic for specific sub-tables like 'seen' or 'favo'.
         if (in_array($subTbl, ['seen', 'favo'])) {
             $that::setCnt($subTbl, $target_id);
         }
 
+        // Special handling for the 'claps' sub-table.
         if ('claps' == $subTbl) {
             $that::setClapCnt($target_id);
         }
     }
 
+    /**
+     * Updates the clap count for a specific target ID.
+     *
+     * @param int $pid The ID of the target to update.
+     * @return bool True if the update was successful, false otherwise.
+     */
     public static function setClapCnt($pid)
     {
+        // Initialize the current class and sub-table details.
         [$that, $sub, $pk, $fk] = self::_init(get_called_class(), 'member');
 
+        // Calculate the total clap count from the database.
         $cnt = mh()->get($that::fmTbl('claps'), ['cnt' => MHelper::raw('SUM(<cnt>)')], [$pk => $pid]);
         $cnt = ($cnt) ? $cnt['cnt'] * 1 : 0;
 
+        // Update the clap count in the main table.
         $rtn = mh()->update($that::fmTbl(), [
             'claps' => $cnt,
         ], [
             'id' => $pid,
         ]);
 
+        // Check for errors and return the result.
         return $that::chkErr($rtn->rowCount());
     }
 
     /**
-     * two type
-     * one with sub table
-     * the other without sub table
+     * Sets a count for a specific sub-table and target ID.
      *
-     * TODO: from sub to main
-     **/
+     * @param int    $pid     The ID of the target to update.
+     * @param string $subTbl  The name of the sub-table.
+     * @param array  $filter  Additional filters for the count.
+     * @param int    $type    The type of count operation.
+     * @return bool True if the update was successful, false otherwise.
+     */
     public static function setCnt($pid, $subTbl = 'video', $filter = [], $type = 0)
     {
+        // Initialize the current class and sub-table details.
         [$that, $sub, $pk, $fk] = self::_init(get_called_class(), $subTbl);
 
+        // Perform different operations based on the type.
         switch ($type) {
             case 1:
                 $cnt = $sub::total(
@@ -103,26 +133,34 @@ trait Belong
                 break;
         }
 
+        // Update the count in the main table.
         $rtn = mh()->update($that::fmTbl(), [
             $subTbl . '_cnt' => $cnt,
         ], [
             'id' => $pid,
         ]);
 
+        // Check for errors and return the result.
         return $that::chkErr($rtn->rowCount());
     }
 
     /**
-     * @param $ta_tbl
-     * @param $pid
-     * @param $reverse
+     * Retrieves a list of sub-table entries related to a target ID.
+     *
+     * @param string $subTbl  The name of the sub-table.
+     * @param int    $pid     The ID of the target.
+     * @param array  $columns The columns to retrieve.
+     * @return array The list of related entries.
      */
     public static function lotsSub($subTbl, $pid, $columns = ['t.id', 'title'])
     {
+        // Initialize the current class and sub-table details.
         [$that, $sub, $pk, $fk] = self::_init(get_called_class(), $subTbl);
 
+        // Define the filter for the query.
         $filter = [$pk => $pid];
 
+        // Generate the join conditions for the query.
         $join = $sub::genJoin();
 
         if (!$join) {
@@ -130,6 +168,7 @@ trait Belong
         }
         $join['[>]' . $sub::fmTbl() . '(t)'] = ['r.' . $fk => 'id'];
 
+        // Execute the query and return the results.
         return mh()->select(
             $that::fmTbl($subTbl) . '(r)',
             $join,
@@ -139,30 +178,17 @@ trait Belong
     }
 
     /**
-     * @param $id
-     * @param $page
-     * @param $limit
-     * @param $cols
+     * Retrieves a list of target IDs associated with a specific tag.
      *
-     * @return mixed
-     */
-    public static function lotsByTag($id, $page = 0, $limit = 6, $cols = '')
-    {
-        $that = get_called_class();
-
-        return $that::lotsByID($that::byTag($id), $page, $limit, $cols);
-    }
-
-    /**
-     * @param $id
-     *
-     * @return array
+     * @param int|array $id The ID or list of IDs of the tag(s).
+     * @return array The list of associated target IDs.
      */
     public static function byTag($id)
     {
         $that = get_called_class();
 
         if (is_array($id)) {
+            // Build a query to count occurrences of each target ID across multiple tags.
             $condi = [];
             foreach ($id as $row) {
                 $condi[] = ' SELECT `' . $that::MTB . '_id` FROM `' . $that::fmTbl('tag') . '` WHERE `tag_id`=' . intval($row) . ' ';
@@ -173,16 +199,19 @@ trait Belong
             $rows = mh()->select($that::fmTbl('tag') . '(r)', ['r.' . $that::MTB . '_id'], ['r.tag_id' => $id]);
         }
 
+        // Extract and return the list of target IDs.
         return \__::pluck($rows, '' . $that::MTB . '_id');
     }
 
     /**
-     * @param       $subTbl
-     * @param       $pid
-     * @param array $rels
-     * @param       $reverse
+     * Saves multiple relationships for a sub-table and target ID.
      *
-     * @return int
+     * @param string $subTbl  The name of the sub-table.
+     * @param int    $pid     The ID of the target.
+     * @param array  $rels    The relationships to save.
+     * @param bool   $reverse Whether to reverse the relationships.
+     * @param bool   $sortable Whether the relationships are sortable.
+     * @return int The number of rows affected.
      */
     public static function saveMany($subTbl, $pid, $rels = [], $reverse = false, $sortable = false)
     {
@@ -190,8 +219,10 @@ trait Belong
             return false;
         }
 
+        // Initialize the current class and sub-table details.
         [$that, $sub, $pk, $fk] = self::_init(get_called_class(), $subTbl);
 
+        // Prepare the data for insertion.
         $data = [];
 
         if ($reverse) {
@@ -220,6 +251,13 @@ trait Belong
         return 1;
     }
 
+    /**
+     * Initializes the current class and sub-table details.
+     *
+     * @param string $that    The name of the current class.
+     * @param string $subTbl  The name of the sub-table.
+     * @return array An array containing the class, sub-table, primary key, and foreign key.
+     */
     private static function _init($that, $subTbl)
     {
         // $that = get_called_class();

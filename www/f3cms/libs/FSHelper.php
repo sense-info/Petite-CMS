@@ -8,8 +8,16 @@ namespace F3CMS;
 use Intervention\Image\Drivers\Imagick\Driver;
 use Intervention\Image\ImageManager as Image;
 
+// The FSHelper class provides file system-related utility methods.
+// It includes functions for file manipulation, directory management, and other file system operations.
 class FSHelper extends Helper
 {
+    /**
+     * Creates a directory.
+     *
+     * @param array|string $pathAry The path(s) to the directory(s).
+     * @return bool True if the directory was created successfully, false otherwise.
+     */
     public static function mkdir($pathAry = [])
     {
         $rtn = true;
@@ -18,10 +26,13 @@ class FSHelper extends Helper
         }
         $oldUMask = umask(0027);
         foreach ($pathAry as $path) {
+            // Check if the directory already exists.
             if (!file_exists($path)) {
+                // Attempt to create the directory.
                 @mkdir($path, 0775, true);
             }
 
+            // Check if the directory was created successfully.
             if (!file_exists($path)) {
                 $rtn = false;
             }
@@ -31,13 +42,22 @@ class FSHelper extends Helper
         return $rtn;
     }
 
+    /**
+     * Copies a file from one location to another.
+     *
+     * @param string $orig The path to the original file.
+     * @param string $new  The path to the new file.
+     * @return bool True if the file was copied successfully, false otherwise.
+     */
     public static function copy($orig, $new)
     {
         try {
+            // Check if the original file exists.
             if (!file_exists($orig)) {
                 throw new \Exception(sprintf('file not exists "%s".', $orig));
             }
 
+            // Check if the new file already exists.
             if (file_exists($new)) {
                 throw new \Exception(sprintf('file exists "%s".', $new));
             }
@@ -45,11 +65,13 @@ class FSHelper extends Helper
             $destination = fopen($new, 'w+b');
             $handle      = fopen($orig, 'rb');
 
+            // Copy the file contents from the original file to the new file.
             stream_copy_to_stream($handle, $destination);
 
             fclose($destination);
             fclose($handle);
 
+            // Check if the file was copied successfully.
             if (!file_exists($new)) {
                 throw new \Exception(sprintf('Failed to copy file "%s".', $new));
             }
@@ -61,6 +83,13 @@ class FSHelper extends Helper
         }
     }
 
+    /**
+     * Renames a file.
+     *
+     * @param string $orig The path to the original file.
+     * @param string $new  The path to the new file.
+     * @return void
+     */
     public static function rename($orig, $new)
     {
         if (self::copy($orig, $new)) {
@@ -68,6 +97,14 @@ class FSHelper extends Helper
         }
     }
 
+    /**
+     * Mirrors a directory structure from source to target.
+     *
+     * @param string $src       The source directory.
+     * @param string $tar       The target directory.
+     * @param bool   $overwrite Whether to overwrite existing files (default: false).
+     * @return void
+     */
     public static function mirror($src, $tar, $overwrite = false)
     {
         if (is_link($src)) {
@@ -77,6 +114,7 @@ class FSHelper extends Helper
             foreach ($files as $file) {
                 $orig = $src . $file;
                 $new  = $tar . $file;
+                // Overwrite the existing file if the overwrite flag is set.
                 if (file_exists($new) && $overwrite) {
                     unlink($new);
                 }
@@ -107,6 +145,7 @@ class FSHelper extends Helper
      */
     public static function dumpFile($filename, $content)
     {
+        // Attempt to write the content to the file.
         if (false === @file_put_contents($filename, $content)) {
             throw new \Exception(sprintf('Failed to write file "%s".', $filename));
         }
@@ -122,6 +161,7 @@ class FSHelper extends Helper
      */
     public static function appendToFile($filename, $content)
     {
+        // Attempt to append the content to the file.
         if (false === @file_put_contents($filename, $content, FILE_APPEND)) {
             throw new \Exception(sprintf('Failed to write file "%s".', $filename));
         }
@@ -139,8 +179,10 @@ class FSHelper extends Helper
     public static function openFile($filepath, $size = 0)
     {
         $contents = null;
+        // Get the real path of the file.
         if ($realPath = realpath($filepath)) {
             $handle   = fopen($realPath, 'rb');
+            // Read the file contents.
             $contents = fread($handle, (0 == $size) ? filesize($realPath) : $size);
             fclose($handle);
         }
@@ -184,6 +226,15 @@ class FSHelper extends Helper
         return $contents;
     }
 
+    /**
+     * Generates thumbnails for an image file.
+     *
+     * @param string $filename   The base filename for the thumbnails.
+     * @param array  $file       The uploaded file information.
+     * @param array  $thumbnails An array of thumbnail sizes.
+     * @param string $root       The root directory for saving thumbnails (optional).
+     * @return array An array containing the paths and dimensions of the generated thumbnails.
+     */
     public static function genThumbnails($filename, $file, $thumbnails, $root = '')
     {
         try {
@@ -206,6 +257,7 @@ class FSHelper extends Helper
             $width  = $im->width();
             $height = $im->height();
 
+            // Generate different sizes of thumbnails.
             if ($width > 1440) {
                 $im->save(sprintf($tmpl, '_ori')); // save original img
                 // resizing to default size
@@ -215,27 +267,31 @@ class FSHelper extends Helper
             // TODO: watermark
             // $im->insert('public/watermark.png', 'bottom-right', 10, 10);
 
+            // Save the default thumbnail.
             if (!file_exists(sprintf($tmpl, ''))) {
                 $im->save(sprintf($tmpl, ''));
             }
 
+            // Convert to WebP format if possible.
             if ($webpable) {
                 self::webp(sprintf($tmpl, ''));
             }
 
+            // Generate and save medium-sized thumbnail.
             $im->scale(width: 720);
             $im->save(sprintf($tmpl, '_md'));
             if ($webpable) {
                 self::webp(sprintf($tmpl, '_md'));
             }
 
+            // Generate and save small-sized thumbnail.
             $im->scale(width: 360);
             $im->save(sprintf($tmpl, '_sm'));
             if ($webpable) {
                 self::webp(sprintf($tmpl, '_sm'));
             }
 
-            // smaller then 360
+            // Generate custom-sized thumbnails.
             foreach ($thumbnails as $ns) {
                 // cropping and resizing
                 $im->cover($ns[0], $ns[1]);
@@ -249,6 +305,7 @@ class FSHelper extends Helper
             }
 
             $new_fn = '/upload' . $filename . '.' . $ext;
+            // Modify the filename for WebP format in non-develop environments.
             if ($webpable && 'develop' != f3()->get('APP_ENV')) {
                 $new_fn = str_replace('.' . $ext, '.webp', $new_fn);
                 $new_fn .= '?' . $ext;
@@ -318,6 +375,7 @@ class FSHelper extends Helper
 
                 $ta    = str_replace('.' . $ext, '.webp', $path);
                 $ratio = 60;
+                // Command to convert the image to WebP format.
                 $sh    = 'convert ' . $path . ' -quality ' . $ratio . ' -define webp:lossless=false,method=6,auto-filter=true,partitions=3,image-hint=photo ' . $ta . ';';
 
                 $logger->write($sh);

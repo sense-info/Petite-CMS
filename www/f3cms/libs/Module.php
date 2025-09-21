@@ -2,14 +2,17 @@
 
 namespace F3CMS;
 
+// The Module class serves as a base class for other modules in the application.
+// It provides utility methods for escaping data, handling requests, and managing languages.
+
 class Module
 {
     /**
-     * _escape
+     * Escapes special characters in an array or string to prevent SQL injection.
      *
-     * @param mixed $array - obj need to escape
-     *
-     * @return mixed
+     * @param mixed $array The data to escape (can be an array or string).
+     * @param bool  $quote Whether to add quotes around the escaped value (default: true).
+     * @return mixed The escaped data.
      */
     protected static function _escape($array, $quote = true)
     {
@@ -36,6 +39,14 @@ class Module
         return $array;
     }
 
+    /**
+     * Escapes special characters for MSSQL or other databases.
+     *
+     * @param mixed $param          The data to escape.
+     * @param bool  $quote          Whether to add quotes around the escaped value (default: true).
+     * @param bool  $only_for_mssql Whether to apply escaping only for MSSQL (default: false).
+     * @return mixed The escaped data.
+     */
     static protected function _mres($param, $quote = true, $only_for_mssql = false)
     {
         // if(is_array($param))
@@ -53,13 +64,22 @@ class Module
     }
 
     /**
-     * @param $str
+     * Protects a string from XSS attacks by encoding special characters.
+     *
+     * @param string $str The input string.
+     * @return string The XSS-protected string.
      */
     final static function protectedXss($str)
     {
         return htmlentities($str, ENT_QUOTES, 'UTF-8');
     }
 
+    /**
+     * Protects a string from XSS attacks using raw URL decoding and sanitization.
+     *
+     * @param string $str The input string.
+     * @return string The XSS-protected string.
+     */
     final static function protectedXss2($str)
     {
         $str = rawurldecode($str);
@@ -68,8 +88,11 @@ class Module
     }
 
     /**
-     * @param $name
-     * @param $target
+     * Shifts a class name to a different namespace or module.
+     *
+     * @param string $name   The original class name.
+     * @param string $target The target module or namespace.
+     * @return string The shifted class name.
      */
     public static function _shift($name, $target)
     {
@@ -81,9 +104,9 @@ class Module
     }
 
     /**
-     * handle angular post data
+     * Handles AngularJS POST data and returns it as an array.
      *
-     * @return array - post data
+     * @return array The processed POST data.
      */
     public static function _getReq()
     {
@@ -117,7 +140,10 @@ class Module
     }
 
     /**
-     * @param array $args
+     * Retrieves the current language based on the request or default settings.
+     *
+     * @param array $args Additional arguments for language selection (optional).
+     * @return string The selected language.
      */
     public static function _lang($args = [])
     {
@@ -163,7 +189,9 @@ class Module
     }
 
     /**
-     * @return mixed
+     * Detects the user agent of a mobile device.
+     *
+     * @return string The detected device type.
      */
     public static function _mobile_user_agent()
     {
@@ -189,49 +217,42 @@ class Module
     }
 
     /**
-     * @param $text
+     * Converts a string into a URL-friendly slug.
      *
-     * @return mixed
+     * @param string $text The input string.
+     * @return string The slugified string.
      */
     public static function _slugify($text)
     {
         $text = str_replace('//', '/', $text);
         $text = str_replace(' ', '-', $text);
 
-        // replace non letter or digits by -
+        // Replace non-letter or digit characters with '-'.
         $text = preg_replace('~[^\\pL\d%/-]+~u', '-', $text);
+        $text = preg_replace('~[^\\pL\\d%/-]+~u', '-', $text);
 
-        // trim
+        // Trim and convert to lowercase.
         $text = trim($text, '-');
-
-        // transliterate
-        // $text = iconv('utf-8', 'us-ascii//TRANSLIT', $text);
-
-        // lowercase
         $text = strtolower($text);
 
-        // remove unwanted characters
-        // $text = preg_replace('~[^-\w]+~', '', $text);
-        //
+        // URL encode the slug.
         $text = urlencode($text);
-
-        if (empty($text)) {
-            return 'n-a';
-        }
 
         return $text;
     }
 
     /**
-     * detect a class file exist
+     * Checks if a class file exists based on its name.
      *
-     * @param string $pClassName Name of the object to load
+     * @param string $pClassName The name of the class to check.
+     * @return bool True if the class file exists, false otherwise.
      */
     public static function _exists($pClassName)
     {
         $className = ltrim($pClassName, '\\');
         $fileName  = '';
         $namespace = '';
+
         if ($lastNsPos = strrpos($className, '\\')) {
             $namespace = substr($className, 0, $lastNsPos);
             $className = substr($className, $lastNsPos + 1);

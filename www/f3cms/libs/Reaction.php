@@ -2,18 +2,21 @@
 
 namespace F3CMS;
 
+// The Reaction class extends the Module class and handles backend operations.
+// It includes methods for saving, uploading, and retrieving data, as well as managing user interactions.
+
 class Reaction extends Module
 {
-    const RTN_DONE       = 'Done';
-    const RTN_MISSCOLS   = 'MissCols';
-    const RTN_WRONGDATA  = 'WrongData';
-    const RTN_UNVERIFIED = 'UnVerified';
+    const RTN_DONE       = 'Done';       // Indicates a successful operation.
+    const RTN_MISSCOLS   = 'MissCols';  // Indicates missing columns in the data.
+    const RTN_WRONGDATA  = 'WrongData'; // Indicates invalid data.
+    const RTN_UNVERIFIED = 'UnVerified'; // Indicates unverified data.
 
     /**
-     * save whole form for backend
+     * Handles rerouting logic for backend operations.
      *
-     * @param object $f3   - $f3
-     * @param array  $args - uri params
+     * @param object $f3   The Fat-Free Framework instance.
+     * @param array  $args The URI parameters.
      */
     public function do_rerouter($f3, $args)
     {
@@ -50,17 +53,21 @@ class Reaction extends Module
     }
 
     /**
-     * @param $f3
-     * @param $args
+     * Retrieves a list of records based on the provided query.
+     *
+     * @param object $f3   The Fat-Free Framework instance.
+     * @param array  $args The URI parameters.
+     * @return array The list of retrieved records.
      */
     public function do_list($f3, $args)
     {
-        $req  = parent::_getReq();
-        $that = get_called_class();
-        $feed = parent::_shift($that, 'feed');
+        $req  = parent::_getReq(); // Retrieve the request data.
+        $that = get_called_class(); // Get the current class name.
+        $feed = parent::_shift($that, 'feed'); // Shift to the Feed module.
 
-        chkAuth($feed::PV_R);
+        chkAuth($feed::PV_R); // Check read permissions.
 
+        // Set pagination parameters.
         $req['page']  = (isset($req['page'])) ? ($req['page'] - 1) : 0;
         $maxLimit     = ($feed::PAGELIMIT > 24) ? $feed::PAGELIMIT : 24;
         $req['limit'] = (!empty($req['limit'])) ? max(min($req['limit'] * 1, $maxLimit), 12) : $maxLimit;
@@ -69,28 +76,31 @@ class Reaction extends Module
             $req['query'] = '';
         }
 
+        // Retrieve the records based on the query.
         $rtn = $feed::limitRows($req['query'], $req['page'], $req['limit']);
 
+        // Process each record using a custom iteratee function.
         $rtn['subset'] = \__::map($rtn['subset'], function ($row) use ($that) {
             return $that::handleIteratee($row);
         });
 
-        return self::_return(1, $rtn);
+        return self::_return(1, $rtn); // Return the processed records.
     }
 
     /**
-     * save whole form for backend
+     * Saves data to the backend.
      *
-     * @param object $f3   - $f3
-     * @param array  $args - uri params
+     * @param object $f3   The Fat-Free Framework instance.
+     * @param array  $args The URI parameters.
+     * @return array The result of the save operation.
      */
     public function do_save($f3, $args)
     {
-        $req  = parent::_getReq();
-        $feed = parent::_shift(get_called_class(), 'feed');
-        $kit  = parent::_shift(get_called_class(), 'kit');
+        $req  = parent::_getReq(); // Retrieve the request data.
+        $feed = parent::_shift(get_called_class(), 'feed'); // Shift to the Feed module.
+        $kit  = parent::_shift(get_called_class(), 'kit'); // Shift to the Kit module.
 
-        chkAuth($feed::PV_U);
+        chkAuth($feed::PV_U); // Check update permissions.
 
         if (!isset($req['id'])) {
             return self::_return(8004);
@@ -104,28 +114,30 @@ class Reaction extends Module
             }
         }
 
-        $id = $feed::save($req);
+        $req = self::beforeSave($req); // Preprocess the data before saving.
 
-        $feed::handleSave($req);
+        $id = $feed::save($req); // Save the data using the Feed module.
 
-        return self::_return(1, ['id' => $id]);
+        $feed::handleSave($req); // Perform additional save handling.
+
+        return self::_return(1, ['id' => $id]); // Return the ID of the saved record.
     }
 
     /**
-     * save photo
+     * Handles file uploads.
      *
-     * @param object $f3   - $f3
-     * @param array  $args - uri params
+     * @param object $f3   The Fat-Free Framework instance.
+     * @param array  $args The URI parameters.
      */
     public function do_upload($f3, $args)
     {
-        kStaff::_chkLogin();
+        kStaff::_chkLogin(); // Check if the user is logged in.
 
-        $name = str_replace(['F3CMS\\', '\\'], ['', ''], get_called_class());
+        $name = str_replace(['F3CMS\\', '\\'], ['', ''], get_called_class()); // Normalize the class name.
 
-        [$type, $className] = preg_split('/(?<=[rfo])(?=[A-Z])/', $name);
+        [$type, $className] = preg_split('/(?<=[rfo])(?=[A-Z])/', $name); // Split the class name into type and name.
 
-        $thumb_str = strtolower($className) . '_thn';
+        $thumb_str = strtolower($className) . '_thn'; // Generate a thumbnail string.
 
         $default = f3()->exists($thumb_str) ? f3()->get($thumb_str) : f3()->get('default_thn');
 
@@ -216,8 +228,11 @@ class Reaction extends Module
     }
 
     /**
-     * @param $f3
-     * @param $args
+     * Retrieves options for a specific query.
+     *
+     * @param object $f3   The Fat-Free Framework instance.
+     * @param array  $args The URI parameters.
+     * @return array The retrieved options.
      */
     public function do_get_opts($f3, $args)
     {
@@ -248,9 +263,10 @@ class Reaction extends Module
     }
 
     /**
-     * @param array $row
+     * Processes a single row of data.
      *
-     * @return mixed
+     * @param array $row The row of data to process.
+     * @return array The processed row.
      */
     public static function handleIteratee($row = [])
     {

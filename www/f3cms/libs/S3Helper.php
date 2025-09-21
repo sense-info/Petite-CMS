@@ -5,12 +5,36 @@ namespace F3CMS;
 use Aws\S3\Exception\S3Exception;
 use Aws\S3\S3Client;
 
-// use \Aws\S3\Sync\DownloadSyncBuilder;
-
+/**
+ * S3Helper class provides utility methods for interacting with AWS S3,
+ * including uploading, downloading, deleting, and listing objects in an S3 bucket.
+ */
 class S3Helper extends Helper
 {
     /**
-     * @param $bucket
+     * @var string The name of the S3 bucket.
+     */
+    private $bucket;
+
+    /**
+     * @var string The target directory path for local file operations.
+     */
+    private $taDirPath;
+
+    /**
+     * @var string The base URI for the S3 bucket.
+     */
+    private $uri;
+
+    /**
+     * @var S3Client The AWS S3 client instance.
+     */
+    private $client;
+
+    /**
+     * Constructor initializes the S3 client and sets up bucket-specific configurations.
+     *
+     * @param string $bucket The name of the bucket to interact with.
      */
     public function __construct($bucket = '')
     {
@@ -33,7 +57,9 @@ class S3Helper extends Helper
     }
 
     /**
-     * @return mixed
+     * Lists all buckets available in the S3 account.
+     *
+     * @return array List of buckets.
      */
     public function buckets()
     {
@@ -43,9 +69,10 @@ class S3Helper extends Helper
     }
 
     /**
-     * @param $filePath, start with /
+     * Uploads a file to the S3 bucket.
      *
-     * @return mixed
+     * @param string $filePath The path of the file to upload, starting with '/'.
+     * @return string|null The URL of the uploaded file or null if an error occurs.
      */
     public function put($filePath)
     {
@@ -59,26 +86,21 @@ class S3Helper extends Helper
             ]);
 
             $result = $this->uri . '/' . $newPath;
-
-            // Fatal error: Allowed memory size of 134217728 bytes exhausted (tried to allocate 69210112 bytes)
-            // $result = $this->client->waitUntil('ObjectExists', array(
-            //     'Bucket' => $this->bucket,
-            //     'Key'    => $newPath
-            // ));
         } catch (S3Exception $e) {
             $logger = new \Log('s3.log');
-            $logger->write('The put was rejected with ' . $e->getAwsErrorCode()); // $e->getAwsErrorMessage();
+            $logger->write('The put was rejected with ' . $e->getAwsErrorCode());
+
+            return null;
         }
 
         return $result;
     }
 
     /**
-     * 非同步上傳檔案到 S3
+     * Asynchronously uploads a file to the S3 bucket.
      *
-     * @param string $filePath
-     *
-     * @return PromiseInterface
+     * @param string $filePath The path of the file to upload.
+     * @return \GuzzleHttp\Promise\PromiseInterface|null A promise for the upload operation or null if an error occurs.
      */
     public function putAsync($filePath)
     {
@@ -91,26 +113,27 @@ class S3Helper extends Helper
                 'SourceFile' => $filePath,
             ])->then(
                 function ($result) {
-                    // echo "File uploaded successfully. ETag: " . $result['ETag'] . PHP_EOL;
+                    // Handle successful upload
                 },
                 function ($reason) {
-                    // echo "Failed to upload file. Reason: " . $reason . PHP_EOL;
+                    // Handle failed upload
                 }
             );
 
             return $promise;
         } catch (S3Exception $e) {
             $logger = new \Log('s3.log');
-            $logger->write('The put was rejected with ' . $e->getAwsErrorCode()); // $e->getAwsErrorMessage();
+            $logger->write('The put was rejected with ' . $e->getAwsErrorCode());
 
             return null;
         }
     }
 
     /**
-     * @param $filename, start with /
+     * Downloads a file from the S3 bucket.
      *
-     * @return mixed
+     * @param string $filename The name of the file to download, starting with '/'.
+     * @return mixed The result of the download operation or an error code if it fails.
      */
     public function get($filename)
     {
@@ -129,16 +152,17 @@ class S3Helper extends Helper
                 'SaveAs' => $this->taDirPath . $filename,
             ]);
         } catch (S3Exception $e) {
-            $result = $e->getAwsErrorCode(); // $e->getAwsErrorMessage();
+            $result = $e->getAwsErrorCode();
         }
 
         return $result;
     }
 
     /**
-     * @param $filename, start with /
+     * Deletes a file from the S3 bucket.
      *
-     * @return mixed
+     * @param string $filename The name of the file to delete, starting with '/'.
+     * @return mixed The result of the delete operation or an error code if it fails.
      */
     public function del($filename)
     {
@@ -148,14 +172,16 @@ class S3Helper extends Helper
                 'Key'    => substr($filename, 1),
             ]);
         } catch (S3Exception $e) {
-            $result = $e->getAwsErrorCode(); // $e->getAwsErrorMessage();
+            $result = $e->getAwsErrorCode();
         }
 
         return $result;
     }
 
     /**
-     * @param $path
+     * Lists objects in a specific path within the S3 bucket.
+     *
+     * @param string $path The path to list objects from.
      */
     public function ls($path)
     {
@@ -172,7 +198,11 @@ class S3Helper extends Helper
     }
 
     /**
-     * @param $path
+     * Checks if a specific object exists in the S3 bucket.
+     *
+     * @param string $path The path of the object to check.
+     * @param int $echo Whether to output debug information (0 or 1).
+     * @return int 1 if the object exists, 0 otherwise.
      */
     public function check($path, $echo = 0)
     {
@@ -202,7 +232,11 @@ class S3Helper extends Helper
     }
 
     /**
-     * @param $path
+     * Checks if a specific object exists in the S3 bucket (alternative method).
+     *
+     * @param string $path The path of the object to check.
+     * @param int $echo Whether to output debug information (0 or 1).
+     * @return int 1 if the object exists, 0 otherwise.
      */
     public function checkExist($path, $echo = 0)
     {

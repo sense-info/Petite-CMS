@@ -2,31 +2,46 @@
 
 namespace F3CMS;
 
+/**
+ * Mession class handles session management, including opening, closing, reading, writing,
+ * destroying sessions, and garbage collection. It also provides utility methods for session-related
+ * data like CSRF tokens, IP addresses, and user agents.
+ */
 class Mession extends MHelper
 {
-    // ! Session ID
+    // Session ID
     protected $sid;
-    // ! Anti-CSRF token
+
+    // Anti-CSRF token
     protected $_csrf;
-    // ! User agent
+
+    // User agent string of the client
     protected $_agent;
-    // ! IP,
+
+    // Client's IP address
     protected $_ip;
-    // ! Suspect callback
+
+    // Callback function for handling suspicious activity
     protected $onsuspect;
 
+    // Database table for storing session data
     protected $tbl;
+
+    // Logger instance for debugging and logging session activities
     protected $logger;
+
+    // Debug mode flag
     protected $debug;
+
+    // Stores the result of the last database query
     protected $rtn;
 
     /**
-     *   Open session
+     * Opens a session. This method is required by the session handler interface.
      *
-     * @param $path string
-     * @param $name string
-     *
-     * @return true
+     * @param string $path Path to the session storage (not used here).
+     * @param string $name Name of the session (not used here).
+     * @return bool Always returns true.
      */
     public function open($path, $name)
     {
@@ -34,28 +49,25 @@ class Mession extends MHelper
     }
 
     /**
-     *   Close session
+     * Closes a session. This method is required by the session handler interface.
      *
-     * @return true
+     * @return bool Always returns true.
      */
     public function close()
     {
         $this->sid = null;
-
         return true;
     }
 
     /**
-     *   Return session data in serialized format
+     * Reads session data from the database.
      *
-     * @param $id string
-     *
-     * @return string
+     * @param string $id Session ID.
+     * @return string Serialized session data or an empty string if no data is found.
      */
     public function read($id)
     {
         $this->sid = $id;
-
         $this->writeLog('select------::' . $id);
         $this->rtn = $this->get($this->tbl, '*', ['session_id' => $id]);
         $this->writeLog('data:' . json_encode($this->rtn));
@@ -64,25 +76,15 @@ class Mession extends MHelper
             return '';
         }
 
-        // IP check ?
-        // if ($this->rtn['ip'] != $this->_ip || $this->rtn['agent'] != $this->_agent) {
-        //     f3()->call($this->onsuspect,[$this, $id]);
-        //     $this->destroy($id);
-        //     $this->close();
-        //     unset(f3()->{'COOKIE.'.session_name()});
-        //     f3()->error(403);
-        // }
-
         return $this->rtn['data'];
     }
 
     /**
-     *   Write session data
+     * Writes session data to the database.
      *
-     * @param $id   string
-     * @param $data string
-     *
-     * @return true
+     * @param string $id Session ID.
+     * @param string $data Serialized session data.
+     * @return bool Always returns true.
      */
     public function write($id, $data)
     {
@@ -115,11 +117,10 @@ class Mession extends MHelper
     }
 
     /**
-     *   Destroy session
+     * Destroys a session by removing its data from the database.
      *
-     * @param $id string
-     *
-     * @return true
+     * @param string $id Session ID.
+     * @return bool Always returns true.
      */
     public function destroy($id)
     {
@@ -131,11 +132,10 @@ class Mession extends MHelper
     }
 
     /**
-     *   Garbage collector
+     * Cleans up old session data from the database.
      *
-     * @param $max int
-     *
-     * @return true
+     * @param int $max Maximum lifetime of sessions in seconds (not used here).
+     * @return bool Always returns true.
      */
     public function cleanup($max)
     {
@@ -147,9 +147,9 @@ class Mession extends MHelper
     }
 
     /**
-     *   Return session id (if session has started)
+     * Returns the current session ID.
      *
-     * @return string|null
+     * @return string|null Session ID or null if no session is active.
      */
     public function sid()
     {
@@ -157,9 +157,9 @@ class Mession extends MHelper
     }
 
     /**
-     *   Return anti-CSRF token
+     * Returns the anti-CSRF token.
      *
-     * @return string
+     * @return string CSRF token.
      */
     public function csrf()
     {
@@ -167,9 +167,9 @@ class Mession extends MHelper
     }
 
     /**
-     *   Return IP address
+     * Returns the client's IP address.
      *
-     * @return string
+     * @return string IP address.
      */
     public function ip()
     {
@@ -177,9 +177,9 @@ class Mession extends MHelper
     }
 
     /**
-     *   Return Unix timestamp
+     * Returns the timestamp of the session.
      *
-     * @return string|false
+     * @return string|false Timestamp or false if no session data is available.
      */
     public function stamp()
     {
@@ -191,9 +191,9 @@ class Mession extends MHelper
     }
 
     /**
-     *   Return HTTP user agent
+     * Returns the HTTP user agent string of the client.
      *
-     * @return string
+     * @return string User agent string.
      */
     public function agent()
     {
@@ -201,26 +201,32 @@ class Mession extends MHelper
     }
 
     /**
-     *   Return TRUE if current cursor position is not mapped to any record
+     * Checks if the current cursor position is not mapped to any record.
      *
-     * @return bool
-     **/
+     * @return bool True if no record is found, false otherwise.
+     */
     public function dry()
     {
         return empty($this->rtn) ? true : false;
     }
 
+    /**
+     * Logs a message if debugging is enabled.
+     *
+     * @param string $str Message to log.
+     */
     public function writeLog($str)
     {
         ($this->debug) ? $this->logger->write($str) : '';
     }
 
     /**
-     *   Instantiate class
+     * Constructor for the Mession class. Initializes session handling and sets up
+     * anti-CSRF tokens, logging, and other configurations.
      *
-     * @param $force     bool
-     * @param $onsuspect callback
-     * @param $key       string
+     * @param bool $force Whether to force session initialization.
+     * @param callable|null $onsuspect Callback for handling suspicious activity.
+     * @param string|null $key Key for storing the CSRF token.
      */
     public function __construct($force = true, $onsuspect = null, $key = null)
     {
