@@ -30,9 +30,15 @@ $f3->set('siteBeginDate', 'Dec 21 2021 12:00:00'); // remove this after online
 
 $f3->set('abspath', $rootDir);
 
+$f3->set('webpath', $webRootDir);
+
+$f3->set('upload_dir', 'loc/');
+
 $f3->set('feVersion', '250701001');
 
 $f3->set('rows_limit', 12);
+
+$f3->set('sessionBase', 'file'); // file, database
 
 $f3->set('cache.post', 5);
 $f3->set('cache.press', 5);
@@ -41,10 +47,10 @@ $f3->set('cache.adv', 1); // 0 : only use published static file
 // db setting
 $f3->set('db_host', 'mariadb');
 $f3->set('db_name', 'target_db');
-$f3->set('db', 'mysql:host=' . $f3->get('db_host') . ';port=3306;dbname=' . $f3->get('db_name'));
 $f3->set('db_account', 'root');
 $f3->set('db_password', 'sPes4uBrEcHUq5qE');
 $f3->set('tpf', 'tbl_');
+$f3->set('db', 'mysql:host=' . $f3->get('db_host') . ';port=3306;dbname=' . $f3->get('db_name'));
 
 $f3->set('uri', 'https://loc.f3cms.com:4433' . $f3->get('BASE'));
 
