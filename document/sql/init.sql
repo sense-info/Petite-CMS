@@ -535,15 +535,32 @@ CREATE TABLE IF NOT EXISTS `tbl_media` (
   `sorter` INT NOT NULL DEFAULT '0',
   `status` enum('Disabled','Enabled') DEFAULT 'Disabled',
   `slug` varchar(255) NOT NULL,
-  `title` varchar(255) CHARACTER SET utf8mb4 DEFAULT NULL,
   `pic` varchar(255) NOT NULL,
-  `info` varchar(255) CHARACTER SET utf8mb4 DEFAULT NULL,
   `last_ts` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   `last_user` int DEFAULT NULL,
   `insert_ts` timestamp NULL DEFAULT NULL,
   `insert_user` int DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+--
+-- 資料表結構 `tbl_media_lang`
+--
+
+CREATE TABLE IF NOT EXISTS `tbl_media_lang` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `from_ai` enum('No','Yes') NOT NULL DEFAULT 'No',
+  `lang` varchar(5) NOT NULL DEFAULT 'tw',
+  `parent_id` int NOT NULL,
+  `title` varchar(255) CHARACTER SET utf8mb4 DEFAULT NULL,
+  `info` varchar(255) CHARACTER SET utf8mb4 DEFAULT NULL,
+  `last_ts` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `last_user` int DEFAULT NULL,
+  `insert_ts` timestamp NULL DEFAULT NULL,
+  `insert_user` int DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `lang_pid` (`lang`,`parent_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 ROW_FORMAT=COMPACT;
 
 -- --------------------------------------------------------
 
