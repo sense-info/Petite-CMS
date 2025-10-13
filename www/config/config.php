@@ -105,6 +105,10 @@ $f3->set('webmaster', 'trevor@sense-info.co');
 
 $f3->set('crontabhost', 'hostname');
 
+// GCP
+$f3->set('gcp_json', '');
+$f3->set('gcp_property', '');
+
 // MP
 $f3->set('mp.merchant', '');
 $f3->set('mp.secret', '');
