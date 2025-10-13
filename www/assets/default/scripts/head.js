@@ -1,0 +1,1 @@
+var ieDetect=function(){"use strict";var e=!1,t=0;return{isTheBrowser:e,actualVersion:t}}();function gtag(){dataLayer.push(arguments)}ieDetect.isTheBrowser&&alert("Sorry! This page doesn't support Internet Explorer"),window.dataLayer=window.dataLayer||[],gtag("js",new Date),gtag("config",window.gaMeasurementID);

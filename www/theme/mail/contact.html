@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>聯絡我們通知信</title>
+    <style>
+    /* 用於移除部分郵件客戶端的預設樣式 */
+    body,
+    table,
+    td,
+    a {
+        -webkit-text-size-adjust: 100%;
+        -ms-text-size-adjust: 100%;
+    }
+
+    table,
+    td {
+        mso-table-rspace: 0pt;
+        mso-table-lspace: 0pt;
+    }
+
+    img {
+        border: 0;
+        height: auto;
+        line-height: 100%;
+        outline: none;
+        text-decoration: none;
+    }
+
+    table {
+        border-collapse: collapse !important;
+    }
+
+    body {
+        margin: 0 !important;
+        padding: 0 !important;
+        width: 100% !important;
+    }
+    </style>
+</head>
+
+<body style="margin: 0 !important; padding: 0 !important; background-color: #f4f4f4;">
+    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+        <tr>
+            <td bgcolor="#f4f4f4" align="center" style="padding: 10px 15px;">
+                <table border="0" cellpadding="0" cellspacing="0" width="600" style="max-width: 600px;">
+                    <tr>
+                        <td bgcolor="#ffffff" align="left" style="padding: 20px; font-family: Arial, sans-serif; font-size: 16px; line-height: 24px;">
+                            <h2 style="margin: 0; font-size: 18px; font-weight: bold;">您有一個新的「聯絡我們」訊息</h2>
+                            <p style="margin: 10px 0;">以下是來自「{{@site_title}}」網站訪客的提交資訊：</p>
+                            <table border="0" cellpadding="0" cellspacing="0" width="100%" style="margin: 20px 0;">
+                                <tr>
+                                    <td style="font-weight: bold;">姓名：</td>
+                                    <td>{{@name}}</td>
+                                </tr>
+                                <tr>
+                                    <td style="font-weight: bold;">電子郵件：</td>
+                                    <td><a href="mailto:{{@email}}" target="_blank">{{@email}}</a></td>
+                                </tr>
+                                <tr>
+                                    <td style="font-weight: bold;">電話：</td>
+                                    <td>{{@phone}}</td>
+                                </tr>
+                                <tr>
+                                    <td style="font-weight: bold;">主旨：</td>
+                                    <td>{{@type}}</td>
+                                </tr>
+                                <tr>
+                                    <td style="font-weight: bold;">訊息：</td>
+                                </tr>
+                                <tr>
+                                    <td colspan="2">{{@message|raw}}</td>
+                                </tr>
+                                <tr>
+                                    <td colspan="2" align="center" style="padding: 2em;"><a href="{{@uri}}/backend/crm/contact/simple/modal/{{@pid}}" style="background-color:#02d6e8;background-image:linear-gradient(#02d6e8,#02d6e8)!important;border-radius:4px;color:#000;display:inline-block;font-size:18px;line-height:50px;text-align:center;text-decoration:none;width:270px;" target="_blank">至後台查看</a></td>
+                                </tr>
+                            </table>
+                            <p style="margin: 10px 0;">請及時回覆此訪客的訊息。</p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td bgcolor="#f4f4f4" align="center" style="padding: 10px; font-family: Arial, sans-serif; font-size: 12px; line-height: 18px; color: #666666;">
+                            <p style="margin: 0;">&copy; {{@site_title}}. 保留所有權利。</p>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
+</body>
+
+</html>

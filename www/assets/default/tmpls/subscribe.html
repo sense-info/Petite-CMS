@@ -1,0 +1,26 @@
+<div class="overlay">
+  <div class="modal-body">
+    <div class="modal-m">
+      <a href="javascript:;" data-gene="click:site/goback" class="go-back gee"><img src="/assets/image/cross.svg"></a>
+      <p class="title">訂閱電子報</p>
+      <form class="subscription-form gee"
+      data-gene="keyup:readySubmit,submit:member/subscription" data-nopde="1"
+      novalidate onsubmit="return false;">
+        <div class="pb-6">
+          <div class="input-group">
+            <div class="flex">
+              <input type="email" name="email" class="form-control" placeholder="請輸入您的Email" required value="">
+              <div class="input-err">無效的電子郵件格式</div>
+              <button class="btn btn-submit btn-disabled text-sm js-cb status-0" type="submit">
+                <img src="/assets/image/mail-white.svg" class="mr-1_5 default"><img src="/assets/image/spinner_sq.svg" class="mr-1_5 loader">訂閱</button>
+            </div>
+          </div>
+
+          <!---TO DO 訂閱成功--->
+          <div class="sub-success j-subscribeSuccess"><div class="flex items-center"><img src="/assets/image/checked.svg">謝謝！您已成功訂閱我們的電子報。</div></div>
+          <!---TO DO 訂閱成功--->
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
