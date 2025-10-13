@@ -22,11 +22,10 @@ class rContact extends Reaction
 
         f3()->set('name', $req['name']);
         f3()->set('email', $req['email']);
-
         f3()->set('phone', !empty($req['phone']) ? $req['phone'] : '');
-        f3()->set('type', !empty($req['type']) ? $req['type'] : '');
         f3()->set('company', !empty($req['company']) ? $req['company'] : '');
 
+        f3()->set('type', !empty($req['type']) ? $req['type'] : '');
         f3()->set('message', nl2br($req['message']));
 
         $sent = Sender::sendmail(

@@ -2,6 +2,7 @@
     "themeName": "v1",
     "colorName": "color-theme-1",
     "lang": "tw",
+    "langScript": "zh-Hant",
     "press": {
         "thumbnail": "300x300",
         "prePage": 4

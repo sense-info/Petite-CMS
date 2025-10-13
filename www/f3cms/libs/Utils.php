@@ -1,23 +1,14 @@
 <?php
 
-// This file contains utility functions for the application.
-// It includes methods for database access, language detection, and security handling.
-
-/**
- * Returns the Base instance of the Fat-Free Framework.
- *
- * @return object The Base instance.
- */
 function f3()
 {
     return Base::instance();
 }
 
 /**
- * Retrieves the database instance.
+ * get db instance
  *
- * @param bool $force Whether to force a new instance (default: false).
- * @return object The database instance.
+ * @return db obj
  */
 function mh($force = false)
 {
@@ -30,30 +21,27 @@ function mh($force = false)
 }
 
 /**
- * Retrieves the Fat-Free Web instance for client-side operations.
+ * get fat free web instance
+ * as a Client-Side
+ * https://fatfreeframework.com/3.7/web#Instantiation
  *
- * @return object The Web instance.
+ * @return instance
  */
 function cs()
 {
     return Web::instance();
 }
 
-/**
- * Retrieves the template prefix.
- *
- * @return string The template prefix.
- */
 function tpf()
 {
     return f3()->get('tpf');
 }
 
 /**
- * Stores a variable in the Fat-Free Framework's hive.
+ * keep output vars
  *
- * @param string $key    The key to store the variable under.
- * @param mixed  $object The variable to store.
+ * @param [type] $key    [description]
+ * @param [type] $object [description]
  */
 function _dzv($key, $object)
 {
@@ -61,22 +49,18 @@ function _dzv($key, $object)
 }
 
 /**
- * Switches between two strings based on the current language.
+ * Two-Phase Switcher
  *
- * @param string $default The default string.
- * @param string $other   The alternative string.
- * @return string The selected string based on the current language.
+ * @param  [string] $default default string
+ * @param  [string] $other   other string
+ *
+ * @return [string] string
  */
 function langTPS($default, $other)
 {
     return (F3CMS\Module::_lang() == f3()->get('defaultLang')) ? $default : $other;
 }
 
-/**
- * Checks if the current connection is HTTPS.
- *
- * @return bool True if the connection is HTTPS, false otherwise.
- */
 function is_https()
 {
     if (isset($_SERVER['HTTPS']) && 'on' === strtolower($_SERVER['HTTPS'])) {
@@ -104,7 +88,7 @@ function is_https()
  * @param string $ip        the ip to check
  * @param array  $whitelist The ip whitelist. An array of strings.
  *
- * @return bool True if the IP is allowed, false otherwise.
+ * @return bool
  */
 function isAllowedIP($ip, array $whitelist)
 {
@@ -141,10 +125,9 @@ function isAllowedIP($ip, array $whitelist)
 }
 
 /**
- * Detects the browser's preferred language.
+ * @param $default
  *
- * @param string $default The default language (default: 'en').
- * @return string The detected language.
+ * @return mixed
  */
 function detectBrowserLang($default = 'en')
 {
@@ -163,9 +146,7 @@ function detectBrowserLang($default = 'en')
 }
 
 /**
- * Sets Cross-Origin Resource Sharing (CORS) headers.
- *
- * @param array $allowedOrigins The list of allowed origins.
+ * @param array $allowedOrigins
  */
 function setCORS($allowedOrigins = [])
 {
@@ -195,10 +176,8 @@ function fQuery()
 }
 
 /**
- * Logs runtime trace information for debugging purposes.
- *
- * @param string $flag  A flag to identify the trace.
- * @param int    $debug The debug level (default: 0).
+ * @param $flag
+ * @param $debug
  */
 function rtTrace($flag = '', $debug = 0)
 {
@@ -212,25 +191,16 @@ function rtTrace($flag = '', $debug = 0)
 }
 
 /**
- * Decodes a Unicode string.
- *
- * @param string $str The Unicode string to decode.
- * @return string The decoded string.
+ * @param $str
  */
 function decodeUnicode($str)
 {
-    // Use an anonymous function to replace Unicode escape sequences with their UTF-8 equivalents.
-    return preg_replace_callback('/\\u([0-9a-f]{4})/i', function ($matches) {
-        return mb_convert_encoding(pack('H*', $matches[1]), 'UTF-8', 'UCS-2BE');
-    }, $str);
+    return preg_replace_callback('/\\\\u([0-9a-f]{4})/i', create_function('$matches', 'return mb_convert_encoding(pack("H*", $matches[1]), "UTF-8", "UCS-2BE");'), $str);
 }
 
 // REMOVE ascii in XML
 /**
- * Removes ASCII characters from a string.
- *
- * @param string $string The input string.
- * @return string The string without ASCII characters.
+ * @param $string
  */
 function removeASCII($string)
 {
@@ -242,10 +212,7 @@ function removeASCII($string)
 
 // REMOVE chinese char
 /**
- * Removes Chinese characters from a string.
- *
- * @param string $string The input string.
- * @return string The string without Chinese characters.
+ * @param $string
  */
 function removeZH($string)
 {
@@ -264,11 +231,8 @@ function containsCJK($string)
 }
 
 /**
- * Validates a registration ID.
- *
- * @param string $str  The registration ID to validate.
- * @param string $mode The validation mode (default: 'strict').
- * @return bool True if the ID is valid, false otherwise.
+ * @param $str
+ * @param $mode
  */
 function chkRegisterID($str, $mode = 'strict')
 {
@@ -288,10 +252,7 @@ function canDo($authority = '')
 }
 
 /**
- * Checks if the current user has the required authority.
- *
- * @param string $authority The required authority.
- * @return bool True if the user has the authority, false otherwise.
+ * @param $authority
  */
 function chkAuth($authority = '')
 {
@@ -303,11 +264,77 @@ function chkAuth($authority = '')
 }
 
 /**
- * Encodes an object to JSON format.
- *
- * @param mixed $obj    The object to encode.
- * @param bool  $pretty Whether to format the JSON output (default: false).
- * @return string The JSON-encoded string.
+ * @param $priv
+ * @param $auth
+ */
+function hasAuth($priv = 0, $auth = '')
+{
+    return F3CMS\fRole::hasAuth($priv, $auth);
+}
+
+/**
+ * @param       $topic
+ * @param array $detail
+ */
+function systemAlert($topic, $detail = [])
+{
+    f3()->set('now', date('Y-m-d H:i:s'));
+    f3()->set('here', gethostname());
+    f3()->set('detail', jsonEncode($detail));
+
+    F3CMS\Sender::sendmail(
+        f3()->get('site_title') . ' ' . $topic,
+        F3CMS\Sender::renderBody('system-alert'),
+        f3()->get('webmaster')
+    );
+}
+
+/**
+ * @return null
+ */
+function chkDiskSpace()
+{
+    try {
+        $diskTotalSpace = @disk_total_space(f3()->get('baseDisk'));
+        $diskFreeSpace  = @disk_free_space(f3()->get('baseDisk'));
+
+        $canUseSpace = round(100 - ($diskFreeSpace / $diskTotalSpace) * 100, 2);
+
+        if ($canUseSpace > 90) {
+            systemAlert('空間用量警示', [
+                'diskTotalSpace' => $diskTotalSpace,
+                'canUseSpace'    => $canUseSpace,
+            ]);
+        }
+    } catch (Exception $e) {
+        return;
+    }
+}
+
+/**
+ * for human json encode
+ */
+function hJsonEncode($obj)
+{
+    return htmlentities(jsonEncode($obj));
+}
+
+function getCSRF()
+{
+    if ('database' == f3()->get('sessionBase')) {
+        return f3()->get('sess')->csrf();
+    } else {
+        return f3()->CSRF;
+    }
+}
+
+function isAjax()
+{
+    return (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) && 'xmlhttprequest' == strtolower($_SERVER['HTTP_X_REQUESTED_WITH'])) || (!empty($_SERVER['HTTP_ACCEPT']) && false !== strpos(strtolower($_SERVER['HTTP_ACCEPT']), 'json'));
+}
+
+/**
+ * for human json encode
  */
 function jsonEncode($obj, $pretty = false)
 {
@@ -321,10 +348,9 @@ function jsonEncode($obj, $pretty = false)
 }
 
 /**
- * Decodes a JSON string.
+ * @param $str
  *
- * @param string $str The JSON string to decode.
- * @return mixed The decoded object or array.
+ * @return mixed
  */
 function jsonDecode($str)
 {
@@ -357,12 +383,85 @@ function jsonDecode($str)
 }
 
 /**
- * Generates a secure random string.
- *
- * @param int    $length     The length of the string.
- * @param string $characters The characters to use (default: alphanumeric).
- * @return string The generated random string.
+ * @param $idx
+ * @param $val
  */
+function safeCookie($idx, $val = '')
+{
+    setCookieV2($idx, $val);
+}
+
+/**
+ * @param $idx
+ * @param $val
+ */
+function unsafeCookie($idx, $val = '')
+{
+    setCookieV2($idx, $val, false);
+}
+
+/**
+ * @return mixed
+ */
+function getCaller()
+{
+    $trace  = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS);
+    $caller = $trace[1]['class']; // 1 or 2
+    $caller = str_replace(['F3CMS\\', '\\'], ['', ''], $caller);
+    $caller = preg_split('/(?<=[fork])(?=[A-Z])/', $caller);
+    $caller = F3CMS_Autoloader::getType()[$caller[0]];
+
+    return $caller;
+}
+
+function safeCount($ary)
+{
+    return (!is_countable($ary)) ? 0 : count($ary);
+}
+
+/**
+ * @param $idx
+ * @param $val
+ */
+function setCookieV2($idx, $val = '', $httponly = true)
+{
+    $opt = [
+        'Expires'  => time() + (86400 * f3()->get('token_expired')),
+        'Secure'   => true,      // or false
+        'Httponly' => $httponly, // or false
+        'Path'     => '/',
+        'Domain'   => (('loc.f3cms.com:4433' !== $_SERVER['HTTP_HOST']) ? f3()->get('JAR.domain') : 'loc.f3cms.com'), // leading dot for compatibility or use subdomain
+        'Samesite' => 'Lax',                                                                                          // None || Lax || Strict
+    ];
+
+    if (empty($val)) {
+        $val = '';
+    }
+
+    try {
+        setcookie($idx, $val, $opt['Expires'], $opt['Path'], $opt['Domain'], $opt['Secure'], $opt['Httponly']);
+        f3()->set('SESSION.' . $idx, $val);
+    } catch (Exception $e) {
+        exit('too late for cookie.');
+    }
+}
+
+/**
+ * @param $idx
+ */
+function getCookie($idx)
+{
+    $idx = str_replace('\'', '"', $idx);
+
+    if (f3()->exists('COOKIE.' . $idx)) {
+        return f3()->get('COOKIE.' . $idx);
+    } elseif (f3()->exists('SESSION.' . $idx)) {
+        return f3()->get('SESSION.' . $idx);
+    } else {
+        return null;
+    }
+}
+
 function secure_random_string($length, $characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ')
 {
     $charactersLength = strlen($characters);
@@ -376,9 +475,7 @@ function secure_random_string($length, $characters = '0123456789abcdefghijklmnop
 }
 
 /**
- * Generates a UUID.
- *
- * @return string The generated UUID.
+ * @return mixed
  */
 function uuid()
 {
