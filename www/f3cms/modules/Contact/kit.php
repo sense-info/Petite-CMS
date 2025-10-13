@@ -23,7 +23,7 @@ class kContact extends Kit
         return [
             'add_new' => [
                 'name'    => 'required|max:250',
-                'captcha' => self::_captchaRule(),
+                // 'captcha' => self::_captchaRule(),
                 'email'   => 'required|email|max:250',
                 // 'mobile'  => 'required|min:6|max:16',
                 // 'subject' => 'required|max:250',

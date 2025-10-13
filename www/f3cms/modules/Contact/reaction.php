@@ -18,22 +18,28 @@ class rContact extends Reaction
 
         Validation::return($req, kContact::rule('add_new'));
 
-        fContact::insert($req);
+        $pid = fContact::insert($req);
 
-        f3()->set('name', $req['name']);
-        f3()->set('email', $req['email']);
-        f3()->set('phone', !empty($req['phone']) ? $req['phone'] : '');
-        f3()->set('company', !empty($req['company']) ? $req['company'] : '');
+        if ($pid) {
+            f3()->set('pid', $pid);
 
-        f3()->set('type', !empty($req['type']) ? $req['type'] : '');
-        f3()->set('message', nl2br($req['message']));
+            f3()->set('name', $req['name']);
+            f3()->set('email', $req['email']);
+            f3()->set('phone', !empty($req['phone']) ? $req['phone'] : '');
+            f3()->set('company', !empty($req['company']) ? $req['company'] : '');
 
-        $sent = Sender::sendmail(
-            f3()->get('site_title') . ' 網站詢問通知',
-            Sender::renderBody('contact'),
-            f3()->get('opts.default.contact_mail')
-        );
+            f3()->set('type', !empty($req['type']) ? $req['type'] : '');
+            f3()->set('message', oContact::nl2brSecurity($req['message']));
 
-        return parent::_return(1, ['msg' => '感謝您~~']);
+            $sent = Sender::sendmail(
+                f3()->get('site_title') . ' 網站詢問通知',
+                Sender::renderBody('contact'),
+                f3()->get('opts.default.contact_mail')
+            );
+
+            return parent::_return(1, ['msg' => '感謝您~~']);
+        } else {
+            return parent::_return(7101, ['msg' => '網站異常，請稍後再試!']);
+        }
     }
 }
