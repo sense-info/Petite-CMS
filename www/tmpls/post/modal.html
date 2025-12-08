@@ -20,17 +20,18 @@
             <div class="field">
               <label class="label">版型</label>
               <p class="control">
-                <input class="input" name="layout" type="text" placeholder="預設值：post">
+                <input type="radio" class="is-checkradio" name="layout" value="normal" checked="checked" id="post-layout-normal">
+                <label class="radio" for="post-layout-normal">基礎版型</label>
               </p>
             </div>
           </div>
           <div class="column">
             <div class="field">
               <label class="label">狀態</label>
-              <input type="radio" class="is-checkradio" name="status" value="Enabled" id="tag-status-enabled">
-              <label class="radio" for="tag-status-enabled">已發布</label>
-              <input type="radio" class="is-checkradio" name="status" value="Disabled" checked="checked" id="tag-status-disabled">
-              <label class="radio" for="tag-status-disabled">下架</label>
+              <input type="radio" class="is-checkradio" name="status" value="Enabled" id="post-status-enabled">
+              <label class="radio" for="post-status-enabled">已發布</label>
+              <input type="radio" class="is-checkradio" name="status" value="Disabled" checked="checked" id="post-status-disabled">
+              <label class="radio" for="post-status-disabled">下架</label>
             </div>
           </div>
           <div class="column">

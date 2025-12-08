@@ -37,9 +37,20 @@
               </p>
             </div>
             <div class="field">
+              <label class="label">目標</label>
+              <input type="radio" class="is-checkradio" name="target" value="Press" checked="checked" id="draft-target-press">
+              <label class="radio" for="draft-target-press">文章</label>
+              <input type="radio" class="is-checkradio" name="target" value="Post" id="draft-target-post">
+              <label class="radio" for="draft-target-post">固定文章</label>
+              <input type="radio" class="is-checkradio" name="target" value="Tag" id="draft-target-tag">
+              <label class="radio" for="draft-target-tag">標籤</label>
+              <input type="radio" class="is-checkradio" name="target" value="None" id="draft-target-none">
+              <label class="radio" for="draft-target-none">無</label>
+            </div>
+            <div class="field">
               <label class="label">關連文章</label>
               <div class="control is-block">
-                <input type="text" class="multipleSelect" name="press_id" placeholder="請輸入字詞查詢" data-url='press/get_opts' />
+                <input type="text" class="multipleSelect" name="row_id" placeholder="請輸入字詞查詢" data-url='{{:item.target}}/get_opts' />
               </div>
             </div>
           </div>

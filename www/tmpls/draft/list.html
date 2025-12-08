@@ -17,7 +17,7 @@
       <div class="control">
         <div class="select">
           <select class="dropdownQuery gee" data-gene="change:dropdownQuery">
-            <option value="">全部 LLM 函式</option>
+                <option value="">全部 LLM 函式</option>
                 <option value="m.method=writing">試稿</option>
                 <option value="m.method=seohelper">SEO文案</option>
                 <option value="m.method=translate">翻譯</option>
@@ -33,6 +33,12 @@
             <optgroup label="資料">
               <option value="m.intent~">意圖</option>
               <option value="m.content~">結果</option>
+            </optgroup>
+            <optgroup label="目標">
+                <option value="m.target=Press">新文章任務</option>
+                <option value="m.target=Post">固定單頁</option>
+                <option value="m.target=Tag">標籤</option>
+                <option value="m.target=None">無</option>
             </optgroup>
             <optgroup label="狀態">
                 <option value="m.status=New">新任務</option>
@@ -67,6 +73,7 @@
           <tr>
             <th>LLM 函式</th>
             <th>負責人</th>
+            <th>目標</th>
             <th>意圖</th>
             <th>狀態</th>
             <th>最後處理時間</th>
@@ -78,6 +85,7 @@
           <tr>
             <td>#{{:prop.id}} {{:~txtLabel(prop.method, {'writing': '試稿', 'seohelper': 'SEO文案', 'translate': '翻譯', 'guideline': '寫作指引'})}}</td>
             <td>{{:prop.owner}}</td>
+            <td>{{:~txtLabel(prop.target, {'Press': '文章', 'Post': '固定單頁', 'Tag': '標籤', 'None': '無'})}}</td>
             <td><div class="multiline-ellipsis" style="max-width: 35vw;">{{:prop.intent}}</div></td>
             <td>{{:~txtLabel(prop.status, {'New': '新任務', 'Waiting': '等待中', 'Done': '已完成', 'Used': '已套用', 'Invalid': '無效'})}}</td>
             <td>{{:prop.last_ts}}</td>

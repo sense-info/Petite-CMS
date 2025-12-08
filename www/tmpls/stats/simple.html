@@ -30,7 +30,7 @@
 </nav>
 
 <div class="columns is-multiline gee" data-gene="init:loadList" data-tmpl="statsList" data-nopde="1" data-method="status">
-  <div class="column is-6">
+  <div class="column is-5">
     <article class="message is-info">
       <div class="message-header">
         <p>瀏覽次數</p>
@@ -40,8 +40,6 @@
         <p class="has-text-right"><a href="https://analytics.google.com/analytics/web/#/p{{:data.property_id}}/reports/explorer?params=_u..nav%3Dmaui&collectionId=user&r=all-pages-and-screens" target="_blank" >前往 GA 報表 <span class="icon"><i class="fa fa-share-square-o"></i></span> </a></p>
       </div>
     </article>
-  </div>
-  <div class="column is-6">
     <article class="message is-info">
       <div class="message-header">
         <p>流量來源</p>
@@ -52,32 +50,67 @@
       </div>
     </article>
   </div>
-  <div class="column is-3">
-    <article class="message is-info">
-      <div class="message-header">
-        <p>系統聯絡窗口</p>
-      </div>
-      <div class="message-body">
-        <ul>
-          <li>聯絡人： Trevor Pao</li>
-          <li>Email： trevor@sense-info.co</li>
-        </ul>
-      </div>
-    </article>
-  </div>
-  <div class="column is-6">
+  <div class="column is-4">
     <article class="message is-info">
       <div class="message-header">
         <p>文章草稿</p>
       </div>
       <div class="message-body">
         {{props data.presses}}
-          <div>
-            <a href="/backend/cms/press/list/editor/{{:prop.id}}" class="is-pulled-right" >編輯 <span class="icon"><i class="fa fa-share-square-o"></i></span></a>
-            <div class="ellipsis">{{:prop.title}}</div>
+          <div class="mb-2">
+            <a href="/backend/cms/press/list/editor/{{:prop.id}}" class="is-pulled-right" >編輯</a>
+            <div class="ellipsis  has-text-dark">{{:prop.title}}</div>
+          </div>
+        {{/props}}
+      </div>
+    </article>
+    <article class="message is-info">
+      <div class="message-header">
+        <p>最近五則外來稿件</p>
+      </div>
+      <div class="message-body">
+        {{props data.contribs}}
+          <div class="mb-2">
+            <a href="https://www.{{:prop.source}}.com.tw{{:prop.uri}}" target="_blank" class="is-pulled-right"> 查看原文 <span class="icon"><i class="fa fa-share-square-o"></i></span> </a>
+            <div class="ellipsis  has-text-dark">{{:prop.title}}</div>
           </div>
         {{/props}}
       </div>
     </article>
   </div>
+  <div class="column is-3">
+    <article class="message is-info">
+      <div class="message-header">
+        <p>快速連結</p>
+      </div>
+      <div class="message-body">
+        <div class="mb-2">
+          <a href="/backend/cms/press/list/editor/0" class="is-pulled-right" >前往</a>
+          <div class="ellipsis  has-text-dark">新增文章</div>
+        </div>
+        <div class="mb-2">
+          <a href="/backend/crm/adv/list/editor/0" class="is-pulled-right" >前往</a>
+          <div class="ellipsis  has-text-dark">新增廣告</div>
+        </div>
+        <div class="mb-2">
+          <a href="/backend/crm/adv/list" class="is-pulled-right" >前往</a>
+          <div class="ellipsis  has-text-dark">調整廣告</div>
+        </div>
+        <div class="mb-2">
+          <a href="/backend/site/post/list" class="is-pulled-right" >前往</a>
+          <div class="ellipsis  has-text-dark">管理關於休區</div>
+        </div>
+      </div>
+    </article>
+    <article class="message is-info">
+      <div class="message-header">
+        <p>操作手冊</p>
+      </div>
+      <div class="message-body">
+        <div class="mb-2">
+          <a href="https://drive.google.com/file/d/1kZcmxSye_MejZ9u2ikdwUEF9sp4Npylp/view?usp=sharing" target="_blank" class="is-pulled-right" >查看 <span class="icon"><i class="fa fa-share-square-o"></i></span></a>
+          <div class="ellipsis  has-text-dark">後台操作手冊</div>
+        </div>
+      </div>
+    </article></div>
 </div>

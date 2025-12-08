@@ -63,8 +63,8 @@
         <thead>
           <tr>
             <th>首圖</th>
-            <th>文章標題 / 作者 / 上線時間</th>
-            <th>建立者</th>
+            <th>文章標題 / 上線時間</th>
+            <th>作者</th>
             <th>分類</th>
           </tr>
         </thead>
@@ -73,25 +73,22 @@
           <tr>
             <td><figure class="image is-marginless"> <img pre-src="{{:~loadPic(prop.cover, 'sm')}}" onerror="app.defaultPic()" > </figure></td>
             <td>
+              {{if prop.status == 'Published' }}
+              <a href="{{:~fixLink('p/'+prop.id+'/'+prop.slug)}}" target="_blank" class="is-pulled-right"> 查看 <span class="icon"><i class="fa fa-share-square-o"></i></span> </a>
+              {{else}}
+              <a href="{{:~fixLink('tw/preview/p/'+prop.id)}}" target="_blank" class="is-pulled-right"> 預覽 <span class="icon"><i class="fa fa-share-square-o"></i></span> </a>
+              {{/if}}
               <div>
                 <a href="javascript:;" data-func="press.loadRow" data-tmpl="pressForm" data-src="editor" data-id="{{:prop.id}}" class="line-clamp press-title engrossed-btn" title="{{:prop.title}}">#{{:prop.id}} {{:prop.title}} <span class="icon"><i class="fa fa-pencil"></i></span></a>
               </div>
-              <div>
-                {{props prop.authors}}
-                  {{if #getIndex() != 0 }} & {{/if}}
-                  <a href="javascript:;" data-func="loadQuery" data-query="author:{{:prop.id}}" data-mode="Add" class="author-id"> {{:prop.title}} <!-- ({{:prop.role}}) --> </a>
-                {{/props}}
-              </div>
               <div>{{:~formatDate(prop.online_date, 'YY-MM-DD HH:mm')}}
                 <span class="tag {{if prop.status == 'Offlined' || prop.status == 'Draft' }}is-warning{{else}}is-success{{/if}}">{{:prop.status}}</span>
-                {{if prop.status == 'Published' }}
-                <a href="{{:~fixLink('p/'+prop.id+'/'+prop.slug)}}" target="_blank" class="is-pulled-right"> <span class="icon"><i class="fa fa-share-square-o"></i></span> </a>
-                {{else}}
-                <a href="{{:~fixLink('tw/preview/p/'+prop.id)}}" target="_blank" class="is-pulled-right"> <span class="icon"><i class="fa fa-share-square-o"></i></span> </a>
-                {{/if}}
               </div>
             </td>
-            <td class="is-hidden-mobile"><div class="ellipsis" style=" width: 70px;">{{:prop.account}}</span></div></td>
+            <td class="is-hidden-mobile"><div class="ellipsis" style="width: 80px;">{{props prop.authors}}
+                  {{if #getIndex() != 0 }} & {{/if}}
+                  <a href="javascript:;" data-func="loadQuery" data-query="author:{{:prop.id}}" data-mode="Add" class="author-id"> {{:prop.title}} <!-- ({{:prop.role}}) --> </a>
+                {{/props}}</div></td>
             <td>
               <div class="tags"> <span class="tag is-warning"> {{:prop.category}} </span> {{props prop.tags}} <span class="tag is-info"> {{:prop.title}} </span> {{/props}} </div>
               <nav class="navbar is-right is-transparent" role="navigation" aria-label="dropdown navigation">
