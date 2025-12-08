@@ -335,22 +335,32 @@ class Feed extends Module
         $that = get_called_class();
         $rows = [];
 
-        if ($replace) {
-            mh()->delete($that::fmTbl('meta'), ['parent_id' => $pid, 'k' => array_keys($data)]);
-        }
-
         foreach ($data as $k => $v) {
             if (!empty($v)) {
-                $rows[] = [
-                    'parent_id' => $pid,
-                    'k'         => $k,
-                    'v'         => $v,
-                ];
+                $affected = 0;
+                if ($replace) {
+                    $do = mh()->update($that::fmTbl('meta'), [
+                        'v' => $v
+                    ], [
+                        'parent_id' => $pid,
+                        'k'         => $k,
+                    ]);
+
+                    $affected = $do->rowCount();
+                }
+
+                if (!$affected) {
+                    $rows[] = [
+                        'parent_id' => $pid,
+                        'k'         => $k,
+                        'v'         => $v,
+                    ];
+                }
             }
         }
 
         if (!empty($rows)) {
-            mh()->insert($that::fmTbl('meta'), $rows);
+             mh()->insert($that::fmTbl('meta'), $rows);
         }
 
         return $that::chkErr(1);
@@ -367,6 +377,15 @@ class Feed extends Module
     {
         if (empty($data)) {
             return false;
+        }
+
+        $keys = array_keys($data);
+        if (is_string($keys[0])) {
+            $ary = [];
+            foreach ($data as $k => $v) {
+                $ary[] = [$k, $v];
+            }
+            $data = $ary;
         }
 
         $that = get_called_class();
