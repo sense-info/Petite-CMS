@@ -72,7 +72,7 @@ class fGenus extends Feed
         }
 
         return mh()->select(self::fmTbl() . '(m)',
-            ['m.id', 'title' => MHelper::raw('CONCAT(m.<id>, \') \', COALESCE(m.<name>, \'\'))')],
+            ['m.id', 'm.name(title)'], // 'title' => MHelper::raw('CONCAT(m.<id>, \') \', COALESCE(m.<name>, \'\'))')
             $filter
         );
     }

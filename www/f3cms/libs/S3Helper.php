@@ -86,21 +86,26 @@ class S3Helper extends Helper
             ]);
 
             $result = $this->uri . '/' . $newPath;
+
+            // Fatal error: Allowed memory size of 134217728 bytes exhausted (tried to allocate 69210112 bytes)
+            // $result = $this->client->waitUntil('ObjectExists', array(
+            //     'Bucket' => $this->bucket,
+            //     'Key'    => $newPath
+            // ));
         } catch (S3Exception $e) {
             $logger = new \Log('s3.log');
-            $logger->write('The put was rejected with ' . $e->getAwsErrorCode());
-
-            return null;
+            $logger->write('The put was rejected with ' . $e->getAwsErrorCode()); // $e->getAwsErrorMessage();
         }
 
         return $result;
     }
 
     /**
-     * Asynchronously uploads a file to the S3 bucket.
+     * 非同步上傳檔案到 S3
      *
-     * @param string $filePath The path of the file to upload.
-     * @return \GuzzleHttp\Promise\PromiseInterface|null A promise for the upload operation or null if an error occurs.
+     * @param string $filePath
+     *
+     * @return PromiseInterface
      */
     public function putAsync($filePath)
     {
@@ -113,17 +118,17 @@ class S3Helper extends Helper
                 'SourceFile' => $filePath,
             ])->then(
                 function ($result) {
-                    // Handle successful upload
+                    // echo "File uploaded successfully. ETag: " . $result['ETag'] . PHP_EOL;
                 },
                 function ($reason) {
-                    // Handle failed upload
+                    // echo "Failed to upload file. Reason: " . $reason . PHP_EOL;
                 }
             );
 
             return $promise;
         } catch (S3Exception $e) {
             $logger = new \Log('s3.log');
-            $logger->write('The put was rejected with ' . $e->getAwsErrorCode());
+            $logger->write('The put was rejected with ' . $e->getAwsErrorCode()); // $e->getAwsErrorMessage();
 
             return null;
         }
@@ -152,7 +157,7 @@ class S3Helper extends Helper
                 'SaveAs' => $this->taDirPath . $filename,
             ]);
         } catch (S3Exception $e) {
-            $result = $e->getAwsErrorCode();
+            $result = $e->getAwsErrorCode(); // $e->getAwsErrorMessage();
         }
 
         return $result;
@@ -172,7 +177,7 @@ class S3Helper extends Helper
                 'Key'    => substr($filename, 1),
             ]);
         } catch (S3Exception $e) {
-            $result = $e->getAwsErrorCode();
+            $result = $e->getAwsErrorCode(); // $e->getAwsErrorMessage();
         }
 
         return $result;

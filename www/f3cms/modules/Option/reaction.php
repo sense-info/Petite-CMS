@@ -89,19 +89,4 @@ class rOption extends Reaction
 
         return self::_return(1, fOption::loadZipcodes($req['county']));
     }
-
-    public function do_categories($f3, $args)
-    {
-        $fc  = new FCHelper('categories');
-        $rtn = $fc->get('categories', 30); // 1 mins
-
-        if (empty($rtn)) {
-            $rtn = fWork::categories();
-            $fc->save('categories', jsonEncode($rtn));
-        } else {
-            $rtn = jsonDecode(preg_replace('/<!--(?!\s*(?:\[if [^\]]+]|<!|>))(?:(?!-->).)*-->/s', '', $rtn), true);
-        }
-
-        return self::_return(1, $rtn);
-    }
 }

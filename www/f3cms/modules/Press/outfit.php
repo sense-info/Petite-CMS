@@ -156,7 +156,7 @@ class oPress extends Outfit
             }
         }
 
-        $cu['content'] = parent::convertUrlsToLinks($cu['content']);
+        // $cu['content'] = parent::convertUrlsToLinks($cu['content']);
 
         $subset = fMedia::limitRows([
             'm.status'    => fMedia::ST_ON,

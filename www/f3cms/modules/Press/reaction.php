@@ -81,7 +81,11 @@ class rPress extends Reaction
                 }
 
                 if (!empty($req['query']['q'])) {
-                    $query['l.title[~]'] = $req['query']['q'];
+                    $query['OR'] = [
+                        'l.title[~]' => $req['query']['q'],
+                        'l.info[~]' => $req['query']['q'],
+                        'l.content[~]' => $req['query']['q'],
+                    ];
                 }
             }
         }

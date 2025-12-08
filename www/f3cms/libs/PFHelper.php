@@ -33,7 +33,14 @@ class PFHelper extends Helper
             }
             $config->set('Cache.SerializerPath', $serializerPath);
 
+            // 1. Enable the Iframe module
+            $config->set('HTML.SafeIframe', true);
+
+            // 2. Define allowed iframe sources (YouTube and Vimeo)
+            $config->set('URI.SafeIframeRegexp', '%^(https?:)?//(www\.youtube(?:-nocookie)?\.com/embed/|player\.vimeo\.com/video/|www\.google\.com/maps/)%');
+
             $def = $config->getHTMLDefinition(true);
+            $def->addAttribute('iframe', 'allowfullscreen', 'Bool');
             $def->addElement('figure', 'Block', 'Flow', 'Common', ['class' => 'Text']);
 
             $this->purifier = new \HTMLPurifier($config);

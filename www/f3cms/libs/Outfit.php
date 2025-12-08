@@ -124,7 +124,7 @@ class Outfit extends Module
         // new cache file path
         // new file name rule
 
-        if (f3()->get('DEBUG') > 2) {
+        if (f3()->get('DEBUG') > -1) {
             $html = $that::_render($args);
         } else {
             $path = dirname($args[0]);
@@ -290,7 +290,7 @@ class Outfit extends Module
     public static function convertUrlsToLinks($text)
     {
         // 正則表達式匹配模式，用於識別 https 開頭的 URL
-        $regex = '@(?<!["\'])((https)://[^\s/$.].([\w./])*\??[\w&=-]*)@';
+        $regex = '@(?<!["\'=])((https)://[^\s/$.].([\w./])*\??[\w&=-]*)@';
 
         // 使用 preg_replace_callback 來替換匹配的 URL 為 HTML <a> 標籤
         $textWithLinks = preg_replace_callback($regex, function ($matches) {
@@ -344,6 +344,18 @@ class Outfit extends Module
         }
 
         return $ary;
+    }
+
+    /**
+     * @param $val
+     * @param $format
+     */
+    public static function gmapI18n($val, $lang1, $lang2)
+    {
+        if ($lang2 == f3()->get('defaultLang')) {
+            return $val;
+        }
+        return str_replace($lang1, $lang2, $val);
     }
 
     /**
@@ -685,8 +697,6 @@ class Outfit extends Module
             $setting['langScript'] = $lang;
         }
 
-        _dzv('lang', $lang);
-
         _dzv('setting', $setting);
         f3()->set('opts', $opts);
         _dzv('opts', $opts);
@@ -695,6 +705,7 @@ class Outfit extends Module
         _dzv('theme', f3()->get('theme'));
         _dzv('uri', f3()->get('uri'));
         _dzv('main_domain', f3()->get('main_domain'));
+        _dzv('lang', f3()->get('lang'));
         _dzv('csrf', f3()->get('SESSION.csrf'));
         _dzv('assetsUri', '/assets/');
         // _dzv('liffID', f3()->get('line_liff'));
