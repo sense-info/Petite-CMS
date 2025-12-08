@@ -14,7 +14,13 @@ class rDraft extends Reaction
      */
     public static function handleRow($row = [])
     {
-        $row['press_id'] = ($row['press_id'] > 0) ? [fPress::oneOpt($row['press_id'])] : [[]];
+        if ($row['target'] != 'None') {
+            $feed = parent::_shift('r' .$row['target'], 'feed');
+            $row['row_id'] = ($row['row_id'] > 0) ? [$feed::oneOpt($row['row_id'])] : [[]];
+        } else {
+            $row['row_id'] = [[]];
+        }
+
         $row['owner_id'] = ($row['owner_id'] > 0) ? [fStaff::oneOpt($row['owner_id'])] : [[]];
 
         if (!in_array($row['method'], ['guideline', 'writing']) && !empty($row['content'])) {
@@ -29,8 +35,16 @@ class rDraft extends Reaction
         chkAuth(fDraft::PV_U);
         $req = parent::_getReq();
 
-        if (mb_strlen($req['title']) > 255 || mb_strlen($req['info']) > 600) {
-            return self::_return(8106, ['msg' => '標題或引言過長!']);
+        // if (mb_strlen($req['title']) > 255 || mb_strlen($req['info']) > 600) {
+        //     return self::_return(8106, ['msg' => '標題或引言過長!']);
+        // }
+
+        if (mb_strlen($req['title']) > 255) {
+            $req['title'] = mb_substr($req['title'], 0, 250, 'UTF-8') . '...';
+        }
+
+        if (mb_strlen($req['info']) > 600) {
+            $req['info'] = mb_substr($req['info'], 0, 595, 'UTF-8') . '...';
         }
 
         $cu = fPress::one($req['press_id']);
@@ -44,13 +58,15 @@ class rDraft extends Reaction
         }
 
         $old = fDraft::one($req['id'], 'id', [
-            'status' => fDraft::ST_DONE,
+            'status' => [fDraft::ST_DONE, fDraft::ST_USED],
             'lang'   => $req['lang'],
         ]);
 
         if (empty($old) || empty($old['content'])) {
             return self::_return(8106, ['msg' => '請檢查草稿狀態及內容']);
         }
+
+        $req['content'] = str_replace(['"%22', '%22"', '\r\n', '\n', '\r'], ['"', '"', '<br />', '<br />', '<br />'], $req['content']);
 
         $affected = fPress::fromDraft($req['press_id'], $req['lang'], [
             'title'   => $req['title'],
@@ -100,8 +116,9 @@ class rDraft extends Reaction
             return self::_return(8106, ['msg' => '無法取得原文內容']);
         }
 
-        $old = fDraft::one($cu['id'], 'press_id', [
+        $old = fDraft::one($cu['id'], 'row_id', [
             'status[!]' => fDraft::ST_INVALID,
+            'target'    => 'Press',
             'method'    => 'seohelper',
             'lang'      => $original,
         ]);
@@ -112,7 +129,8 @@ class rDraft extends Reaction
 
         $pid = fDraft::add([
             'lang'      => $original,
-            'press_id'  => $cu['id'],
+            'row_id'    => $cu['id'],
+            'target'    =>  'Press',
             'intent'    => '產生文章 (' . $cu['id'] . ') SEO 相關資料',
             'guideline' => $content,
             'method'    => 'seohelper',
@@ -143,7 +161,7 @@ class rDraft extends Reaction
         }
 
         if ('importIntro' == $req['method']) {
-            if (empty($old['press_id'])) {
+            if (empty($old['row_id'])) {
                 return self::_return(8106, ['msg' => '無來源文章']);
             }
 
@@ -153,7 +171,7 @@ class rDraft extends Reaction
 
             $tmp = jsonDecode($old['content']);
 
-            $affected = fPress::fromDraft($old['press_id'], 'tw', [
+            $affected = fPress::fromDraft($old['row_id'], 'tw', [
                 'info'    => $tmp['introduction'],
             ]);
 
@@ -174,7 +192,8 @@ class rDraft extends Reaction
 
             $pid = fDraft::add([
                 'lang'      => $old['lang'],
-                'press_id'  => $old['press_id'],
+                'row_id'    => $old['row_id'],
+                'target'    => 'Press',
                 'intent'    => $old['intent'],
                 'guideline' => $old['guideline'],
                 'method'    => $method,
@@ -191,7 +210,8 @@ class rDraft extends Reaction
 
             $pid = fDraft::add([
                 'lang'      => $old['lang'],
-                'press_id'  => $old['press_id'],
+                'row_id'    => $old['row_id'],
+                'target'    => 'Press',
                 'intent'    => '產生文章試稿 SEO 相關資料',
                 'guideline' => $old['content'],
                 'method'    => $method,
@@ -232,7 +252,8 @@ class rDraft extends Reaction
         $pid = fDraft::add([
             'status'    => fDraft::ST_WAITING,
             'lang'      => $target,
-            'press_id'  => 0,
+            'row_id'    => 0,
+            'target'    => 'None',
             'intent'    => '翻譯文案為 ' . $targetLang,
             'guideline' => $content,
             'method'    => 'quicktrans',
@@ -357,8 +378,9 @@ class rDraft extends Reaction
             return self::_return(8106, ['msg' => '已有' . $targetLang . '的內容']);
         }
 
-        $old = fDraft::one($cu['id'], 'press_id', [
+        $old = fDraft::one($cu['id'], 'row_id', [
             'status[!]' => fDraft::ST_INVALID,
+            'target'    => 'Press',
             'method'    => 'translate',
             'lang'      => $req['target'],
         ]);
@@ -386,7 +408,8 @@ class rDraft extends Reaction
 
         $pid = fDraft::add([
             'lang'      => $req['target'],
-            'press_id'  => $req['press_id'],
+            'row_id'    => $req['press_id'],
+            'target'    => 'Press',
             'intent'    => '翻譯文章 (' . $req['press_id'] . ') 為 ' . $targetLang,
             'guideline' => $guideline,
             'method'    => 'translate',
@@ -452,7 +475,7 @@ class rDraft extends Reaction
                 $tmp .= '已有'. $targetLang .'的內容';
             }
 
-            $old = fDraft::one($cu['id'], 'press_id', [
+            $old = fDraft::one($cu['id'], 'row_id', [
                 'status[!]' => fDraft::ST_INVALID,
                 'method' => 'translate',
                 'lang' => $idx,
@@ -465,7 +488,8 @@ class rDraft extends Reaction
             if ($tmp == '') {
                 $pid = fDraft::add([
                     'lang' => $idx,
-                    'press_id' => $cu['id'],
+                    'row_id' => $cu['id'],
+                    'target' => 'Press',
                     'intent' => '翻譯文章 (' . $cu['id'] . ') 為 ' . $targetLang,
                     'guideline' => $guideline,
                     'method' => 'translate'

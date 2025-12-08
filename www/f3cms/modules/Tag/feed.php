@@ -61,6 +61,39 @@ class fTag extends Feed
         return mh()->select(self::fmTbl(), ['id', $column], $filter);
     }
 
+    public static function fromDraft($pid, $lang, $data)
+    {
+        $old = mh()->get(self::fmTbl('lang'), ['id'], [
+            'parent_id' => $pid,
+            'lang'      => $lang,
+        ]);
+
+        if (empty($old)) {
+            mh()->insert(self::fmTbl('lang'), [
+                'parent_id' => $pid,
+                'lang'      => $lang,
+            ]);
+        }
+
+        $updates = [
+        ];
+
+        if (!empty($data['title'])) {
+            $updates['title'] = $data['title'];
+        }
+
+        if (!empty($data['info'])) {
+            $updates['info'] = $data['info'];
+        }
+
+        $data = mh()->update(self::fmTbl('lang'), $updates, [
+            'parent_id' => $pid,
+            'lang'      => $lang,
+        ]);
+
+        return parent::chkErr($data->rowCount());
+    }
+
     /**
      * get detail by tag id
      *

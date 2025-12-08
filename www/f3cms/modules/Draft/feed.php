@@ -16,7 +16,7 @@ class fDraft extends Feed
     public const ST_INVALID = 'Invalid';
     public const ST_USED    = 'Used';
 
-    public const BE_COLS = 'm.id,m.press_id,m.owner_id,m.status,m.lang,m.method,m.intent,m.insert_ts,m.last_ts,m.last_user,m.insert_user';
+    public const BE_COLS = 'm.id,m.row_id,m.target,m.owner_id,m.status,m.lang,m.method,m.intent,m.insert_ts,m.last_ts,m.last_user,m.insert_user';
 
     /**
      * @param $req
@@ -179,7 +179,7 @@ class fDraft extends Feed
     {
         $rtn = PHP_EOL . $row['id'] . ') Seohelper : ';
 
-        $res = kDraft::seohelper($row['guideline'], $row['press_id']);
+        $res = kDraft::seohelper($row['guideline'], $row['row_id']);
         usleep(30000); // 0.03s
 
         $data = mh()->update(self::fmTbl(), [
@@ -201,42 +201,74 @@ class fDraft extends Feed
         $err = '';
         $json = jsonDecode($row['content']);
 
-        if ('Syntax error, malformed JSON' == $json || empty($json['article_title']) || empty($json['article_info']) || empty($json['article_content'])) {
+        if ('Syntax error, malformed JSON' == $json) {
             $err = '格式錯誤';
         }
 
-        if (mb_strlen($json['article_title']) > 255 || mb_strlen($json['article_info']) > 700) {
-            $err = '標題或引言過長!';
+        if (mb_strlen($json['article_title']) > 255) {
+            $json['article_title'] = mb_substr($json['article_title'], 0, 250, 'UTF-8') . '...';
         }
 
-        $cu = fPress::one($row['press_id']);
+        if (mb_strlen($json['article_info']) > 700) {
+            $json['article_info'] = mb_substr($json['article_info'], 0, 695, 'UTF-8') . '...';
+        }
+        $target = ucfirst($row['target']);
+        $that = '\\F3CMS\\f' . $target;
+        $affected = 0;
+
+        $cu = $that::one($row['row_id']);
 
         if (empty($cu)) {
-            $err = '無對應文章!';
+            $err = '無對應記錄!';
         }
 
-        if (!empty($cu['lang'][$row['lang']]['content'])) {
-            $err = '文章中已有內容，請先清空!';
+        switch ($target) {
+            case 'Post':
+                if (!empty($cu['lang'][$row['lang']]['content'])) {
+                    $err = '記錄中已有內容，請先清空!';
+                }
+
+                if ($err == '') {
+                    $affected = $that::fromDraft($row['row_id'], $row['lang'], [
+                        'title'   => $json['article_title'],
+                        'content' => $json['article_content'],
+                    ]);
+                }
+                break;
+            case 'Tag':
+                if ($err == '') {
+                    $affected = $that::fromDraft($row['row_id'], $row['lang'], [
+                        'title'   => $json['article_title'],
+                        'info'    => $json['article_info'],
+                    ]);
+                }
+                break;
+            case 'Press':
+            default:
+                if (!empty($cu['lang'][$row['lang']]['content'])) {
+                    $err = '記錄中已有內容，請先清空!';
+                }
+
+                if ($err == '') {
+                    $affected = $that::fromDraft($row['row_id'], $row['lang'], [
+                        'title'   => $json['article_title'],
+                        'info'    => $json['article_info'],
+                        'content' => $json['article_content'],
+                    ]);
+                }
+                break;
         }
 
-        if ($err == '') {
-            $affected = fPress::fromDraft($row['press_id'], $row['lang'], [
-                'title'   => $json['article_title'],
-                'info'    => $json['article_info'],
-                'content' => $json['article_content'],
+        if ($affected) {
+            self::saveCol([
+                'col' => 'status',
+                'val' => self::ST_USED,
+                'pid' => $row['id'],
             ]);
 
-            if ($affected) {
-                self::saveCol([
-                    'col' => 'status',
-                    'val' => self::ST_USED,
-                    'pid' => $row['id'],
-                ]);
-
-                $err = '0';
-            } else {
-                $err = '無法寫入!';
-            }
+            $err = '0';
+        } else {
+            $err = '無法寫入!';
         }
 
         return $rtn . $err;
@@ -246,7 +278,7 @@ class fDraft extends Feed
     {
         $rtn = PHP_EOL . $row['id'] . ') Translate : ';
 
-        $res = kDraft::translate($row['lang'], $row['guideline'], $row['press_id']);
+        $res = kDraft::translate($row['lang'], $row['guideline'], $row['row_id']);
         usleep(30000); // 0.03s
 
         $data = mh()->update(self::fmTbl(), [
@@ -273,9 +305,9 @@ class fDraft extends Feed
             if (!is_array($reply)) {
                 $status = self::ST_INVALID;
                 $rtn .= '格式錯誤';
-            } elseif (empty($reply['article_title'])
-                || empty($reply['article_info'])
-                || empty($reply['article_content'])
+            } elseif (!isset($reply['article_title'])
+                || !isset($reply['article_info'])
+                || !isset($reply['article_content'])
             ) {
                 $status = self::ST_INVALID;
                 $rtn .= '未完成';
