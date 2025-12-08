@@ -48,7 +48,7 @@ class fDoorman extends Feed
     {
         $now  = date('Y-m-d H:i:s');
         $user = 0;
-        $user = kMember::_isLogin() ? fMember::_current('id') : $user;
+        // $user = kMember::_isLogin() ? fMember::_current('id') : $user;
         $user = kStaff::_isLogin() ? fStaff::_current('id') : $user; // if user is a staff, staff id first
 
         $data = [
@@ -105,26 +105,28 @@ class fDoorman extends Feed
      */
     public static function lastFootmark($type, $id)
     {
-        $rows = self::exec('SELECT `insert_ts` FROM `' . tpf() . strtolower($type) . '_footmark` WHERE `parent_id`=:parent_id ORDER BY `insert_ts` DESC ' . self::limit(0, 1), [
-            ':parent_id' => $id,
+        $row = mh()->get(tpf() . strtolower($type) . '_footmark', 'insert_ts', [
+            'parent_id' => $id,
+            'ORDER'     => ['insert_ts' => 'DESC'],
+            'LIMIT'     => 1,
         ]);
 
-        if (1 != count($rows)) {
+        if (empty($rows)) {
             return 0;
         } else {
-            $lastFootmark = $rows[0]['insert_ts'];
+            $time = $row['insert_ts'];
 
-            $rtn = 0;
+            $lastFootmark = 0;
 
-            if ($lastFootmark) {
-                $birth = new \DateTime($lastFootmark); // three days difference!
+            if ($time) {
+                $birth = new \DateTime($time); // three days difference!
                 $today = new \DateTime();
                 $diff  = $birth->diff($today);
 
-                $rtn = $diff->days;
+                $lastFootmark = $diff->days;
             }
 
-            return $rtn;
+            return $lastFootmark;
         }
     }
 

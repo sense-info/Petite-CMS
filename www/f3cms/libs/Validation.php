@@ -49,6 +49,17 @@ class Validation extends Module
     }
 
     /**
+     * @param $input
+     * @param $rule
+     */
+    public static function msg($input, $rule)
+    {
+        self::init($input, $rule);
+
+        return (self::$_instance->fails()) ? self::$_instance->errors()->all() : '';
+    }
+
+    /**
      * Validates the input data against the rules and outputs errors if validation fails.
      *
      * @param array $input The input data to validate.

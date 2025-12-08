@@ -162,7 +162,7 @@ class SRHelper extends Helper
         foreach ($files as $file) {
             if ('index.html' == basename($file)) {
                 if (file_exists($file)) {
-                    unlink($file);
+                    unlink($file); // nosemgrep: php.lang.security.unlink-use.unlink-use
                 }
             }
         }

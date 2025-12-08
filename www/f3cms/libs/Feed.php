@@ -1253,7 +1253,7 @@ class Feed extends Module
     final public static function _chkPsw($str, $hash, $memberID = 0)
     {
         if (0 != $memberID && strlen($hash) < 40) {
-            if ($hash == md5($str)) {
+            if ($hash === md5($str)) {
                 $that = get_called_class();
 
                 $that::saveCol([

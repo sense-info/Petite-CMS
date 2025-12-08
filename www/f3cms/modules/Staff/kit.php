@@ -55,19 +55,19 @@ class kStaff extends Kit
         return [
             'save'        => [
                 'account' => self::_accountRule(),
-                'pwd'     => 'regex:/^(?=.*\d)(?=.*[a-zA-Z]){2,}(?=.*[a-zA-Z])(?!.*\s).{8,32}/', // 建議長度 8-16 字元，含英數字
+                'pwd'     => 'regex:/^(?=.*\d)(?=.*[a-zA-Z]){2,}(?=.*[a-zA-Z])(?!.*\s).{12,32}/', // 建議長度 12-32 字元，含英數字
             ],
             'login'        => [
-                'account' => 'required|min:3|max:200', // 建議長度 8-16 字元，含英數字
+                'account' => 'required|min:3|max:200', // 建議長度 12-32 字元，含英數字
                 // SELECT `id`, `account`, LENGTH(`account`) AS LengthOfString FROM `tbl_member`
                 //     WHERE 1 HAVING LengthOfString > 16 OR  LengthOfString < 4;
                 // 526, 1062, 61, 415
 
-                'pwd'  => 'required|min:4|max:32', // 建議長度 8-16 字元，含英數字
+                'pwd'  => 'required|min:4|max:32', // 建議長度 12-32 字元，含英數字
             ],
             'update'       => [
-                'pwd'    => 'regex:/^(?=.*\d)(?=.*[a-zA-Z]){2,}(?=.*[a-zA-Z])(?!.*\s).{8,32}/', // 建議長度 8-16 字元，含英數字
-                're_pwd' => 'regex:/^(?=.*\d)(?=.*[a-zA-Z]){2,}(?=.*[a-zA-Z])(?!.*\s).{8,32}/', // 建議長度 8-16 字元，含英數字
+                'pwd'    => 'regex:/^(?=.*\d)(?=.*[a-zA-Z]){2,}(?=.*[a-zA-Z])(?!.*\s).{12,32}/', // 建議長度 12-32 字元，含英數字
+                're_pwd' => 'regex:/^(?=.*\d)(?=.*[a-zA-Z]){2,}(?=.*[a-zA-Z])(?!.*\s).{12,32}/', // 建議長度 12-32 字元，含英數字
 
                 'realname'  => 'required|min:2|max:100',
                 'nickname'  => 'required|min:2|max:100',
@@ -75,8 +75,8 @@ class kStaff extends Kit
                 // 'phone'     => 'required|numeric|min:6'
             ],
             'reset' => [
-                'pwd'    => 'regex:/^(?=.*\d)(?=.*[a-zA-Z]){2,}(?=.*[a-zA-Z])(?!.*\s).{8,32}/', // 建議長度 8-16 字元，含英數字
-                're_pwd' => 'regex:/^(?=.*\d)(?=.*[a-zA-Z]){2,}(?=.*[a-zA-Z])(?!.*\s).{8,32}/', // 建議長度 8-16 字元，含英數字
+                'pwd'    => 'regex:/^(?=.*\d)(?=.*[a-zA-Z]){2,}(?=.*[a-zA-Z])(?!.*\s).{12,32}/', // 建議長度 12-32 字元，含英數字
+                're_pwd' => 'regex:/^(?=.*\d)(?=.*[a-zA-Z]){2,}(?=.*[a-zA-Z])(?!.*\s).{12,32}/', // 建議長度 12-32 字元，含英數字
             ],
             'tokenVerify'  => [
                 'token' => 'required',

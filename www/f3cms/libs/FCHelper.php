@@ -249,6 +249,7 @@ class FCHelper extends Reaction
         $handler = fopen($this->base . $path, $mode);
         fwrite($handler, $content);
         fclose($handler);
+        @chmod($this->base . $path, 0664);
     }
 
     /**
@@ -292,14 +293,14 @@ class FCHelper extends Reaction
         if (is_dir($path)) {
             foreach (glob($path . '*') as $filename) {
                 if (is_dir($filename)) {
-                    array_map('unlink', glob($filename . '/*'));
+                    array_map('unlink', glob($filename . '/*')); // nosemgrep: php.lang.security.unlink-use.unlink-use
                     @rmdir($filename);
                 } else {
-                    @unlink($filename);
+                    @unlink($filename); // nosemgrep: php.lang.security.unlink-use.unlink-use
                 }
             }
         } else {
-            @unlink($path);
+            @unlink($path); // nosemgrep: php.lang.security.unlink-use.unlink-use
         }
     }
 

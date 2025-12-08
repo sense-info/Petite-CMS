@@ -18,6 +18,10 @@ class rContact extends Reaction
 
         Validation::return($req, kContact::rule('add_new'));
 
+        if (fContact::count() > 4) {
+            return parent::_return(8106, ['msg' => '資料過多，請稍後再試!']);
+        }
+
         $pid = fContact::insert($req);
 
         if ($pid) {

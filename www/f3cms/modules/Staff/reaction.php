@@ -19,6 +19,7 @@ class rStaff extends Reaction
     const RTN_MUTLI      = 'Mutli';
     const RTN_WRONGIP    = 'WrongIP';
     const RTN_WRONGCSRF  = 'WrongCSRF';
+    const RTN_TOOFRESH   = 'TooFresh';
 
     /**
      * @param $f3
@@ -132,9 +133,28 @@ class rStaff extends Reaction
             if (null == $cu) {
                 $rtn = self::RTN_WRONGDATA;
             } else {
-                // if (fStaff::ST_FREEZE == $cu['status']) {
-                //     $rtn = self::RTN_UNVERIFIED;
-                // }
+                if (!empty($req['pwd'])) {
+                    $oldPws = fDoorman::lotsFootmark(fDoorman::T_STAFF, $cu['id']);
+
+                    $same = 0;
+                    foreach ($oldPws as $hash) {
+                        if (fStaff::_chkPsw($req['pwd'], $hash, $cu['id'])) {
+                            $same = 1;
+                            break;
+                        }
+                    }
+
+                    if ($same) {
+                        $rtn = self:: RTN_REPEAT;
+                    } else {
+                        if (count($oldPws) > 1) {
+                            $lastFootmark = fDoorman::lastFootmark(fDoorman::T_STAFF, $cu['id']);
+                            if ($lastFootmark < 1) {
+                               $rtn = self:: RTN_TOOFRESH;
+                            }
+                        }
+                    }
+                }
             }
         }
 
@@ -298,7 +318,7 @@ class rStaff extends Reaction
             ],
             'Repeated' => [
                 'code' => 8210,
-                'msg'  => '密碼重覆，請重新設定!',
+                'msg'  => '這是近期曾使用過的密碼，請重新設定!',
             ],
             'Mutli'    => [
                 'code' => 8211,
@@ -311,6 +331,10 @@ class rStaff extends Reaction
             'WrongCSRF'    => [
                 'code' => 8213,
                 'msg'  => 'CSRF 異常，請重整畫面後重試',
+            ],
+            'TooFresh'   => [
+                'code' => 8214,
+                'msg'  => '密碼異動不足一天，暫時無法變更密碼!',
             ],
         ], parent::formatMsgs());
     }

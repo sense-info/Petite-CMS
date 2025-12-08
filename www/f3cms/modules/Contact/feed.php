@@ -41,4 +41,17 @@ class fContact extends Feed
 
         return self::chkErr(mh()->id());
     }
+
+    /**
+     *
+     */
+    public static function count()
+    {
+        $cnt = mh()->get(self::fmTbl() . '(m)', ['cnt' => MHelper::raw('COUNT(m.<id>)')], [
+            'm.status'       => self::ST_NEW,
+            'm.insert_ts[>]' => date('Y-m-d H:i:s', time() - 3600),
+        ]);
+
+        return ($cnt) ? $cnt['cnt'] * 1 : 0;
+    }
 }
