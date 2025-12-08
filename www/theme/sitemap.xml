@@ -1,40 +1,20 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+  xmlns:news="http://www.google.com/schemas/sitemap-news/0.9"
   xmlns:image="http://www.google.com/schemas/sitemap-image/1.1"
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
+  <repeat group="{{ @rows.subset }}" value="{{ @row }}" counter="{{ @ctr }}"><url>
+    <loc>{{@uri}}/{{@lang}}/p/{{ @row.id }}/{{ @row.slug }}</loc>
+    <lastmod>{{ @row.last_ts, 'c' | date }}</lastmod>
+    <news:news>
+      <news:publication>
+        <news:name>{{@site_title}}</news:name>
+        <news:language>{{@language}}</news:language>
+      </news:publication>
+      <news:publication_date>{{ @row.online_date, 'c' | date }}</news:publication_date>
+      <news:title>{{ @row.title }}</news:title>
+    </news:news>
+  </url></repeat>
   <url>
-    <loc>{{@uri}}/about-us</loc>
-    <changefreq>daily</changefreq>
+    <loc>{{@uri}}/tw/about</loc>
   </url>
-  <url>
-    <loc>{{@uri}}/s/navigation</loc>
-    <changefreq>daily</changefreq>
-  </url>
-  <url>
-    <loc>{{@uri}}/s/faq</loc>
-    <changefreq>daily</changefreq>
-  </url>
-  <url>
-    <loc>{{@uri}}/s/links</loc>
-    <changefreq>daily</changefreq>
-  </url>
-  <url>
-    <loc>{{@uri}}/art-pedia</loc>
-    <changefreq>daily</changefreq>
-  </url>
-  <url>
-    <loc>{{@uri}}/videos</loc>
-    <changefreq>daily</changefreq>
-  </url>
-  <repeat group="{{ @rows.subset }}" value="{{ @row }}" counter="{{ @ctr }}">
-    <url><check if="{{ isset(@row.duration) }}"><true>
-      <loc>{{@uri}}/v/{{ @row.id }}/{{ @row.slug }}</loc>
-      <changefreq>daily</changefreq>
-      <lastmod>{{ @row.last_ts, 'c' | date }}</lastmod>
-    </true>
-    <false>
-      <loc>{{@uri}}/p/{{ @row.id }}/{{ @row.slug }}</loc>
-      <changefreq>daily</changefreq>
-      <lastmod>{{ @row.online_date, 'c' | date }}</lastmod>
-    </false></check></url>
-  </repeat>
 </urlset>

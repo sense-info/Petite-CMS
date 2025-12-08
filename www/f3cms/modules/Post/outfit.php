@@ -18,12 +18,20 @@ class oPost extends Outfit
     /**
      * @param $args
      */
-    public static function sitemap($args)
+    public static function sitemapxml($args)
     {
         $subset = fPress::limitRows([
             'm.status' => [fPress::ST_PUBLISHED, fPress::ST_CHANGED],
         ], 0, 1000);
 
+        // ISO 639 Language Code (either 2 or 3 letters); see: http://www.loc.gov/standards/iso639-2/php/code_list.php
+        // Exception: For Chinese, please use zh-cn for Simplified Chinese or zh-tw for Traditional Chinese. Required.
+        $lang = parent::_lang();
+        if ($lang == 'tw') {
+            $lang = 'zh-tw';
+        }
+
+        f3()->set('language', $lang);
         f3()->set('rows', $subset);
         f3()->set('page', fOption::load('page'));
 
@@ -162,6 +170,15 @@ class oPost extends Outfit
     {
         $args['slug'] = 'terms';
         self::_render($args);
+    }
+
+    /**
+     * @param $args
+     */
+    public static function sitemap($args)
+    {
+        $args['slug'] = 'sitemap';
+        parent::render($args);
     }
 
     /**
