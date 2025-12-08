@@ -46,9 +46,10 @@ class oPress extends Outfit
     public static function show($args)
     {
         $fc = new FCHelper('press');
+        $key = 'press_' . parent::_lang() . '_' . $args['slug'] .'_'. f3()->get('siteName');
 
         if (0 === f3()->get('cache.press')) {
-            $html = $fc->get('press_' . parent::_lang() . '_' . $args['slug']);
+            $html = $fc->get($key);
 
             if (empty($html)) {
                 if (!kStaff::_isLogin()) {
@@ -58,11 +59,11 @@ class oPress extends Outfit
                 }
             }
         } else {
-            $html = $fc->get('press_' . parent::_lang() . '_' . $args['slug'], f3()->get('cache.press'));
+            $html = $fc->get($key, f3()->get('cache.press'));
 
             if (empty($html)) {
                 $html = self::_render($args['slug']);
-                $fc->save('press_' . parent::_lang() . '_' . $args['slug'], $html, f3()->get('cache.press'));
+                $fc->save($key, $html, f3()->get('cache.press'));
             }
         }
 
@@ -79,14 +80,14 @@ class oPress extends Outfit
             f3()->error(404);
         }
 
-        $fc            = new FCHelper('press');
+        $fc = new FCHelper('press');
         $fc->ifHistory = 0;
 
         foreach (f3()->get('acceptLang') as $n) {
             parent::_lang(['lang' => $n]);
 
             $html = self::_render($args['slug'], false, true);
-            $fc->save('press_' . $n . '_' . $args['slug'], $html); // renew cache
+            $fc->save('press_' . $n . '_' . $args['slug'] .'_'. f3()->get('siteName'), $html); // renew cache
         }
     }
 

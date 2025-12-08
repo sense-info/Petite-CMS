@@ -97,12 +97,12 @@ class rMenu extends Reaction
         }
 
         $fc = new FCHelper('menu');
-
-        $rtn = $fc->get('menu_' . parent::_lang() . '_' . $req['menuID'], 1); // 1 mins
+        $key = 'menu_' . parent::_lang() . '_' . $req['menuID'] .'_'. f3()->get('siteName');
+        $rtn = $fc->get($key, 1); // 1 mins
 
         if (empty($rtn)) {
             $rtn = self::sort_menus($req['menuID'], 0, '', 0);
-            $fc->save('menu_' . parent::_lang() . '_' . $req['menuID'], json_encode($rtn));
+            $fc->save($key, json_encode($rtn));
         } else {
             $rtn = json_decode(preg_replace('/<!--(?!\s*(?:\[if [^\]]+]|<!|>))(?:(?!-->).)*-->/s', '', $rtn), true);
         }

@@ -20,10 +20,12 @@ class rAdv extends Reaction
 
         if (0 != f3()->get('cache.adv')) {
             $fc  = new FCHelper('board');
-            $rtn = $fc->get('board_' . $req['pid'] . 'x' . $limit, f3()->get('cache.adv')); // 1 mins
+            $key = 'board_' . $req['pid'] . 'x' . $limit  .'_'. f3()->get('siteName');
+            $rtn = $fc->get($key, f3()->get('cache.adv')); // 1 mins
 
             if (empty($rtn)) {
                 $rtn = self::_render($req['pid'], $limit, $req['meta']);
+                $fc->save($key, json_encode($rtn));
             } else {
                 $rtn = json_decode(preg_replace('/<!--(?!\s*(?:\[if [^\]]+]|<!|>))(?:(?!-->).)*-->/s', '', $rtn), true);
             }
@@ -197,9 +199,6 @@ class rAdv extends Reaction
 
             return $cu;
         });
-
-        $fc = new FCHelper('board');
-        $fc->save('board_' . $id . 'x' . $limit, json_encode($rtn));
 
         return $rtn;
     }

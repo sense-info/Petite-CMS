@@ -10,7 +10,7 @@ class kAdv extends Kit
     public static function loadAry($key, $ary, $force = 0)
     {
         $fc  = new FCHelper('board');
-        $key .= '_' . Module::_lang();
+        $key .= '_' . Module::_lang() .'_'. f3()->get('siteName');
         $cache = $fc->get($key);
 
         if (1 == $force || empty($cache)) {
@@ -52,7 +52,7 @@ class kAdv extends Kit
         $fc         = new FCHelper('board');
         $acceptLang = f3()->get('acceptLang');
         foreach ($acceptLang as $val) {
-            $fc->flush($key . '_' . $val);
+            $fc->flush($key . '_' . $val .'_'. f3()->get('siteName'));
         }
     }
 }

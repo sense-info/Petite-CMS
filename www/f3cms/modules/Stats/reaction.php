@@ -36,7 +36,7 @@ class rStats extends Reaction
         }
 
         $fc  = new FCHelper('stats');
-        $idx = 'stats_default_' . $start . '_' . $end;
+        $idx = 'stats_default_' . $start . '_' . $end .'_'. f3()->get('siteName');
         $rtn = $fc->get($idx, 60); // 60 mins
 
         if (empty($rtn)) {

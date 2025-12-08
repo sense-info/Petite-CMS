@@ -15,7 +15,8 @@ class rPost extends Reaction
         $rtn = [];
 
         $fc  = new FCHelper('post');
-        $rtn = $fc->get('post_' . $req['slug'], 1); // 1 mins
+        $key = 'post_' . parent::_lang() . '_' . $req['slug'] .'_'. f3()->get('siteName');
+        $rtn = $fc->get($key, f3()->get('cache.post')); // 1 mins
 
         if (empty($rtn)) {
             if (is_numeric($req['slug'])) {
@@ -33,7 +34,7 @@ class rPost extends Reaction
                 'content' => $row['content'],
             ];
 
-            $fc->save('post_' . $req['slug'], json_encode($rtn));
+            $fc->save($key, json_encode($rtn));
         } else {
             $rtn = json_decode(preg_replace('/<!--(?!\s*(?:\[if [^\]]+]|<!|>))(?:(?!-->).)*-->/s', '', $rtn), true);
         }
