@@ -10,8 +10,8 @@ class kWebhook extends Kit
     public static function rules()
     {
         return [
-            'getCode'  => [
-                'payload'   => 'required',
+            'getPress'  => [
+                'press_id'   => 'required',
             ],
         ];
     }

@@ -21,7 +21,16 @@ class kStaff extends Kit
         f3()->set('service_mail', fOption::get('service_mail'));
         f3()->set('email', $email);
 
-        Sender::sendmail(f3()->get('site_title') . '-後台帳號開通通知信', Sender::renderBody('invite'), $email);
+        $api = new MPThelper(f3()->get('mp.merchant'), f3()->get('mp.secret'));
+
+        $action       = 'sendmail';
+        $request_data = [
+            'subject' => f3()->get('site_title') . '-後台帳號開通通知信',
+            'content' => Sender::renderBody('invite'),
+            'recipient' => $email,
+        ];
+
+        $api->call($action, $request_data);
     }
 
     public static function _notExistAccount($account)

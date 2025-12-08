@@ -29,14 +29,27 @@ class rWebhook extends Reaction
      * @param $f3
      * @param $args
      */
-    public function do_getCode($f3, $args)
+    public function do_getPress($f3, $args)
     {
         $req = self::_req();
 
-        $logger = new \Log('wh_get_code.log');
-        $logger->write(jsonEncode($req));
+        if (empty($_SERVER['HTTP_AUTHORIZATION'])) {
+            return self::_rtn([
+                'code' => 8201,
+                'data' => ['msg' => 'Bearer authorization Failed']
+            ]);
+        }
 
-        $msg = Validation::msg($req, kWebhook::rule('getCode'));
+        // if the Authorization is not equal to the secret key, then it is invalid
+        $authorization = str_replace('Bearer ', '', $_SERVER['HTTP_AUTHORIZATION']);
+        if ($authorization !== f3()->get('webhook.secret')) {
+            return self::_rtn([
+                'code' => 8201,
+                'data' => ['msg' => 'Bearer authorization Failed']
+            ]);
+        }
+
+        $msg = Validation::msg($req, kWebhook::rule('getPress'));
 
         if ('' == $msg) {
             $msg = 'Success!';
@@ -46,38 +59,63 @@ class rWebhook extends Reaction
             $msg = implode(', ', $msg);
         }
 
-        $cwm = new CWMhelper();
-
-        $json = $cwm->_decrypt($req['payload']);
-
-        $rows = jsonDecode($json);
-
-        if (!is_array($rows)) {
-            $logger->write($rows); // not json
-            f3()->status(400);
-        }
-
-        $rtn = \__::pluck($rows, 'invNum');
-
-        fWebhook::insert('CMoney', 'getCode',
-            jsonEncode($rows),
-            jsonEncode(['message' => $msg])
-        );
-
         if ('Success!' != $msg) {
             f3()->status(404);
         }
 
-        $data = kInvoice::formatSum($rows);
+        $cu = fPress::one($req['press_id']);
 
-        if (!empty($data)) {
-            fInvoice::autoInsert($data);
+        if (empty($cu)) {
+            return self::_rtn([
+                'code'    => 8106
+            ]);
         }
 
+        $cu = rPress::handleRow($cu);
+
+        $subset = fMedia::limitRows([
+            'm.status'    => fMedia::ST_ON,
+            'm.target'    => 'Press',
+            'm.parent_id' => $cu['id'],
+        ], 0, 30, ',m.insert_ts');
+
+        $cu['pics'] = $subset['subset'];
+
+        $uri = f3()->get('uri');
+
+        if (!empty($cu['cover'])) {
+            $cu['cover'] =  $uri . $cu['cover'];
+        }
+
+        if (!empty($cu['banner'])) {
+            $cu['banner'] =  $uri . $cu['banner'];
+        }
+
+        foreach ($cu['lang'] as $lang => $row) {
+            $cu['lang'][$lang]['content'] = str_replace('src="/upload/', 'src="'. $uri .'/upload/', $row['content']);
+        }
+
+        foreach ($cu['pics'] as $idx => $row) {
+            $cu['pics'][$idx]['pic'] = $uri . $row['pic'];
+            $cu['pics'][$idx]['lang'] = fMedia::lotsLang($row['id']);
+
+            unset($cu['pics'][$idx]['id']);
+            unset($cu['pics'][$idx]['title']);
+        }
+
+        $cu['link'] = $uri . '/p/' . $cu['id'];
+        $cu['tags'] = '';
+        $cu['authors'] = '';
+        $cu['relateds'] = '';
+        $cu['terms'] = '';
+
+        unset($cu['history']);
+        unset($cu['id']);
+        unset($cu['status_publish']);
+
         self::_rtn([
-            'code'    => 200,
-            'msg'     => 'success',
-            'payload' => $cwm->_encrypt($rtn),
+            'code'    => 1,
+            'data' => $cu,
         ]);
     }
 

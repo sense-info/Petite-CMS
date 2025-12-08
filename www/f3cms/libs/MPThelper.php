@@ -25,7 +25,7 @@ class MPThelper
     /**
      * @var string
      */
-    private $_gateway_uri = 'https://qa.mediapartner.tw'; // 'https://dev.mediapartner.tw/api'; //
+    private $_gateway_uri = 'https://qa.mediapartner.tw';
     /**
      * @var array
      */
@@ -36,6 +36,10 @@ class MPThelper
         ],
         'answer' => [
             'action'    => 'webhook/v1/answer',
+            'hash_keys' => ['merchant'],
+        ],
+        'sendmail' => [
+            'action'    => 'webhook/v1/sendmail',
             'hash_keys' => ['merchant'],
         ],
         'ask' => [
@@ -71,6 +75,10 @@ class MPThelper
         }
         if (!empty($api_secret)) {
             $this->_api_secret = $api_secret;
+        }
+
+        if ('production' == f3()->get('APP_ENV')) {
+            $this->_gateway_uri = 'https://dev.mediapartner.tw';
         }
     }
 
