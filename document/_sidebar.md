@@ -1,0 +1,43 @@
+- [Home](README.md)
+- Guides
+  - [Guides Index](guides/index.md)
+  - Foundations
+    - [Overall Guide](guides/overall.md)
+  - [Setup Guide](guides/setup.md)
+  - Onboarding
+    - [30-Minute Onboarding](guides/new_engineer_30min.md)
+  - Design
+    - [FDD idea.md Writing Guide](guides/idea_md_writing_guide.md)
+    - [FDD idea.md Role Examples](guides/idea_md_role_examples.md)
+    - [FDD Porting Guide](guides/fdd_porting_guide.md)
+    - [TestMode Development Guide](guides/testmode_development_guide.md)
+    - [SA Requirement Breakdown](guides/sa_requirement_breakdown.md)
+    - [Data Modeling](guides/data_modeling.md)
+    - [LLM DBA Guide](guides/llm_dba_guide.md)
+    - [Module Design](guides/module_design.md)
+    - [SD Conventions](guides/sd_conventions.md)
+  - Implementation
+    - [Feed Guide](guides/feed_guide.md)
+    - [Query and Performance](guides/query_and_performance.md)
+    - [Create Module Guide](guides/create_new_module.md)
+  - Validation
+    - [Data Architecture Checklist](guides/data_architecture_checklist.md)
+    - [PR Review Checklist](guides/pr_review_checklist.md)
+  - Writing
+  - [Coding Style](guides/coding_style.md)
+    - [Markdown Guide](guides/markdown_guide.md)
+- [Glossary](glossary.md)
+- References
+  - [Reference Index](reference/intro.md)
+  - [Feed Function Reference](reference/feed_reference.md)
+  - [Reaction Function Reference](reference/reaction_reference.md)
+  - [Outfit Function Reference](reference/outfit_reference.md)
+- Examples
+  - [Cashier Usage](examples/cashier_usage.md)
+  - [Sender Usage](examples/sender_usage.md)
+  - [SMS Sender Usage](examples/smsender_usage.md)
+  - [OAuth Usage](examples/oauth_usage.md)
+- Payment
+  - [Cube Payment Guide](payment/cube.md)
+- SQL
+  - [Initialization Script](sql/init.sql)
