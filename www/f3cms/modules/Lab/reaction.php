@@ -69,6 +69,66 @@ class rLab extends Reaction
                     echo PHP_EOL . 'RTN_SAFEIP';
                 }
                 break;
+            case 'renameImg':
+                set_time_limit(0);
+
+                $filteredFiles = fMedia::lots([
+                    'status'      => fMedia::ST_ON,
+                    'pic[REGEXP]' => '[^ -~]',
+                    'ORDER'       => ['id' => 'ASC'],
+                    'LIMIT'       => 250,
+                ]);
+
+                if (empty($filteredFiles)) {
+                    echo 'No matched media.' . PHP_EOL;
+                    break;
+                }
+
+                $stats = [
+                    'renamed' => 0,
+                    'skipped' => 0,
+                    'failed'  => 0,
+                ];
+
+                foreach ($filteredFiles as $file) {
+                    $result = self::renameMediaPic($file);
+
+                    if ('renamed' == $result['status']) {
+                        $saved = fMedia::save([
+                            'id'  => $file['id'],
+                            'pic' => $result['to'],
+                        ]);
+
+                        if (empty($saved)) {
+                            $result = self::renameResult('failed', $result['from'], $result['to'], 'database update failed');
+                        }
+                    }
+
+                    $stats[$result['status']]++;
+
+                    echo sprintf(
+                        '[%s] #%d %s => %s',
+                        strtoupper($result['status']),
+                        $file['id'],
+                        $result['from'],
+                        $result['to']
+                    );
+
+                    if (!empty($result['message'])) {
+                        echo ' (' . $result['message'] . ')';
+                    }
+
+                    echo PHP_EOL;
+                }
+
+                echo sprintf(
+                    'Summary: renamed=%d skipped=%d failed=%d',
+                    $stats['renamed'],
+                    $stats['skipped'],
+                    $stats['failed']
+                ) . PHP_EOL;
+
+                break;
             case 'batchDraft':
                 // 增加 PHP 腳本的最大執行時間
                 set_time_limit(0);
@@ -91,5 +151,39 @@ class rLab extends Reaction
                 // code...
                 break;
         }
+    }
+
+    private static function renameMediaPic($file)
+    {
+        $oldPic = $file['pic'];
+
+        $pathInfo = pathinfo(parse_url($oldPic, PHP_URL_PATH));
+        $basename = empty($pathInfo['filename']) ? '' : rawurldecode($pathInfo['filename']);
+
+        if (!preg_match('/[^\x20-\x7E]/u', $basename)) {
+            return self::renameResult('skipped', $oldPic, $oldPic, 'basename already ascii');
+        }
+
+        $newBase = substr(md5($file['id'] . '|' . $oldPic), 0, 15);
+        if ($newBase === $basename) {
+            return self::renameResult('skipped', $oldPic, $oldPic, 'basename unchanged');
+        }
+
+        $renamed = FSHelper::renameMediaPic($oldPic, $newBase);
+        if (!$renamed['ok']) {
+            return self::renameResult('failed', $oldPic, $oldPic, $renamed['message']);
+        }
+
+        return self::renameResult('renamed', $oldPic, $renamed['pic']);
+    }
+
+    private static function renameResult($status, $from, $to, $message = '')
+    {
+        return [
+            'status'  => $status,
+            'from'    => $from,
+            'to'      => $to,
+            'message' => $message,
+        ];
     }
 }

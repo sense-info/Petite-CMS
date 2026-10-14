@@ -26,16 +26,21 @@ class FSHelper extends Helper
         }
         $oldUMask = umask(0027);
         foreach ($pathAry as $path) {
-            // Check if the directory already exists.
-            if (!file_exists($path)) {
-                // Attempt to create the directory.
-                @mkdir($path, 0775, true);
+            if (is_dir($path)) {
+                // Keep directory mode consistent across environments with different umask defaults.
+                @chmod($path, 02775);
+                continue;
             }
 
-            // Check if the directory was created successfully.
-            if (!file_exists($path)) {
+            @mkdir($path, 0775, true);
+            clearstatcache(true, $path);
+
+            if (!is_dir($path)) {
                 $rtn = false;
+                continue;
             }
+
+            @chmod($path, 02775);
         }
         umask($oldUMask);
 
@@ -236,6 +241,114 @@ class FSHelper extends Helper
         natsort($contents);
 
         return $contents;
+    }
+
+    public static function renameMediaPic($pic, $newBase)
+    {
+        $parsed = self::parseMediaPic($pic);
+
+        if (empty($parsed)) {
+            return ['ok' => false, 'message' => 'invalid media path'];
+        }
+
+        $renamed = self::renameMediaFiles($parsed, $newBase);
+        if (!$renamed['ok']) {
+            return $renamed;
+        }
+
+        return [
+            'ok'      => true,
+            'message' => '',
+            'pic'     => self::buildMediaPic($parsed, $newBase),
+        ];
+    }
+
+    protected static function parseMediaPic($pic)
+    {
+        $parts = parse_url($pic);
+        if (empty($parts['path']) || 0 !== strpos($parts['path'], '/upload/')) {
+            return null;
+        }
+
+        $pathInfo = pathinfo($parts['path']);
+        if (empty($pathInfo['dirname']) || empty($pathInfo['filename']) || empty($pathInfo['extension'])) {
+            return null;
+        }
+
+        return [
+            'dirname'   => $pathInfo['dirname'],
+            'basename'  => rawurldecode($pathInfo['filename']),
+            'extension' => strtolower($pathInfo['extension']),
+            'query'     => empty($parts['query']) ? '' : $parts['query'],
+        ];
+    }
+
+    protected static function buildMediaPic($parsed, $newBase)
+    {
+        $pic = $parsed['dirname'] . '/' . $newBase . '.' . $parsed['extension'];
+
+        if ('' !== $parsed['query']) {
+            $pic .= '?' . $parsed['query'];
+        }
+
+        return $pic;
+    }
+
+    protected static function renameMediaFiles($parsed, $newBase)
+    {
+        $root        = rtrim(f3()->get('abspath') . 'upload/' . f3()->get('upload_dir'), '/');
+        $relativeDir = substr($parsed['dirname'], strlen('/upload'));
+        $absoluteDir = $root . $relativeDir;
+
+        if (!is_dir($absoluteDir)) {
+            return ['ok' => false, 'message' => 'media directory not found'];
+        }
+
+        $pattern = $absoluteDir . '/' . $parsed['basename'] . '*';
+        $matches = glob($pattern);
+        if (empty($matches)) {
+            return ['ok' => false, 'message' => 'media files not found'];
+        }
+
+        $renamePairs = [];
+
+        foreach ($matches as $source) {
+            if (!is_file($source)) {
+                continue;
+            }
+
+            $sourceInfo = pathinfo($source);
+            $sourceBase = $sourceInfo['filename'];
+
+            if ($sourceBase !== $parsed['basename'] && 0 !== strpos($sourceBase, $parsed['basename'] . '_')) {
+                continue;
+            }
+
+            $suffix = substr($sourceBase, strlen($parsed['basename']));
+            $target = $absoluteDir . '/' . $newBase . $suffix . '.' . $sourceInfo['extension'];
+
+            if ($source !== $target && file_exists($target)) {
+                return ['ok' => false, 'message' => 'target file already exists'];
+            }
+
+            $renamePairs[] = [$source, $target];
+        }
+
+        if (empty($renamePairs)) {
+            return ['ok' => false, 'message' => 'matched files missing'];
+        }
+
+        foreach ($renamePairs as [$source, $target]) {
+            if ($source === $target) {
+                continue;
+            }
+
+            if (!rename($source, $target)) {
+                return ['ok' => false, 'message' => 'failed to rename file'];
+            }
+        }
+
+        return ['ok' => true, 'message' => ''];
     }
 
     /**
