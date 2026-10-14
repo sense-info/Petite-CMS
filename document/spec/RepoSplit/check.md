@@ -301,3 +301,8 @@
 2. 驗證通過：
    - `config.develop.php`、`config.qa.php`、`themeSetting.json` 會被忽略。
    - `site.config.php`、`routes.site.ini` 不會被忽略。
+
+## Optimization 補丁驗收（tmpls 公開路徑捷徑）
+1. 已新增 `www/demo/public/tmpls` 符號連結，指向 `../../../core/tmpls`。
+2. 驗證通過：
+   - `https://loc.f3cms.com:4433/tmpls/app/default.html` 為 200。

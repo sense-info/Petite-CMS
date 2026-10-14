@@ -284,3 +284,9 @@
 2. 驗證結果：
    - `www/demo/config/config.develop.php`、`www/demo/config/config.qa.php`、`www/demo/config/themeSetting.json` 皆命中 ignore。
    - `www/demo/config/site.config.php`、`www/demo/config/routes.site.ini` 不受影響。
+
+## 第 28 輪討論結果
+1. 依使用者要求，於 `www/demo/public` 建立 `tmpls` 捷徑，指向 `core/tmpls`：
+   - `www/demo/public/tmpls -> ../../../core/tmpls`
+2. 驗證結果（Docker/HTTPS）：
+   - `https://loc.f3cms.com:4433/tmpls/app/default.html` 回應 200。

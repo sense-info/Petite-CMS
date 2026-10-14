@@ -108,6 +108,8 @@ $f3->set('webmaster', 'trevor@sense-info.co');
 
 $f3->set('crontabhost', 'hostname');
 
+$f3->set('backend.license', '');
+
 // GCP
 $f3->set('gcp_json', '');
 $f3->set('gcp_property', '');
