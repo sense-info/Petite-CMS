@@ -1,0 +1,286 @@
+# History
+
+## 第 1 輪討論結果
+1. 本輪依 `FDD Sprint` 的要求，先確認目前 spec 解析結果為 `document/spec/RepoSplit`，並判斷目前處於 `idea` stage。
+2. 承接盤點結果顯示此 spec 尚未建立 `history.md`、`plan.md`、`check.md`，因此仍屬需求收斂與設計定義階段，而非實作階段。
+3. 目前 repo 仍為既有單體架構，目標設計要求將核心程式移到 `core/`，站點資料放在 `www/`，範例站為 `www/demo`，Nginx 站點設定集中於 `www/infra/*.conf`。
+4. 這代表在實際改碼前，需先處理「repo 結構與目標 layout 的 drift」確認，避免直接依賴舊路徑 `../f3cms` 與 `../config/<site>`。
+
+## 第 2 輪討論結果
+1. 本輪依 `FDD Sprint` 進行後續承接，補寫 `history.md`，確認本輪對 spec 的理解與後續最小下一步。
+2. 因此前置假設需要明確記錄：`core/` 為核心系統，`www/demo` 為示範站，`www/infra` 為站點 Nginx 設定，並將 bootstrap 改為 `CORE_DIR` / `SITE_DIR` 的讀取方式。
+3. 本輪沒有擴張到修改任何實作程式碼，仍維持在 spec / drift 紀錄與下一步規劃階段。
+4. 後續最小下一步為建立 `plan.md`，將 repo split 工作拆成可執行的 migration stage 與 validation checkpoints，再開始實作。
+5. 若後續進入驗證，將優先使用 Docker 環境，且資料庫驗證依 `.env` 提供之設定為準。
+
+## 第 3 輪討論結果
+1. 本輪依 `FDD Sprint` gate 規則，確認 `history.md`、`plan.md`、`check.md` 已存在，且 `check.md` 已判定可進入實作，因此開始執行 `plan.md` 的 Stage 1（盤點與對照）。
+2. Stage 1 實際盤點結果：
+   - `www/f3cms/` 存在，可對應到目標 `core/`。
+   - `www/theme/`、`www/tmpls/` 存在，可對應到 `core/theme/`、`core/tmpls/`。
+   - `www/loc.f3cms.com/` 存在，可對應到 `www/demo/public/`。
+   - `www/config/loc.f3cms.com/` 存在，可對應到 `www/demo/config/`。
+   - `www/loc.f3cms.com/modules/` 存在（`Post`、`Press`），可對應到 `www/demo/modules/`。
+3. 舊路徑依賴盤點結果：
+   - entrypoint 仍使用 `$rootDir .'f3cms/bootstrap.php'` 與 `$rootDir .'f3cms/cli_bootstrap.php'`。
+   - `www/f3cms/bootstrap.php`、`www/f3cms/cli_bootstrap.php` 仍依賴 `$rootDir .'config/'` 舊結構。
+   - site module 仍存在 `require_once '../f3cms/modules/...';`。
+4. 本輪發現一項文件漂移：`document/spec/.current-spec.md` 的 stage 描述仍顯示 idea-only 狀態，與目前已存在 `history.md`、`plan.md`、`check.md` 的實際狀態不一致；此漂移不阻塞 Stage 2 實作，但需在後續文件流程中校正。
+5. 下一步為進入 Stage 2：重構 `www/demo/public/index.php`、`www/demo/cli.php` 與 `core/bootstrap` 啟動路徑（先以最小可行切分完成 `CORE_DIR` / `SITE_DIR` 導入）。
+
+## 第 4 輪討論結果
+1. 本輪依 `plan.md` 進入 Stage 2，已建立新入口：
+   - `www/demo/public/index.php`
+   - `www/demo/cli.php`
+   兩者都已導入 `SITE_DIR` 與 `CORE_DIR`，並先保留 legacy fallback（當 `core/` 尚未完整掛載時回退到既有 `www/f3cms`）。
+2. 已新增：
+   - `core/bootstrap.php`
+   - `core/cli_bootstrap.php`
+   兩者已改為以 `CORE_DIR` / `SITE_DIR` 作為主路徑，並提供舊路徑 fallback，避免在 split 過程中立即中斷現有 runtime。
+3. Docker 驗證結果：
+   - 以 `php-fpm` 容器完成新入口 lint（`/var/www/demo/public/index.php`, `/var/www/demo/cli.php`）皆通過。
+   - `core/*.php` 因目前 compose mount 只掛載 `www/`，改以 stdin 方式在容器內做 lint，語法通過。
+4. 本輪新增一項非阻塞 drift：既有 Docker volume 對映仍是 `WWW_PATH=./../../www`，尚未覆蓋 root-level `core/`，因此 `core/` 真正 runtime 路徑切換需配合後續容器掛載調整。
+5. 下一步維持最小步驟：進入 Stage 3，修正 site modules 內 `../f3cms/modules/...` 依賴為 `CORE_DIR` 導向載入策略。
+
+## 第 5 輪討論結果
+1. 依使用者要求，已把 `www/f3cms` 剩餘內容實際搬移到 `core/`（`libs/`, `modules/`, `vendor/`, `composer.json`, `composer.lock`, `README.md`, `LICENSE`），並移除 `www/f3cms/` 目錄。
+2. 已同步修正主要入口與模組依賴：
+   - `www/loc.f3cms.com/index.php`、`www/loc.f3cms.com/cli.php` 改用 `CORE_DIR` 載入 `core/bootstrap.php` / `core/cli_bootstrap.php`。
+   - `www/loc.f3cms.com/modules/Post/outfit.php`、`www/loc.f3cms.com/modules/Press/reaction.php` 改為從 `core/modules` 載入（保留 legacy fallback）。
+   - `www/config/config.php` 的 `AUTOLOAD` 改成優先指向 `core/`（保留 `f3cms/` fallback）。
+3. 因 root-level `core/` 不在原本 Docker volume 內，已在 `conf/docker/docker-compose.yml` 為 `web-server` 與 `php-fpm` 新增 `./../../core:/var/core` 掛載，讓容器可讀取核心程式。
+4. 驗證結果：
+   - Docker PHP lint：新入口、site modules、config、core bootstrap 皆通過。
+   - Docker CLI smoke（`loc.f3cms.com/cli.php`）可執行，`/var/www/f3cms` 缺失錯誤已排除。
+5. 目前仍有一項待續查項目：HTTP `/` 與 `/home` 回應 404（由 F3 route 層回傳），需在下一輪確認是既有行為、路由載入落差，或資料/環境前提未滿足。
+
+## 第 6 輪討論結果
+1. 本輪針對 web 404 驗收缺口做最小修復，先確認 route 已載入，再定位 runtime 問題來源。
+2. 問題定位結果：
+   - 404 並非 route 缺失，而是 bootstrap 以固定 `SITE_DIR/public/` 作為 web root，導致 legacy site（`www/loc.f3cms.com` 無 `public/`）路徑判斷錯位。
+   - 修正後轉為 500，進一步定位為 theme 實體尚未搬移到 `core/theme`。
+3. 已完成修正：
+   - `core/bootstrap.php` 改為：若存在 `public/` 才使用，否則回退 `SITE_DIR/` 作為 web root。
+   - 完成 `www/theme` → `core/theme` 與 `www/tmpls` → `core/tmpls` 實體搬移。
+4. 驗證結果（Docker）：
+   - `Host: loc.f3cms.com` 下 `/` 與 `/home` 皆恢復 200。
+   - `loc.f3cms.com/cli.php` 與 `demo/cli.php` smoke 均可執行。
+5. 本輪關閉了「HTTP `/`、`/home` 回應 404」驗收缺口；下一步可按 plan 進入 Stage 4（nginx include 佈局切換）。
+
+## 第 7 輪討論結果
+1. 本輪執行 Stage 4（nginx include 佈局切換）：
+   - `conf/nginx/sites/default.conf` 已改為保留共用設定並 `include /var/www/infra/*.conf;`。
+   - 新增站點檔 `www/infra/10-loc.conf`，先承接現行 `loc.f3cms.com` runtime。
+2. 為避免 route fallback regressions，`10-loc.conf` 的 `location /` 已調整為 `try_files $uri $uri/ /index.php?$query_string;`，避免 `/` 請求被改寫成舊 `q` 參數風格造成 404。
+3. 驗證結果（Docker）：
+   - `nginx -t` 通過且 reload 成功。
+   - `Host: loc.f3cms.com` 下 `/`、`/home` 皆為 200。
+4. Stage 4 與 plan 的「`10-demo.conf`」存在一項可控 drift：
+   - 目前先落地 `10-loc.conf` 是為了維持既有 runtime 可用。
+   - 待 `www/demo` 的 config/modules 完整對齊後，再補 `10-demo.conf` 切換為正式 demo 站。
+
+## 第 8 輪討論結果
+1. 本輪執行 Stage 4.1：補齊 `www/demo` 的 site config/modules，讓 demo 站可在 `demo.f3cms.com` 獨立啟動。
+2. 已補齊 `www/demo/config`：
+   - `config.php`、`config.develop.php`
+   - `site.config.php`
+   - `routes.ini`、`routes.site.ini`
+   - `themeSetting.json`
+   - `api-project-653166915507-e307beb30f10.json`
+3. 已補齊 `www/demo/modules`：
+   - `Post/`
+   - `Press/`
+   並在 `www/demo/public/index.php` 額外載入 site module 入口，確保 `\PCMS\oPost` 路由可解析。
+4. 已新增 `www/infra/10-demo.conf`（`server_name demo.f3cms.com`、`root /var/www/demo/public`），與既有 `10-loc.conf` 並行。
+5. Docker 驗證結果：
+   - `nginx -t`、reload 皆通過。
+   - `Host: demo.f3cms.com` 下 `/`、`/home` 皆為 200。
+   - `Host: loc.f3cms.com` 下 `/` 仍為 200（舊站未回歸）。
+   - `demo/cli.php` 與 `loc.f3cms.com/cli.php` smoke 皆可執行。
+
+## 第 9 輪討論結果
+1. 本輪執行 Stage 5（ignore 策略與文件同步）：
+   - `.gitignore` 已改為「預設忽略 `www/*`，僅保留 `www/demo/**`、`www/infra/**`、`www/gitignore.sample`」。
+   - 新增 `www/gitignore.sample`（內容：`demo/`），供本機複製為 `www/.gitignore` 使用。
+2. 文件同步：
+   - `README.md` 新增 Repo Split 結構摘要（`core/`, `www/demo`, `www/infra`）。
+   - `INFO.md` 已更新資料夾結構、`VND_PATH`（改為 `core/vendor`）與 Docker composer 指令路徑（改為 `/var/core`）。
+3. 本輪主要為文件與版控策略更新，無變更 runtime 行為；Stage 4.1 的 Docker 驗證結果保持有效。
+
+## 第 10 輪討論結果
+1. 依使用者決策「不保留過渡站點」，已移除 `www/infra/10-loc.conf`，改為 demo-only 站點策略。
+2. 目前 `www/infra` 僅保留 `10-demo.conf`，由 include 佈局接管。
+3. Docker 驗證結果：
+   - `nginx -t` 通過且 reload 成功。
+   - `Host: demo.f3cms.com` 下 `/`、`/home` 皆為 200。
+   - `demo/cli.php` smoke 可執行。
+4. 補充觀察：
+   - 在僅有 `10-demo.conf` 時，`Host: loc.f3cms.com` 仍回 200（落入 default server），但內容由 demo 站承接，符合「不保留 loc 過渡站點」決策。
+
+## 第 11 輪討論結果
+1. 本輪執行文件對齊收尾：校正 `document/spec/.current-spec.md` 的 stage 描述，移除「idea-only」舊狀態。
+2. 校正後 `.current-spec.md` 與實際進度一致（目前為 check stage，且 `history.md` / `plan.md` / `check.md` 已完整存在）。
+
+## 第 12 輪討論結果
+1. 本輪進一步收斂 `check.md` 的驗收狀態，將「驗收項目（預計）」更新為「驗收項目（已完成）」。
+2. 同步校正檢查結論與下一步：確認 Stage 1~5 主流程與 demo-only 切換已完成，下一步應轉入 retrospective / Optimization，而非擴張實作範圍。
+
+## 第 13 輪討論結果
+1. 本輪執行最終 Docker smoke 驗證時，先遇到短暫 blocking drift：`php-fpm` 服務未在 compose 網路中可解析，導致 nginx upstream `php-fpm:9000` 檢查失敗。
+2. 已即時以既有 compose 流程啟動 `php-fpm`，服務恢復後重新驗證：
+   - `nginx -t` 通過。
+   - `Host: demo.f3cms.com` 下 `/`、`/home` 皆為 200。
+   - `demo/cli.php` smoke 可執行。
+3. 本輪確認此 blocking drift 為環境服務狀態問題，非 RepoSplit 程式或配置回歸；目前驗收狀態維持可進 retrospective / Optimization。
+
+## 第 14 輪討論結果
+1. 本輪執行 Optimization 收尾文件化：補齊 `check.md` 的「最終驗收摘要（封存前）」與「回滾策略（最小可行）」。
+2. `.current-spec.md` 已由 check stage 推進為 Optimization stage，並註明 Stage 1~5 + final smoke 已完成，後續聚焦封存前整理。
+
+## 第 15 輪討論結果
+1. 使用者回報 `https://loc.f3cms.com:4433/` 無法連線；本輪判定為 nginx 站點在 `www/infra/10-demo.conf` 僅監聽 `80`，未提供 `443 ssl` listener。
+2. 以最小改動補上 `loc.f3cms.com` 的 HTTPS server block（沿用 demo root，憑證使用 `conf/nginx/letsencrypt/loc.f3cms.com+1.pem`）。
+3. Docker 驗證結果：
+   - `nginx -t` 通過並 reload 成功。
+   - `https://loc.f3cms.com:4433/` 與 `/home` 回應皆為 200。
+4. 本輪屬 Optimization 階段的連線可用性修補，未回退 RepoSplit 結構決策（仍維持不恢復 `10-loc.conf` 獨立站檔）。
+
+## 第 16 輪討論結果
+1. 使用者回報 `https://loc.f3cms.com:4433/assets/` 指向未完成；本輪定位為 demo root (`www/demo/public`) 缺少 `assets/` 靜態資源。
+2. 以最小實作補齊 `www/demo/public/assets/`（由既有 `www/loc.f3cms.com/assets/` 同步），避免 runtime 再依賴已退役站點路徑。
+3. 驗證結果（Docker）：
+   - `https://loc.f3cms.com:4433/assets/styles/app.css` 回應 200。
+   - `https://demo.f3cms.com:4433/assets/styles/app.css` 回應 200。
+   - `https://loc.f3cms.com:4433/assets/` 目前回應 403（目錄無 index，屬 nginx 預設行為）。
+4. 本輪屬 Optimization 階段的站點資源完整性修補，未變更 core 與 include 架構決策。
+
+## 第 17 輪討論結果
+1. 依使用者要求清理 `www` 舊資料夾並收斂目錄責任：
+   - 移除 `www/assets`、`www/config`、`www/loc.f3cms.com`。
+   - 共用 config 改由 `core/config/config.php` 載入；站點保留 `www/demo/config` 的 site/環境覆寫。
+2. upload 與 tmp 重新對齊：
+   - `www/upload/loc` 更名為 `www/upload/demo`。
+   - 新增 `www/demo/public/upload -> ../../upload/demo` 捷徑。
+   - runtime tmp 改為每站點目錄（`www/demo/tmp`）。
+3. `pma` 路由修復：
+   - 在 `www/infra/10-demo.conf` 補上 `/pma/` alias 與 php fastcgi 轉發。
+   - 同步整理 server block，保留 `loc.f3cms.com:443` 測試入口。
+4. Docker 驗證結果：
+   - `https://loc.f3cms.com:4433/pma/` 回應 200。
+   - `https://loc.f3cms.com:4433/upload/img/2025/06/35d23df4b5034bf.jpg` 回應 200。
+   - `https://loc.f3cms.com:4433/assets/styles/app.css` 回應 200。
+
+## 第 18 輪討論結果
+1. 依使用者要求，將 `www/infra/10-demo.conf` 中 `80/443` 重複的站點邏輯抽為共用 include：
+   - 新增 `www/infra/_demo-site-common.inc`
+   - `10-demo.conf` 僅保留 listener、server_name、SSL 與 include。
+2. 本輪未改變路由與站點行為，只做配置去重與可維護性改善。
+3. Docker 驗證結果：
+   - `nginx -t` 通過並 reload 成功。
+   - `https://loc.f3cms.com:4433/`、`/pma/`、`/upload/img/2025/06/35d23df4b5034bf.jpg` 皆為 200。
+
+## 第 19 輪討論結果
+1. 依使用者要求調整 tmp/cache 目錄責任：
+   - `www/demo/tmp` 僅保留 `.gitkeep`，其餘檔案改由 `.gitignore` 忽略。
+   - `www/cache` 功能搬移到 `www/demo/cache`，目錄僅保留 `.gitkeep`，其餘檔案忽略。
+2. 實作調整：
+   - `core/config/config.php` 新增 `cache_root` 指向 `www/demo/cache`。
+   - `core/libs/FCHelper.php` 改為優先使用 `cache_root`（未設定時才 fallback 到舊 `abspath + cache`）。
+   - `.gitignore` 新增 `www/demo/tmp/**`、`www/demo/cache/**` 忽略規則，並保留 `.gitkeep`。
+3. 驗證結果：
+   - bootstrap 讀值確認 `cache_root = /var/www/demo/cache`。
+   - `https://loc.f3cms.com:4433/`、`/pma/`、`/upload/img/2025/06/35d23df4b5034bf.jpg` 皆為 200。
+
+## 第 20 輪討論結果
+1. 依使用者要求，將共用(預設)設定從站點層移到 core：
+   - `routes.ini` 移至 `core/config/routes.ini`
+   - `themeSetting.json` 移至 `core/config/themeSetting.json`
+2. 載入順序調整：
+   - `core/bootstrap.php` 改為優先載入 `core/config/routes.ini`，再載入站點 `routes.site.ini` 作覆寫。
+   - `core/bootstrap.php` / `core/cli_bootstrap.php` 新增 `core_configpath`。
+   - `core/libs/FSHelper.php` 的 `loadConfig()` 新增 `core_configpath` fallback，供共用 JSON 設定讀取。
+3. demo 站點 config 收斂：
+   - 移除 `www/demo/config/routes.ini` 與 `www/demo/config/themeSetting.json`，保留站點層 `routes.site.ini` 與 `site.config.php`。
+4. 驗證結果（Docker）：
+   - PHP lint（bootstrap/cli_bootstrap/FSHelper）通過。
+   - `https://loc.f3cms.com:4433/`、`/pma/`、`/upload/img/2025/06/35d23df4b5034bf.jpg` 皆為 200。
+
+## 第 21 輪討論結果
+1. 依使用者回饋，將啟動流程中 `LEGACY` 命名收斂為 core/site 語意命名，避免與現行架構不符：
+   - `LEGACY_SITE_CONFIG_DIR` 改為 `SITE_CONFIG_DIR`。
+   - bootstrap/cli_bootstrap 內部 `legacy*` 變數改為 `projectRootDir`、`fallbackCoreDir`、`fallbackConfigRoot`、`siteConfigDir` 等名稱。
+2. 本輪為命名與可讀性修正，不改變既有路徑 fallback 行為。
+3. 驗證結果（Docker）：
+   - PHP lint（`core/bootstrap.php`、`core/cli_bootstrap.php`、`www/demo/public/index.php`、`www/demo/cli.php`）通過。
+   - `https://loc.f3cms.com:4433/`、`/pma/`、`/upload/img/2025/06/35d23df4b5034bf.jpg` 皆為 200。
+
+## 第 22 輪討論結果
+1. 針對使用者提出「`AUTOLOAD` 已設定，`index.php` 手動 require 是否必要」進行 root-cause 修正：
+   - `core/libs/Autoload.php` 對 `PCMS` namespace 的模組路徑改為優先 `SITE_DIR/modules`（不再依賴 `webpath/modules`）。
+   - `core/bootstrap.php` 的 `AUTOLOAD` 首段改為站點層 `SITE_DIR/modules`，並保留 `public/modules` 與 fallback 路徑作相容。
+2. 在上述修正後，已移除 `www/demo/public/index.php` 的手動載入：
+   - `modules/Post/outfit.php`
+   - `modules/Press/reaction.php`
+3. 驗證結果（Docker）：
+   - `class_exists('PCMS\\oPost', true)` 回傳 `true`（無手動 require）。
+   - `https://loc.f3cms.com:4433/`、`/home`、`/pma/` 皆為 200。
+
+## 第 23 輪討論結果
+1. 依使用者要求，將 core 共用目錄加上 `_` 前綴以區分站點內容：
+   - `www/infra` → `www/_infra`
+   - `www/pma` → `www/_pma`
+   - `www/upload` → `www/_upload`
+2. 路徑對齊調整：
+   - `conf/nginx/sites/default.conf` include 改為 `/var/www/_infra/*.conf`
+   - 站點檔 `10-demo.conf` 的 `/pma/` alias 改為 `/var/www/_pma/`
+   - `www/demo/public/upload` 捷徑改為指向 `../../_upload/demo`
+   - `core/config/config.php` 新增 `upload_root=_upload/`
+   - `core/libs/Upload.php`、`core/libs/FSHelper.php` 改為使用 `upload_root` 建立檔案系統路徑
+3. 相關文件/腳本同步：
+   - `.gitignore` 保留規則改為 `www/_infra/**`
+   - `README.md`、`INFO.md`、`document/README.md` 更新新目錄名稱
+   - `bin/rsync-upload-sync.sh` 預設同步路徑改為 `/www/_upload/`
+4. 驗證結果（Docker）：
+   - `nginx -t` 通過並 reload 成功。
+   - PHP lint（`core/config/config.php`、`core/libs/Upload.php`、`core/libs/FSHelper.php`）通過。
+   - `https://loc.f3cms.com:4433/`、`/pma/`、`/upload/img/2025/06/35d23df4b5034bf.jpg` 皆為 200。
+
+## 第 24 輪討論結果
+1. 依使用者要求實作站點複製：
+   - 已將 `www/demo` 複製為 `www/news`（本機目錄存在）。
+2. ignore 規則驗證與修正：
+   - `www/news/` 已被 root `.gitignore` 正確忽略（`git status --ignored` 顯示 `!! www/news/`）。
+   - `www/gitignore.sample` 原先的 `_upload` 例外規則無法正確保留 `.gitkeep`，已修正為：
+     - `_upload/*`
+     - `!_upload/.gitkeep`
+3. 驗證結果：
+   - root `.gitignore`：`www/_upload/demo/...` 會被忽略、`www/_upload/.gitkeep` 不會被忽略。
+   - `www/gitignore.sample`：在獨立測試 repo 中驗證 `_pma` 會忽略、`_upload/demo/*` 會忽略、`_upload/.gitkeep` 不會忽略。
+
+## 第 25 輪討論結果
+1. 依使用者澄清，「news」僅為測試名稱，不可寫死於 `www/gitignore.sample`，已改為通用規則：
+   - `/_upload/**`
+   - `!/_upload/**/`
+   - `!/_upload/**/.gitkeep`
+2. root `.gitignore` 也同步對齊 `_upload` 規則，補上 `!www/_upload/` 以解除父層忽略影響，並保留「僅 `.gitkeep` 可追蹤」。
+3. 驗證結果：
+   - `_upload/demo/b.jpg` ignored
+   - `_upload/demo/.gitkeep` not-ignored
+   - `_upload/news/b.jpg` ignored
+   - `_upload/news/.gitkeep` not-ignored
+
+## 第 26 輪討論結果
+1. 依使用者要求，補齊「複製新站 SOP」中 upload 調整步驟，避免只複製目錄卻未切換站點上傳路徑。
+2. 已更新 `plan.md` Stage 5 與 `INFO.md`：
+   - 複製後需重建 `public/upload` 連結到 `../../_upload/<site>`
+   - 建立 `www/_upload/<site>/.gitkeep`
+   - `site.config.php` 的 `upload_dir` 改為 `<site>/`
+
+## 第 27 輪討論結果
+1. 依使用者要求更新 ignore 規則，將 demo 站點的敏感/站點化設定檔排除版控：
+   - `www/demo/config/*.json`
+   - `www/demo/config/config.*.php`
+2. 驗證結果：
+   - `www/demo/config/config.develop.php`、`www/demo/config/config.qa.php`、`www/demo/config/themeSetting.json` 皆命中 ignore。
+   - `www/demo/config/site.config.php`、`www/demo/config/routes.site.ini` 不受影響。

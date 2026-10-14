@@ -7,8 +7,8 @@ declare(strict_types=1);
 
 $finder = PhpCsFixer\Finder::create()
     // ->ignoreVCSIgnored(true)
-    ->in([__DIR__ . '/www/f3cms/'])
-    ->exclude([__DIR__ . '/www/f3cms/tmp/', __DIR__ . '/www/f3cms/cache/'])
+    ->in([__DIR__ . '/core/'])
+    ->exclude([__DIR__ . '/core/tmp/', __DIR__ . '/core/cache/'])
     ->append([
         __FILE__,
     ])

@@ -1,0 +1,5 @@
+/demo/
+/_infra/10-demo.conf
+/_pma/
+/_upload/**
+!/_upload/**/.gitkeep

@@ -22,18 +22,18 @@ conf           設定檔
 
 database       資料庫檔案  
 
-log            log  
+log            log
    nginx       nginx log  
    mysql       mysql log  
    php         php log  
 
-www            website 網站位置  
-   cache       cache file
-   config      config file
-   f3cms       f3cms core
-   pma         phpmyadmin 
-   tmp         tmp file  
-   vendor      php composer dir
+core           f3cms core（config/libs/modules/vendor/theme/tmpls）
+
+www            website 網站位置
+   demo        範例站（public/config(site-only)/modules/tmp/cache）
+   _infra      nginx 站點設定（*.conf）
+   _pma        phpmyadmin
+   _upload     共用上傳資料（demo 透過 public/upload 連結）
 ```
 
 
@@ -55,7 +55,7 @@ DOCKER_CONF_PATH=./conf/docker
 HOST_HTTP_PORT=8080
 HOST_HTTPS_PORT=4433
 WWW_PATH=./../../www
-VND_PATH=PATH_TO_YOUR_VENDOR/www/f3cms/vendor
+VND_PATH=PATH_TO_YOUR_VENDOR/core/vendor
 
 
 ### php ######
@@ -85,7 +85,7 @@ MYSQL_DATA_PATH=./../../database
 ```sh
 wget https://www.phpmyadmin.net/downloads/phpMyAdmin-latest-all-languages.zip
 unzip phpMyAdmin-latest-all-languages.zip
-mv phpMyAdmin-*/* ./www/pma
+mv phpMyAdmin-*/* ./www/_pma
 rm -rf phpMyAdmin-*
 
 # composer update
@@ -124,7 +124,7 @@ docker restart nginx_pcms
 
 docker exec -it php-fpm_pcms bash
 
-cd f3cms
+cd /var/core
 composer install
 
 # Start the WebSocket server
@@ -160,38 +160,55 @@ mkcert loc.f3cms.com my.f3cms.lo
 ## Server Test
 [loc.f3cms.com:4433](https://loc.f3cms.com:4433/)
 
+## 新站複製 SOP（含 upload 調整）
+```sh
+# 1) 複製範例站
+cp -a www/demo www/client-a
+
+# 2) upload 連結改到 client-a 專屬目錄
+rm -f www/client-a/public/upload
+ln -s ../../_upload/client-a www/client-a/public/upload
+
+# 3) 建立 upload 目錄錨點（只追蹤 .gitkeep）
+mkdir -p www/_upload/client-a
+touch www/_upload/client-a/.gitkeep
+```
+
+並調整 `www/client-a/config/site.config.php`：
+- `upload_dir` 改為 `client-a/`
+
 ## Crontab
 
 設定排程後要檢查 logs 資料夾的權限
 ```sh
-sudo chown trevor:www-data /www/Petite-CMS/www/tmp/logs
-sudo chmod 775 /www/Petite-CMS/www/tmp/logs
+sudo chown trevor:www-data /www/Petite-CMS/www/demo/tmp/logs
+sudo chmod 775 /www/Petite-CMS/www/demo/tmp/logs
 
-sudo chown trevor:www-data /www/Petite-CMS/www/tmp/logs/*
-sudo chmod 664 /www/Petite-CMS/www/tmp/logs/*
+sudo chown trevor:www-data /www/Petite-CMS/www/demo/tmp/logs/*
+sudo chmod 664 /www/Petite-CMS/www/demo/tmp/logs/*
 ```
 
 ### crontab -e
 ```ini
 
-*/5 * * * * export APP_ENV=qa && php8.3 /www/Petite-CMS/www/loc.f3cms.com/cli.php /Minutely/5
-1 * * * * export APP_ENV=qa && php8.3 /www/Petite-CMS/www/loc.f3cms.com/cli.php /Hourly/1
-1 0 * * * export APP_ENV=qa && php8.3 /www/Petite-CMS/www/loc.f3cms.com/cli.php /Daily/1
-1 0 1 * * export APP_ENV=qa && php8.3 /www/Petite-CMS/www/loc.f3cms.com/cli.php /Monthly/1
+*/5 * * * * export APP_ENV=qa && php8.3 /www/Petite-CMS/www/demo/cli.php /Minutely/5
+1 * * * * export APP_ENV=qa && php8.3 /www/Petite-CMS/www/demo/cli.php /Hourly/1
+1 0 * * * export APP_ENV=qa && php8.3 /www/Petite-CMS/www/demo/cli.php /Daily/1
+1 0 1 * * export APP_ENV=qa && php8.3 /www/Petite-CMS/www/demo/cli.php /Monthly/1
 
 ```
 
 ### Test
 ```sh
-export APP_ENV=qa && php8.3 /www/Petite-CMS/www/loc.f3cms.com/cli.php /Hourly/1
+export APP_ENV=qa && php8.3 /www/Petite-CMS/www/demo/cli.php /Hourly/1
 
-export APP_ENV=qa && php8.3 /www/Petite-CMS/www/loc.f3cms.com/cli.php /Daily/1
+export APP_ENV=qa && php8.3 /www/Petite-CMS/www/demo/cli.php /Daily/1
 
 ```
 
 ### Log
 ```sh
-tail -f www/tmp/logs/_F3CMS_fPress_cronjob.log
+tail -f www/demo/tmp/logs/_F3CMS_fPress_cronjob.log
 
 ```
 
@@ -200,4 +217,3 @@ tail -f www/tmp/logs/_F3CMS_fPress_cronjob.log
 ```sh
 php-cs-fixer fix -v --using-cache=no
 ```
-

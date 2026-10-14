@@ -7,16 +7,35 @@ log/nginx/*.log
 log/autoPull.log
 
 # www
-www/pma/*
-!www/pma/config.inc.php
-www/f3cms/vendor/*
-!www/f3cms/vendor/.gitkeep
-www/cache/*
-!www/cache/.gitkeep
-www/tmp/*
-!www/tmp/.gitkeep
-www/upload/*
-!www/upload/.gitkeep
+www/*
+!www/gitignore.sample
+
+# www/demo
+!www/demo/
+www/demo/config/*.json
+www/demo/config/config.*.php
+www/demo/tmp/**
+!www/demo/tmp/.gitkeep
+www/demo/cache/**
+!www/demo/cache/.gitkeep
+www/demo/vendor/**
+!www/demo/vendor/.gitkeep
+
+# www/_
+!www/_infra/
+!www/_infra/*
+!www/_pma/
+www/_pma/**
+!www/_pma/config.sample.inc.php
+!www/_upload/
+www/_upload/**
+!www/_upload/demo/
+www/_upload/demo/**
+!www/_upload/**/.gitkeep
+
+# vendor
+core/vendor/*
+!core/vendor/.gitkeep
 
 # database
 ib*

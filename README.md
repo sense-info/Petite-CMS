@@ -5,3 +5,11 @@
 Petite CMS 是一個效能卓越且安全可靠的多站式內容管理系統 (Multi-Site CMS)，將多語系、SEO、媒體管理、安全與效能等關鍵功能直接整合，搭配簡潔後台與多種部署選項，讓中小企業與個人創作者都能用最少心力、最短時間，輕鬆自行打造並維護高品質網站。
 
 [前往官網](https://petite.pub/)
+
+## Repo Split（Core + Multi-Site）
+
+- 核心程式位於 `core/`
+- 範例站位於 `www/demo`
+- Nginx 站點設定位於 `www/_infra/*.conf`
+
+更多本機啟動與 Docker 操作請參考 [INFO.md](./INFO.md)。

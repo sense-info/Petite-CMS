@@ -1,5 +1,0 @@
-
-# upload folder in sites
-*/upload
-config/*/*.json
-config/*/config.*.php

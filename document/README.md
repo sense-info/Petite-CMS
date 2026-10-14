@@ -66,11 +66,11 @@ operonjs/    # 前端 submodule
    MYSQL_CONF_PATH=./conf/mysql/my.cnf
    MYSQL_DATA_PATH=./database
    ```
-4. **phpMyAdmin 安裝至** `www/pma`：下載最新壓縮檔、解壓並移動內容。
+4. **phpMyAdmin 安裝至** `www/_pma`：下載最新壓縮檔、解壓並移動內容。
    ```sh
    wget https://www.phpmyadmin.net/downloads/phpMyAdmin-latest-all-languages.zip
    unzip phpMyAdmin-latest-all-languages.zip
-   mv phpMyAdmin-*/* ./www/pma
+   mv phpMyAdmin-*/* ./www/_pma
    rm -rf phpMyAdmin-*
    ```
 5. **靜態檔案**：將 `themeSetting.json` 放在 `www/`，並更新 `browscap.ini`。
