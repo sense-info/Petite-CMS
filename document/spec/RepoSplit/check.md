@@ -330,3 +330,28 @@
 2. `document/_sidebar.md` 已新增 `Environment Info` 導覽項目。
 3. `README.md` 已改為連到 `document/info.md`。
 4. `document/info.md` 已新增「新進工程師必讀」推薦清單。
+
+## Optimization 補丁驗收（setup 文件最小修正）
+1. `document/guides/setup.md` 已移除前段殘留與未閉合 code block，文件結構恢復正常。
+2. 舊路徑 `/www/site` 已更新為 RepoSplit 現況示例 `/www/Petite-CMS/www`，包含表格、Step 1 標題與 `SOURCE_DIR`。
+3. 本輪為文件修正，未涉及 runtime 行為變更，無需額外 Docker smoke。
+
+## Optimization 補丁驗收（document/README.md 重寫）
+1. `document/README.md` 已重寫為無重複章節版本，移除重複的版本資訊與過時段落。
+2. 內容已對齊現況：
+   - 容器與專案命名：`pcms` / `nginx_pcms` / `php-fpm_pcms` / `mariadb_pcms`
+   - RepoSplit 結構：`core/`、`www/demo`、`www/_infra`、`www/_pma`、`www/_upload`、`www/docu`
+   - 啟動命令：`./bin/build`、`./bin/up`、`./bin/down`、`./bin/clear`
+3. 本輪為文件修正，未涉及 runtime 行為變更，無需額外 Docker smoke。
+
+## Optimization 補丁驗收（document/README.md 連結化）
+1. README 中驗證路徑網址已改為可點擊超連結。
+2. README 中延伸文件項目已改為可點擊相對連結。
+3. 本輪為文件修正，未涉及 runtime 行為變更，無需額外 Docker smoke。
+
+## Optimization 補丁驗收（側欄文案語意對齊）
+1. `document/_sidebar.md` 首兩項導覽名稱已調整為：
+   - `文件首頁`（原 `Home`）
+   - `開發環境與操作筆記`（原 `Environment Info`）
+2. 導覽連結目標未變更，僅文案調整。
+3. 本輪為文件修正，未涉及 runtime 行為變更，無需額外 Docker smoke。

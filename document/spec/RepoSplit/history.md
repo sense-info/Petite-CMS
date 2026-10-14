@@ -322,3 +322,31 @@
    - `document/_sidebar.md` 新增 `Environment Info`（`info.md`）。
    - 根目錄 `README.md` 連結改為 `document/info.md`。
 3. 在 `document/info.md` 新增「新進工程師必讀」區塊，推薦 FDD 與架構核心文件。
+
+## 第 33 輪討論結果
+1. 使用者要求對 `document/guides/setup.md` 做「最小修正」並對齊現況。
+2. 已修正文件格式錯誤：移除檔案前段殘留的舊片段與未閉合 code block，恢復正常 Markdown 結構。
+3. 已將備份來源說明由舊路徑 `/www/site` 改為 RepoSplit 現況示例 `/www/Petite-CMS/www`，並同步更新：
+   - 時程表描述
+   - Step 1 標題
+   - `backup_site.sh` 範例中的 `SOURCE_DIR`
+
+## 第 34 輪討論結果
+1. 使用者要求重寫 `document/README.md`，避免重複資訊。
+2. 已整份改寫為單一結構版本，內容對齊目前 RepoSplit 現況：
+   - 專案命名改為 `pcms`，容器名稱更新為 `nginx_pcms` / `php-fpm_pcms` / `mariadb_pcms`。
+   - 目錄結構改為 `core/`、`www/demo`、`www/_infra`、`www/_pma`、`www/_upload`、`www/docu`。
+   - `.env` 關鍵變數改為 `WWW_PATH` / `CORE_PATH` / `DOCU_PATH` / `HOST_*` / `MYSQL_*`。
+3. 已移除過時與重複段落（舊 Apache 變數、舊 `f3cms`/`up.sh` 指令、重複版本資訊、手動 docu 軟連結流程）。
+
+## 第 35 輪討論結果
+1. 使用者要求將 `document/README.md` 中的路徑與網址改為可點擊連結。
+2. 已完成調整：
+   - 驗證路徑（首頁、`/pma/`、`/docu/index.html`）改為 Markdown 超連結。
+   - 延伸文件（`guides/index.md`、`guides/new_engineer_30min.md`、`guides/setup.md`、`info.md`）改為相對路徑超連結。
+
+## 第 36 輪討論結果
+1. 使用者要求微調 `document/_sidebar.md` 導覽文案，讓其與新版 README 命名語意一致。
+2. 已完成最小調整：
+   - `Home` → `文件首頁`（對應 `document/README.md` 標題語意）
+   - `Environment Info` → `開發環境與操作筆記`（對應 `document/info.md` 內容定位）

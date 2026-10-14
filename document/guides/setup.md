@@ -1,51 +1,31 @@
-
-
-### 1. 備份 `/www/site` 的腳本
-
-首先，在 43 伺服器上創建一個腳本 `backup_site.sh`，其內容應如下：
-
-```bash
-#!/bin/bash
-
-# 設定變數
-SOURCE_DIR="/www/site"
-DEST_HOST="11_ip_address" # 替換為實際的 IP 地址
-DEST_DIR="/backup"
-DATE=$(date +\%Y-\%m-\%d)
-BACKUP_FILE="site_backup_\$DATE.tar.gz"
-
-# 備份資料夾
-tar -czf /tmp/\$BACKUP_FILE \$SOURCE_DIR
-
-# 備份文件傳輸到目標伺服器
-scp /tmp/\$BACKUP_FILE user@\$DEST_HOST:\$DEST_DIR
 # Setup & Backup Playbook
 
-這份指南整理了三支常駐腳本，協助 43 與 11 兩台伺服器每日自動備份站點與資料庫，同時清理舊檔並監控磁碟空間。
+這份指南整理了三支常駐腳本，協助伺服器每日自動備份站點與資料庫，同時清理舊檔並監控磁碟空間。
+目前 RepoSplit 結構下，站點內容請以 `www/`（例如 `/www/Petite-CMS/www`）為備份來源，而不是舊的 `/www/site`。
 
 ## 環境需求
 - Bash 4+ 與可用的 `scp`, `tar`, `gzip`, `mysqldump`, `find`, `df` 指令。
-- 43 主機能以 SSH 私鑰連線到 11 主機（用於站點備份傳送）。
+- 主機能以 SSH 私鑰連線到備份主機（用於站點備份傳送）。
 - 11 主機具有寫入 `/backup`, `/web_backup`, `/db_backup` 等目錄的權限。
 - 具備 `crontab` 操作權限，可設定排程於 root 或指定帳號。
 
 > 下列腳本皆預設與 cron 置於 `/usr/local/sbin`，可依專案實際目錄調整。
 
 ## 時程一覽
-| 腳本 | 主機 | 目的 | 預設 Cron |
-| --- | --- | --- | --- |
-| `backup_site.sh` | 43 | 備份 `/www/site` 並傳至 11 | `0 1 * * *` |
-| `backup_db.sh` | 11 | 匯出全部 MariaDB | `30 1 * * *` |
-| `clearup.sh` | 11 | 清除舊備份與檢查磁碟 | `50 0 * * *` |
+| 腳本 | 目的 | 預設 Cron |
+| --- | --- | --- |
+| `backup_site.sh` | 備份 `/www/Petite-CMS/www` 並傳至備份主機 | `0 1 * * *` |
+| `backup_db.sh` | 匯出全部 MariaDB | `30 1 * * *` |
+| `clearup.sh` | 清除舊備份與檢查磁碟 | `50 0 * * *` |
 
-## Step 1. 備份 `/www/site`
-在 43 主機建立 `backup_site.sh`：
+## Step 1. 備份 `/www/Petite-CMS/www`
+在主機建立 `backup_site.sh`：
 
 ```bash
 #!/bin/bash
 set -euo pipefail
 
-SOURCE_DIR="/www/site"
+SOURCE_DIR="/www/Petite-CMS/www"
 DEST_HOST="11_ip_address"   # TODO: 改為實際 IP
 DEST_USER="user"            # TODO: 改為備援帳號
 DEST_DIR="/backup"
@@ -69,7 +49,7 @@ chmod +x /usr/local/sbin/backup_site.sh
 > **Tip：** 首次部署可加上 `BACKUP_RETENTION_DAYS` 等參數延伸，或以 `rsync` 取代 `scp` 以減少傳輸量。
 
 ## Step 2. 備份 MariaDB
-在 11 主機建立 `backup_db.sh`：
+在主機建立 `backup_db.sh`：
 
 ```bash
 #!/bin/bash
@@ -95,7 +75,7 @@ chmod +x /usr/local/sbin/backup_db.sh
 > **建議：** 若資料庫較大，請增加 `mysqldump` 參數（如 `--single-transaction`、`--quick`），並將輸出導向分割磁碟。
 
 ## Step 3. 清理備份並檢查磁碟
-在 11 主機建立 `clearup.sh`：
+在主機建立 `clearup.sh`：
 
 ```bash
 #!/bin/bash
@@ -133,4 +113,4 @@ chmod +x /usr/local/sbin/clearup.sh
 - **磁碟告警**：建議搭配 `Prometheus node_exporter` 或簡單 `df` 閾值通知，避免清理腳本過晚觸發。
 - **版本控管**：將腳本放入 git 並同時維護 checksum，以便審核修改。
 
-依此流程即可在 F3CMS 專案中快速複製一致的備份策略，同時保有擴充與監控彈性。
+依此流程即可在 Petite CMS 專案中快速複製一致的備份策略，同時保有擴充與監控彈性。

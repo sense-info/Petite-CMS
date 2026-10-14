@@ -8,7 +8,7 @@ Petite CMS 是一個效能卓越且安全可靠的多站式內容管理系統 (M
 
 ## Repo Split（Core + Multi-Site）
 
-- 核心程式位於 `core/`
+- 核心程式位於 `core/`，以 F3CMS 打造
 - 範例站位於 `www/demo`
 - Nginx 站點設定位於 `www/_infra/*.conf`
 

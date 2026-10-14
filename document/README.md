@@ -1,123 +1,71 @@
-# Docker-F3CMS
+# Petite CMS 文件首頁
 
-## 版本資訊
-+ nginx alpine
-+ php 8.3
-+ maria 10
-
-## 資料夾結構
-
-本頁作為 `document/` 目錄的主索引，提供本地 LAMP（Nginx + PHP 8.3 + MariaDB 10）開發環境的快速指南與延伸文件連結。
+本頁是 `document/` 的入口，提供目前 RepoSplit 架構下的環境啟動、目錄對照與常用文件索引。
 
 ## 版本資訊
 | 元件 | 版本/說明 |
 | --- | --- |
-| Nginx | Alpine 版，作為反向代理與靜態資源服務 |
-| PHP | 8.3 FPM，掛載 `www/` 目錄 |
-| MariaDB | 10.x，資料存於 `database/` |
+| Nginx | Alpine（容器：`nginx_pcms`） |
+| PHP | 8.3 FPM（容器：`php-fpm_pcms`） |
+| MariaDB | 10.x（容器：`mariadb_pcms`） |
 
-## 資料夾結構
+## 目前目錄結構（重點）
 ```text
-conf/        # Apache / MySQL / Nginx / PHP 設定檔
-database/    # MariaDB 資料檔案
-document/    # 本說明與其他使用指南 (examples, payment, sql, setup)
-log/         # 服務 log：apache / nginx / mysql / php
-www/         # 網站程式碼與靜態資源 (f3cms, pma, vendor ...)
-gene-panel/  # 後端 submodule
-operonjs/    # 前端 submodule
+core/        # 核心程式（config/libs/modules/vendor/theme/tmpls）
+www/         # 站點層
+  demo/      # 範例站（public/config/modules/tmp/cache）
+  _infra/    # Nginx 站點設定（*.conf）
+  _pma/      # phpMyAdmin 目錄
+  _upload/   # 站點上傳共用根目錄
+  docu/      # Docsify 內容入口
+conf/        # Docker / Nginx / PHP / MySQL 設定
+database/    # MariaDB data
+log/         # 服務 log
+document/    # 說明文件
 ```
 
-更多主題請參考：
-- `examples/*.md`：Cashier、Sender、SM Sender、OAuth 使用方式。
-- `payment/*.md`：金流整合說明。
-- `sql/init.sql`：預設資料表。
-- `setup.md`：伺服器備份與 Cron 腳本做法。
-
-## 建置前準備
-1. **hosts 解析**：將 `loc.f3cms.com` 指向本機。
+## 啟動前準備
+1. 設定 hosts（至少包含 `loc.f3cms.com`）：
    ```sh
    sudo sh -c 'echo "0.0.0.0 loc.f3cms.com" >> /etc/hosts'
    ```
-2. **本機憑證**：使用 `mkcert loc.f3cms.com` 生成測試憑證。
-3. **設定** `.env`（置於專案根目錄，可依實際需求微調）：
-   ```ini
-   COMPOSE_PROJECT_NAME=f3cms
-   APP_NAME=f3cms
+2. 於 repo 根目錄建立/確認 `.env`（目前使用變數）：
+   - `WWW_PATH`
+   - `CORE_PATH`
+   - `DOCU_PATH`
+   - `HOST_HTTP_PORT`
+   - `HOST_HTTPS_PORT`
+   - `MYSQL_*`
+3. 如需 SSL 本機測試，於 `conf/nginx/letsencrypt` 產生對應憑證。
 
-   # Apache
-   APACHE_HOST_HTTP_PORT=8080
-   APACHE_HOST_HTTPS_PORT=4433
-   APACHE_HOST_LOG_PATH=./log/apache
-   APACHE_CONF_PATH=./conf/apache
-   APACHE_WWW_PATH=./www
-   VND_PATH=/var/www/vendor
-
-   # PHP
-   PHP_HOST_LOG_PATH=./log/php
-   PHP_CONF_PATH=./conf/php
-
-   # MySQL
-   MYSQL_PORT=3366
-   MYSQL_LOG_PATH=./log/mysql
-   MYSQL_ROOT_PASSWORD=sPes4uBrEcHUq5qE
-   MYSQL_DATABASE=target_db
-   MYSQL_USER=root
-   MYSQL_PASSWORD=sPes4uBrEcHUq5qE
-   MYSQL_CONF_PATH=./conf/mysql/my.cnf
-   MYSQL_DATA_PATH=./database
-   ```
-4. **phpMyAdmin 安裝至** `www/_pma`：下載最新壓縮檔、解壓並移動內容。
-   ```sh
-   wget https://www.phpmyadmin.net/downloads/phpMyAdmin-latest-all-languages.zip
-   unzip phpMyAdmin-latest-all-languages.zip
-   mv phpMyAdmin-*/* ./www/_pma
-   rm -rf phpMyAdmin-*
-   ```
-5. **靜態檔案**：將 `themeSetting.json` 放在 `www/`，並更新 `browscap.ini`。
-   ```sh
-   wget -O ./www/browscap.ini https://browscap.org/stream?q=PHP_BrowsCapINI
-   ```
-
-## 容器操作
+## 容器操作（以專案腳本為主）
 ```sh
-docker-compose build     # 第一次建置 image
-./up.sh                  # 啟動服務 (等同 docker-compose up -d)
-./down.sh                # 停止並清理容器
-
-docker exec -it nginx_f3cms /bin/sh                       # 進入 Nginx
-docker exec nginx_f3cms tail -f /var/log/nginx/error.log  # 追蹤錯誤
-docker logs nginx_f3cms                                   # 檢視 log
-docker restart nginx_f3cms                                # 重啟 Nginx
-docker exec -it php-fpm_f3cms bash                        # 進入 PHP
+./bin/build   # build images
+./bin/up      # 啟動服務
+./bin/down    # 關閉服務
+./bin/clear   # 清理 images/容器資源
 ```
 
-## 驗證與初始化
-- 主站測試：[https://loc.f3cms.com:4433/](https://loc.f3cms.com:4433/)
+必要時可直接查看容器：
+```sh
+docker exec -it nginx_pcms /bin/sh
+docker exec -it php-fpm_pcms bash
+docker logs nginx_pcms
+docker exec nginx_pcms tail -f /var/log/nginx/error.log
+```
+
+## 驗證路徑
+- 站台首頁：[https://loc.f3cms.com:4433/](https://loc.f3cms.com:4433/)
 - phpMyAdmin：[https://loc.f3cms.com:4433/pma/](https://loc.f3cms.com:4433/pma/)
-- 匯入預設 DB：
-  ```sh
-  mysql -uroot -p --port=3366 -h loc.f3cms.com target_db < ./conf/mysql/init.sql
-  ```
+- 文件入口：[https://loc.f3cms.com:4433/docu/index.html](https://loc.f3cms.com:4433/docu/index.html)
 
-## Submodule 作業
+## 初始化資料庫（選用）
 ```sh
-git submodule init
-git submodule update
+mysql -uroot -p --port=3366 -h loc.f3cms.com target_db < ./conf/mysql/init.sql
 ```
-完成後依各子模組 README 進一步安裝。
 
----
-
-## 說明文件安裝
-
-更多自動化（備份、排程、金流、登入流程）請參閱本資料夾其他 Markdown 文件或透過 `document/index.html` 的 Docsify 入口瀏覽。 
-
-### 設定 Docsify 入口
-
-```sh
-# 進入 PHP 容器
-docker exec -it php-fpm_f3cms bash 
-# 容器工作目錄
-cd ./f3cms
-ln -s ../document ./docu
-```
+## 延伸文件
+- [guides/index.md](./guides/index.md)：指南總覽與閱讀順序
+- [guides/new_engineer_30min.md](./guides/new_engineer_30min.md)：新進工程師 30 分鐘上手
+- [guides/setup.md](./guides/setup.md)：備份與排程腳本（43/11 主機）
+- [info.md](./info.md)：本地開發與日常操作筆記

@@ -1,5 +1,5 @@
-- [Home](README.md)
-- [Environment Info](info.md)
+- [文件首頁](README.md)
+- [開發環境與操作筆記](info.md)
 - Guides
   - [Guides Index](guides/index.md)
   - Foundations
