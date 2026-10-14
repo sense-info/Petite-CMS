@@ -306,3 +306,27 @@
 1. 已新增 `www/demo/public/tmpls` 符號連結，指向 `../../../core/tmpls`。
 2. 驗證通過：
    - `https://loc.f3cms.com:4433/tmpls/app/default.html` 為 200。
+
+## Optimization 補丁驗收（pma PHP 轉發修復）
+1. `www/_infra/10-demo.conf` 的 `/pma/` location 已由 `^~` 改為一般 prefix，以允許 `/pma/*.php` regex location 生效。
+2. 驗證通過：
+   - `https://loc.f3cms.com:4433/pma/` 與 `/pma/index.php` 回應 `Content-Type: text/html; charset=utf-8`
+   - 響應頭包含 `X-Powered-By: PHP/8.3.35`（確認非靜態下載）。
+
+## Optimization 補丁驗收（douc 文件路徑相容）
+1. 已新增 `www/demo/public/douc` 符號連結至 `../../docu`，與既有 `docu` 並存。
+2. 驗證通過：
+   - `https://loc.f3cms.com:4433/douc/index.html` 為 200。
+   - `https://loc.f3cms.com:4433/docu/index.html` 為 200。
+
+## Optimization 補丁驗收（docu 正名）
+1. 已移除 `www/demo/public/douc` 相容捷徑，保留正確拼寫 `docu`。
+2. 驗證通過：
+   - `https://loc.f3cms.com:4433/docu/index.html` 為 200。
+   - `https://loc.f3cms.com:4433/douc/index.html` 為 404。
+
+## Optimization 補丁驗收（文件導覽調整）
+1. 已將環境說明文件移至 `document/info.md`（原 `INFO.md`）。
+2. `document/_sidebar.md` 已新增 `Environment Info` 導覽項目。
+3. `README.md` 已改為連到 `document/info.md`。
+4. `document/info.md` 已新增「新進工程師必讀」推薦清單。

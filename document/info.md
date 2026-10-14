@@ -2,6 +2,14 @@
 
 Petite CMS 是一個效能卓越且安全可靠的內容管理系統 (CMS)，是適合用於建立和管理多語系、多站台式系統的架構
 
+## 新進工程師必讀
+1. [flow.llm.md](./flow.llm.md)：最精簡的 FDD 執行契約（先讀這份再開始改動）。
+2. [flow.md](./flow.md)：完整 FDD 流程與 gate 說明。
+3. [guides/new_engineer_30min.md](./guides/new_engineer_30min.md)：30 分鐘上手與常見工作入口。
+4. [guides/sd_conventions.md](./guides/sd_conventions.md)：模組邊界與程式設計慣例。
+5. [guides/llm_dba_guide.md](./guides/llm_dba_guide.md)：資料庫與 ownership-first 決策原則。
+6. [spec/.current-spec.md](./spec/.current-spec.md)：目前進行中的 spec 與 stage（做事前先確認）。
+
 
 ## 版本資訊
 

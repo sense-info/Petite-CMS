@@ -1,4 +1,5 @@
 - [Home](README.md)
+- [Environment Info](info.md)
 - Guides
   - [Guides Index](guides/index.md)
   - Foundations

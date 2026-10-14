@@ -290,3 +290,35 @@
    - `www/demo/public/tmpls -> ../../../core/tmpls`
 2. 驗證結果（Docker/HTTPS）：
    - `https://loc.f3cms.com:4433/tmpls/app/default.html` 回應 200。
+
+## 第 29 輪討論結果
+1. 使用者回報 `https://loc.f3cms.com:4433/pma/` 會下載檔案而非開啟 phpMyAdmin。
+2. 根因為 nginx `location ^~ /pma/` 使 regex PHP location 不再參與比對，導致 `index.php` 被當靜態檔回傳。
+3. 已將 `www/_infra/10-demo.conf` 的 `/pma/` 區塊由 `^~` 改為一般 prefix `location /pma/`，恢復 PHP 轉發。
+4. 驗證結果（Docker/HTTPS）：
+   - `/pma/` 與 `/pma/index.php` 均為 `Content-Type: text/html; charset=utf-8`
+   - 回應包含 `X-Powered-By: PHP/8.3.35`，確認已由 PHP-FPM 執行。
+
+## 第 30 輪討論結果
+1. 使用者回報 `https://loc.f3cms.com:4433/douc/index.html` 為 404。
+2. 根因確認：`www/demo/public` 僅存在 `docu -> ../../docu`，不存在 `douc` 捷徑；`/douc/*` 會落到前端路由而回 404。
+3. 已新增相容捷徑：
+   - `www/demo/public/douc -> ../../docu`
+4. 驗證結果（Docker/HTTPS）：
+   - `https://loc.f3cms.com:4433/douc/index.html` 回應 200。
+   - `https://loc.f3cms.com:4433/docu/index.html` 仍回應 200。
+
+## 第 31 輪討論結果
+1. 使用者確認正確拼寫為 `docu`，不需保留 `douc` 相容捷徑。
+2. 已移除 `www/demo/public/douc`，恢復單一正確入口 `www/demo/public/docu`。
+3. 驗證結果（Docker/HTTPS）：
+   - `https://loc.f3cms.com:4433/docu/index.html` 回應 200。
+   - `https://loc.f3cms.com:4433/douc/index.html` 回應 404。
+
+## 第 32 輪討論結果
+1. 依使用者要求將環境操作文件移入 `document/`：
+   - `INFO.md` → `document/info.md`
+2. 已更新文件導覽：
+   - `document/_sidebar.md` 新增 `Environment Info`（`info.md`）。
+   - 根目錄 `README.md` 連結改為 `document/info.md`。
+3. 在 `document/info.md` 新增「新進工程師必讀」區塊，推薦 FDD 與架構核心文件。

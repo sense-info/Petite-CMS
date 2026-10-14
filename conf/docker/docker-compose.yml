@@ -8,7 +8,8 @@ services:
             - php-fpm
         volumes:
             - ${WWW_PATH}:/var/www
-            - ./../../core:/var/core
+            - ${CORE_PATH}:/var/core
+            - ${DOCU_PATH}:/var/www/docu
             - ${CONF_PATH}/nginx/nginx.conf:/etc/nginx/nginx.conf
             - ${CONF_PATH}/nginx/letsencrypt:/etc/nginx/letsencrypt
             - ${LOG_PATH}/nginx:/var/log/nginx
@@ -34,7 +35,7 @@ services:
             - mariadb
         volumes:
             - ${WWW_PATH}:/var/www
-            - ./../../core:/var/core
+            - ${CORE_PATH}:/var/core
             - ${CONF_PATH}/nginx/letsencrypt:/etc/nginx/letsencrypt
             - ${MYSQL_DATA_PATH}:/var/lib/mysql
             - ${CONF_PATH}/php/php-ini-overrides.ini:/usr/local/etc/php/conf.d/php-ini-overrides.ini

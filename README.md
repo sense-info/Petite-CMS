@@ -12,4 +12,4 @@ Petite CMS 是一個效能卓越且安全可靠的多站式內容管理系統 (M
 - 範例站位於 `www/demo`
 - Nginx 站點設定位於 `www/_infra/*.conf`
 
-更多本機啟動與 Docker 操作請參考 [INFO.md](./INFO.md)。
+更多本機啟動與 Docker 操作請參考 [document/info.md](./document/info.md)。

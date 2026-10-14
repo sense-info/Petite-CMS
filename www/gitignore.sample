@@ -1,4 +1,5 @@
 /demo/
+/error-pages/
 /_infra/10-demo.conf
 /_pma/
 /_upload/**
