@@ -57,7 +57,8 @@
         <tfoot></tfoot>
         <tbody class="gee" data-gene="init:loadList,click:reactList" data-tmpl="dictionaryList" data-nopde="1">
           <tr>
-            <td data-label="狀態">{{:prop.status}}</td>
+            <td data-label="狀態">
+              <span class="tag {{if prop.status == 'Disabled' }}is-warning{{/if}}">{{:~txtLabel(prop.status, {'Enabled': '啟用', 'Disabled': '未啟用'})}}</span></td>
             <td data-label="網址">{{:prop.slug}}</td>
             <td data-label="標題">{{:prop.title}}</td>
             <td class="is-actions-cell">

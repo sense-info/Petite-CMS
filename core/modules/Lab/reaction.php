@@ -29,16 +29,19 @@ class rLab extends Reaction
         }
 
         // /api/lab/info?batchDraft=1
+        // 手動執行，狀態為"新建"之記錄
         if (!empty($_GET['batchDraft'])) {
             self::test('batchDraft');
         }
 
         // /api/lab/info?batchAnswer=1
+        // 手動執行，狀態為"等待中"之記錄
         if (!empty($_GET['batchAnswer'])) {
             self::test('batchAnswer');
         }
 
         // /api/lab/info?batchImport=1
+        // 手動執行，將結果匯入目標
         if (!empty($_GET['batchImport'])) {
             self::test('batchImport');
         }

@@ -69,7 +69,7 @@
           <tr>
             <td>{{:prop.id}}</td>
             <td>{{:~txtLabel(prop.group, {'press': '文章分類', 'course': '課程分類'})}}</td>
-            <td><span class="tag {{if prop.status == 'Disabled' }}is-warning{{else}}is-success{{/if}}">{{:~txtLabel(prop.status, {'Disabled': '停用', 'Enabled': '啟用'})}}</span></td>
+            <td><span class="tag {{if prop.status == 'Disabled' }}is-warning{{/if}}">{{:~txtLabel(prop.status, {'Disabled': '停用', 'Enabled': '啟用'})}}</span></td>
             <td>{{:prop.title}} <br> {{:prop.slug}}
               <a href="{{:~fixLink('category/'+prop.slug)}}" target="_blank" class="is-pulled-right"> <span class="icon"><i class="fa fa-share-square-o"></i></span> </a></td>
             <td><div class="multiline-ellipsis" style="max-width: 35vw;">{{:prop.info}}</div></td>

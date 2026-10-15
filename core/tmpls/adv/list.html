@@ -76,7 +76,7 @@
                       <small>{{:~beforeDate(prop.start_date)}} ~ {{:~beforeDate(prop.end_date)}}</small>
                       <span class="tooltip-text">{{:~formatDate(prop.start_date, 'YYYY-MM-DD')}} ~ {{:~formatDate(prop.end_date, 'YYYY-MM-DD')}}</span>
                     </div>
-                    <div class="level-item"><span class="tag {{if prop.status == 'Disabled' }}is-warning{{else}}is-success{{/if}}">{{:prop.status}}</div>
+                    <div class="level-item"><span class="tag {{if prop.status == 'Disabled' }}is-warning{{/if}}">{{:prop.status}}</span></div>
                   </div>
                   <div class="level-right">
                     <div class="level-item">
@@ -95,10 +95,6 @@
         </div>
       </div>
       {{/props}}
-
-      <div class="columns is-multiline">
-        {{props data}}{{/props}}
-      </div>
     </div>
 
     <div class="list-footer level"><div class="level-left">

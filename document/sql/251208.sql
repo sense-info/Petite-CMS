@@ -3,3 +3,5 @@ ALTER TABLE `tbl_draft` ADD `target` ENUM('Post','Press','Tag','None') NOT NULL 
 ALTER TABLE `tbl_draft` CHANGE `press_id` `row_id` INT(11) NOT NULL DEFAULT '0' COMMENT '目標 ID';
 
 UPDATE `tbl_draft` SET `target` = 'Press' WHERE `row_id` != 0;
+
+ALTER TABLE `tbl_draft` ADD `request_id` VARCHAR(36) NOT NULL DEFAULT '' COMMENT '呼叫 ID' AFTER `owner_id`;

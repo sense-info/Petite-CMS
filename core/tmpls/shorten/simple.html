@@ -69,7 +69,8 @@
           <tr>
             <td>{{:prop.token}}</td>
             <td>{{:prop.origin}}</td>
-            <td>{{:~txtLabel(prop.status, {'Enabled': '已發布', 'Disabled': '已下架'})}}</td>
+            <td data-label="狀態">
+              <span class="tag {{if prop.status == 'Disabled' }}is-warning{{/if}}">{{:~txtLabel(prop.status, {'Enabled': '啟用', 'Disabled': '未啟用'})}}</span></td>
             <td>{{:prop.cap}} / {{:prop.hits}} / {{:prop.finished}}</td>
             <td>
               <a href="javascript:;" class="button is-info" data-func="loadRow" data-tmpl="shortenForm" data-id="{{:prop.id}}">編輯</a>

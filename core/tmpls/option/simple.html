@@ -22,7 +22,9 @@
       <div class="box list-body">
         <div class="columns is-multiline">
         {{props prop.rows}}
-          <div class="column is-3">{{:prop.name}} 
+          <div class="column is-3">
+            <span class="tag {{if prop.status == 'Disabled' }}is-warning{{/if}}">{{:~txtLabel(prop.status, {'Enabled': '啟用', 'Disabled': '未啟用'})}}</span>
+            {{:prop.name}}
             <a href="javascript:;" class="is-pulled-right" data-func="loadRow" data-tmpl="optionForm" data-id="{{:prop.id}}">{{:prop.title}} <span class="icon"><i class="fa fa-pencil"></i></span></a>
           </div>
           <div class="column is-9 line-clamp" style="max-width: 72%;" data-func="editor.switchField" data-event="dblclick" data-pid="{{:prop.id}}" data-column="content">

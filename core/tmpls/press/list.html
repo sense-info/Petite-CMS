@@ -32,12 +32,6 @@
               <option value="tag:">標籤</option>
               <option value="author:">作者</option>
             </optgroup>
-            <!-- <optgroup label="狀態">
-                <option value="m.status=Published">已發佈</option>
-                <option value="m.status=Draft">草稿</option>
-                <option value="m.status=Scheduled">排程中</option>
-                <option value="m.status=Offlined">已下架</option>
-            </optgroup> -->
           </select>
         </div>
       </p>
@@ -82,7 +76,8 @@
                 <a href="javascript:;" data-func="press.loadRow" data-tmpl="pressForm" data-src="editor" data-id="{{:prop.id}}" class="line-clamp press-title engrossed-btn" title="{{:prop.title}}">#{{:prop.id}} {{:prop.title}} <span class="icon"><i class="fa fa-pencil"></i></span></a>
               </div>
               <div>{{:~formatDate(prop.online_date, 'YY-MM-DD HH:mm')}}
-                <span class="tag {{if prop.status == 'Offlined' || prop.status == 'Draft' }}is-warning{{else}}is-success{{/if}}">{{:prop.status}}</span>
+                <span class="tag {{if prop.status == 'Scheduled' || prop.status == 'Draft' }}is-warning{{/if}}">
+                  {{:~txtLabel(prop.status, {'Published': '已發佈', 'Draft': '草稿', 'Scheduled': '排程中', 'Offlined': '已下架'})}}</span>
               </div>
             </td>
             <td class="is-hidden-mobile"><div class="ellipsis" style="width: 80px;">{{props prop.authors}}

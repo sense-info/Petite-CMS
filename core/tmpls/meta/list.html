@@ -66,7 +66,8 @@
         <tfoot></tfoot>
         <tbody class="gee" data-gene="init:loadList,click:reactList" data-tmpl="metaList" data-nopde="1">
           <tr>
-            <td>{{:~txtLabel(prop.status, {'Enabled': '啟用', 'Disabled': '未啟用'})}}</td>
+            <td data-label="狀態">
+              <span class="tag {{if prop.status == 'Disabled' }}is-warning{{/if}}">{{:~txtLabel(prop.status, {'Enabled': '啟用', 'Disabled': '未啟用'})}}</span></td>
             <td>{{:prop.fence}}</td>
             <td>{{:prop.label}}</td>
             <td><div class="tags" style="width: 25vw;"> {{props prop.tags}} <span class="tag is-info"> {{:prop.title}} </span> {{/props}} </div></td>

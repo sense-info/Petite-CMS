@@ -1,0 +1,86 @@
+<nav class="level">
+  <div class="level-left"><h1 class="module-title">外站稿件</h1> <p class="desc">透過 RSS 取得各網頁最新文章</p></div>
+  <div class="level-right">
+    <p class="level-item tooltip">
+      <a class="button is-primary modal-btn is-hidden gee" data-gene="click:showModal" data-tmpl="contribForm" data-src="modal" data-size="lg" data-id="0">新增</a>
+      <span class="tooltip-text">建立新外站稿件</span>
+    </p>
+  </div>
+</nav>
+<nav class="list-filter level">
+  <div class="level-left">
+    <div class="level-item query-box">
+      <div class="field has-addons">
+        <div class="control"><div class="select" >
+          <select name="query" class="gee" data-gene="change:checkOption">
+            <optgroup label="資料">
+              <option value="m.title~">名稱</option>
+              <option value="m.uri~">網址</option>
+            </optgroup>
+            <optgroup label="來源">
+              <option value="m.source=yangmei">楊梅</option>
+              <option value="m.source=tqthyfarm">台七桃花源</option>
+              <option value="m.source=kengzixi">坑子溪</option>
+              <option value="m.source=dabeiken">大北坑</option>
+              <option value="m.source=yamfarm">月眉</option>
+              <option value="m.source=dagumountain">大古山</option>
+              <option value="m.source=xihai">溪海</option>
+              <option value="m.source=lotuspark">蓮花園</option>
+              <option value="m.source=oceanhakka">海洋客家</option>
+              <option value="m.source=kangzhuang">康莊</option>
+            </optgroup>
+          </select>
+        </div></div>
+        <div class="control">
+          <input class="input" type="text" placeholder="Find a option">
+        </div>
+        <div class="control tooltip">
+          <button class="button is-expanded gee" data-gene="init:initQueryForm,click:combineQuery" type="button">查詢</button>
+          <span class="tooltip-text">可記錄最後一次查詢條件</span>
+        </div>
+      </div>
+    </div>
+    <p class="level-item is-hidden">搜尋條件：</p>
+    <div class="tags js-query-list level-item"></div>
+  </div>
+  <div class="level-right"></div>
+</nav>
+
+<div class="columns is-multiline">
+  <div class="column is-10 is-offset-1 b-table">
+    <div class="content box table-wrapper has-mobile-cards">
+      <table class="list-body table is-striped is-hoverable">
+        <thead>
+          <tr>
+            <th style="width: 120px;">狀態</th>
+            <th>標題 / 網址 <span class="icon tooltip"><i class="fa fa-question"></i><span class="tooltip-text">網址後方日期為： 原文上線日期</span></span></th>
+            <th class="is-actions-cell">操作</th>
+          </tr>
+        </thead>
+        <tfoot></tfoot>
+        <tbody class="gee" data-gene="init:loadList,click:reactList" data-tmpl="contribList" data-nopde="1">
+          <tr>
+            <td>{{:~txtLabel(prop.status, {'New': '新建', 'Done': '已匯入', 'Enabled': '排程匯入', 'Disabled': '下架'})}}</td>
+            <td><a href="https://www.{{:prop.source}}.com.tw{{:prop.uri}}" target="_blank" class="is-pulled-right"> 查看原文 <span class="icon"><i class="fa fa-share-square-o"></i></span> </a> {{:prop.title}}
+            <br> <small>#{{:prop.original_id}}</small> at {{:prop.online_date}} </td>
+            <td class="is-actions-cell">
+              {{if prop.status == 'New' }}
+                <button type="button" class="button is-primary" data-func="arena/touch"
+                  data-confirm="點擊【確定】後匯入，請至文章區查看結果!!" data-endpoint="contrib/importPress"
+                  data-params='{"slug":"{{:prop.slug}}"}'>匯入</button>
+              {{else}}
+                <a href="/p/{{:prop.press_id}}" target="_blank" class="is-pulled-right"> 查看 <span class="icon"><i class="fa fa-share-square-o"></i></span> </a>
+                <!-- <a href="javascript:;" class="button is-danger" data-func="delRow" data-id="{{:prop.id}}"> 刪除 </a> -->
+              {{/if}}
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="list-footer level"><div class="level-left">
+        <span class="total-items level-item"></span>
+        <nav class="pagination level-item"><ul id="paginate"></ul></nav>
+    </div></div>
+  </div>
+</div>

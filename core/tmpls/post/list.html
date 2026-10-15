@@ -63,7 +63,8 @@
         <tfoot></tfoot>
         <tbody class="gee" data-gene="init:loadList,click:reactList" data-tmpl="postList" data-nopde="1">
           <tr>
-            <td data-label="狀態">{{:~txtLabel(prop.status, {'Enabled': '啟用', 'Disabled': '未啟用'})}}</td>
+            <td data-label="狀態">
+              <span class="tag {{if prop.status == 'Disabled' }}is-warning{{/if}}">{{:~txtLabel(prop.status, {'Enabled': '啟用', 'Disabled': '未啟用'})}}</span></td>
             <td data-label="語意化網址"><small class="ellipsis" style="max-width: 27vw; display: inline-block;">{{:prop.slug}}</small><a href="{{:~fixLink('s/'+prop.slug)}}" target="_blank" class="is-pulled-right"> <span class="icon"><i class="fa fa-share-square-o"></i></span> </a></td>
             <td data-label="標題">#{{:prop.id}} {{:prop.title}}</td>
             <td class="is-actions-cell">
