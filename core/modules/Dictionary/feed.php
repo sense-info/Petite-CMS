@@ -20,7 +20,8 @@ class fDictionary extends Feed
      * @return array [word => id]
      * @throws \Exception If there is an error inserting a new word.
      */
-    function findWord(array $words) {
+    function findWord(array $words) 
+    {
         $rows = self::lots([
             'l1.lang' => 'tw',
             'l1.title' => $words,

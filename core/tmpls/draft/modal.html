@@ -44,6 +44,8 @@
               <label class="radio" for="draft-target-post">固定文章</label>
               <input type="radio" class="is-checkradio" name="target" value="Tag" id="draft-target-tag">
               <label class="radio" for="draft-target-tag">標籤</label>
+              <input type="radio" class="is-checkradio" name="target" value="Dictionary" id="draft-target-dictionary">
+              <label class="radio" for="draft-target-dictionary">詞彙</label>
               <input type="radio" class="is-checkradio" name="target" value="None" id="draft-target-none">
               <label class="radio" for="draft-target-none">無</label>
             </div>
@@ -108,7 +110,7 @@
                   <ul class="control mb-3">
                   {{for item.meta.hashtags}}
                     <li class="tr-like">{{:text}} <span>| <a href="javascript:;" class="pre-gee" data-gene="click:arena/touch" data-confirm="加入新的標籤？ 點擊【確定】後加入!!"
-                data-endpoint="draft/nextstep" data-params='{"pid":"{{:text}}","method":"importTags"}' >加入</a></span></li>
+                data-endpoint="draft/nextstep" data-params='{"pid":"{{:text}}","method":"importTag"}' >加入</a></span></li>
                   {{/for}}
                   </ul>
                 </div>
@@ -144,7 +146,7 @@
             {{/if }}
           {{/if }}
 
-          {{if item.method == 'translate' }}
+          {{if item.method == 'translate' || item.method == 'phrasetrans' }}
           <textarea class="textarea" placeholder="結果" name="content"></textarea>
           {{/if }}
         {{else }}

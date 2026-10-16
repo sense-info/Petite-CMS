@@ -17,6 +17,11 @@ class kDraft extends Kit
         return self::ask(__FUNCTION__, ['intent' => '產生文章 SEO 相關資料', 'guideline' => $guideline, 'pid' => $pid]);
     }
 
+    public static function phrasetrans($guideline)
+    {
+        return self::ask(__FUNCTION__, ['intent' => '進行短詞翻譯', 'guideline' => $guideline]);
+    }
+
     public static function guideline($intent)
     {
         return self::ask(__FUNCTION__, ['intent' => $intent]);

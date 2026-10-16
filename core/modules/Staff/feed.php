@@ -45,6 +45,21 @@ class fStaff extends Feed
     }
 
     /**
+     * @return mixed
+     */
+    public static function oneOpt($pid)
+    {
+        $filter = [
+            'id'    => $pid,
+            'ORDER' => ['id' => 'DESC'],
+        ];
+
+        $cu = mh()->get(self::fmTbl(), ['id', 'account(title)'], $filter);
+
+        return $cu;
+    }
+
+    /**
      * @param $account
      * @param $id
      * @param $email

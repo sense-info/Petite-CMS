@@ -148,77 +148,143 @@ class rDraft extends Reaction
         chkAuth(fDraft::PV_U);
         $req = parent::_getReq();
 
-        $old = fDraft::one($req['pid'], 'id', [
-            'status[!]' => fDraft::ST_NEW,
-        ]);
-
-        if (empty($old)) {
-            return self::_return(8106, ['msg' => '無來源資料']);
-        }
-
-        if (empty($old['intent'])) {
-            return self::_return(8106, ['msg' => '來源意圖為空']);
-        }
-
-        if ('importIntro' == $req['method']) {
-            if (empty($old['row_id'])) {
-                return self::_return(8106, ['msg' => '無來源文章']);
+        // pid is numeric
+        if (!is_numeric($req['pid'])) {
+            // check method is importDict or importTag
+            if (!in_array($req['method'], ['importDict', 'importTag'])) {
+                return self::_return(8106, ['msg' => '無效的操作方法']);
             }
-
-            if (empty($old['content'])) {
-                return self::_return(8106, ['msg' => '無引言']);
-            }
-
-            $tmp = jsonDecode($old['content']);
-
-            $affected = fPress::fromDraft($old['row_id'], 'tw', [
-                'info'    => $tmp['introduction'],
+            $guideline = $req['pid'];
+        } else {
+            $old = fDraft::one($req['pid'], 'id', [
+                'status[!]' => fDraft::ST_NEW,
             ]);
 
-            if ($affected) {
-                return self::_return(1);
-            } else {
-                return self::_return(8106, ['msg' => '匯入失敗']);
+            if (empty($old)) {
+                return self::_return(8106, ['msg' => '無來源資料']);
+            }
+
+            if (empty($old['intent'])) {
+                return self::_return(8106, ['msg' => '來源意圖為空']);
             }
         }
 
-        if ('guideline' == $old['method']) {
-            if (empty($old['guideline'])) {
-                return self::_return(8106, ['msg' => '來源無指引內容']);
-            }
+        // use switch to handle different methods
+        switch ($req['method']) {
+            case 'importIntro':
+                if (empty($old['row_id'])) {
+                    return self::_return(8106, ['msg' => '無來源文章']);
+                }
 
-            $method = 'writing';
-            $tip    = '已建立文章試稿';
+                if (empty($old['content'])) {
+                    return self::_return(8106, ['msg' => '無引言']);
+                }
 
-            $pid = fDraft::add([
-                'lang'      => $old['lang'],
-                'row_id'    => $old['row_id'],
-                'target'    => 'Press',
-                'intent'    => $old['intent'],
-                'guideline' => $old['guideline'],
-                'method'    => $method,
-            ]);
+                $tmp = jsonDecode($old['content']);
+
+                $affected = fPress::fromDraft($old['row_id'], 'tw', [
+                    'info'    => $tmp['introduction'],
+                ]);
+
+                $tip    = '已匯入文章引言。';
+
+                if (!$affected) {
+                    return self::_return(8106, ['msg' => '匯入失敗']);
+                }
+                break;
+            case 'importTitle':
+                if (empty($old['row_id'])) {
+                    return self::_return(8106, ['msg' => '無來源文章']);
+                }
+
+                if (empty($old['content'])) {
+                    return self::_return(8106, ['msg' => '無標題']);
+                }
+
+                $tmp = jsonDecode($old['content']);
+
+                if (!isset($req['idx']) || !isset($tmp['titles'][$req['idx']])) {
+                    return self::_return(8106, ['msg' => '缺少標題索引']);
+                }
+
+                $affected = fPress::fromDraft($old['row_id'], 'tw', [
+                    'info'    => $tmp['titles'][$req['idx']],
+                ]);
+
+                $tip = '已匯入文章標題。';
+
+                if (!$affected) {
+                    return self::_return(8106, ['msg' => '匯入失敗']);
+                }
+                break;
+            case 'guideline':
+                if (empty($old['guideline'])) {
+                    return self::_return(8106, ['msg' => '來源無指引內容']);
+                }
+
+                $method = 'writing';
+                $tip    = '已建立文章試稿，稍後由排程執行工作，可至草稿區查看結果。';
+
+                $pid = fDraft::add([
+                    'lang'      => $old['lang'],
+                    'row_id'    => $old['row_id'],
+                    'target'    => 'Press',
+                    'intent'    => $old['intent'],
+                    'guideline' => $old['guideline'],
+                    'method'    => $method,
+                ]);
+                break;
+            case 'writing':
+                if (empty($old['content'])) {
+                    return self::_return(8106, ['msg' => '來源無試稿']);
+                }
+
+                $method = 'seohelper';
+                $tip    = '已建立 SEO 文案，稍後由排程執行工作，可至草稿區查看結果。';
+
+                $pid = fDraft::add([
+                    'lang'      => $old['lang'],
+                    'row_id'    => $old['row_id'],
+                    'target'    => 'Press',
+                    'intent'    => '產生文章試稿 SEO 相關資料',
+                    'guideline' => $old['content'],
+                    'method'    => $method,
+                ]);
+                break;
+            case 'importDict':
+                $method = 'phrasetrans';
+                $tip    = '已建立快速翻譯，稍後由排程執行工作，可至草稿區查看結果。';
+
+                $pid = fDraft::add([
+                    'lang'      => 'tw',
+                    'row_id'    => 0,
+                    'target'    => 'Dictionary',
+                    'intent'    => '進行短詞翻譯，稍後由排程執行工作，可至草稿區查看結果。',
+                    'guideline' => $guideline,
+                    'method'    => $method,
+                ]);
+                break;
+            case 'importTag':
+                $method = 'phrasetrans';
+                $tip    = '已建立快速翻譯，稍後由排程執行工作，可至草稿區查看結果。';
+
+                // remove # from $guideline
+                $guideline = str_replace('#', '', $guideline);
+
+                $pid = fDraft::add([
+                    'lang'      => 'tw',
+                    'row_id'    => 0,
+                    'target'    => 'Tag',
+                    'intent'    => '進行短詞翻譯，稍後由排程執行工作，可至草稿區查看結果。',
+                    'guideline' => $guideline,
+                    'method'    => $method,
+                ]);
+                break;
+            default:
+                return self::_return(8106, ['msg' => '未知的方法']);
         }
 
-        if ('writing' == $old['method']) {
-            if (empty($old['content'])) {
-                return self::_return(8106, ['msg' => '來源無試稿']);
-            }
-
-            $method = 'seohelper';
-            $tip    = '已建立 SEO 文案';
-
-            $pid = fDraft::add([
-                'lang'      => $old['lang'],
-                'row_id'    => $old['row_id'],
-                'target'    => 'Press',
-                'intent'    => '產生文章試稿 SEO 相關資料',
-                'guideline' => $old['content'],
-                'method'    => $method,
-            ]);
-        }
-
-        return self::_return(1, ['msg' => $tip . '，稍後由排程執行工作，可至草稿區查看結果。']);
+        return self::_return(1, ['msg' => $tip]);
     }
 
     /**

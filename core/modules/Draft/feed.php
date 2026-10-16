@@ -25,6 +25,10 @@ class fDraft extends Feed
      */
     public static function add($req)
     {
+        if (empty($req['owner_id'])) {
+            $req['owner_id'] = fStaff::_current('id');
+        }
+
         mh()->insert(self::fmTbl(), array_merge($req, [
             'status'     => self::ST_NEW,
             'insert_ts'  => date('Y-m-d H:i:s'),
@@ -180,6 +184,26 @@ class fDraft extends Feed
         $rtn = PHP_EOL . $row['id'] . ') Seohelper : ';
 
         $res = kDraft::seohelper($row['guideline'], $row['row_id']);
+        usleep(30000); // 0.03s
+
+        $data = mh()->update(self::fmTbl(), [
+            'status'     => self::ST_DONE,
+            'content'    => jsonEncode($res['data']['reply']),
+            'request_id' => $res['request_id'],
+        ], [
+            'id' => $row['id'],
+        ]);
+
+        $rtn .= 'Done';
+
+        return $rtn; // TODO: return json
+    }
+
+    public static function batchPhrasetrans($row)
+    {
+        $rtn = PHP_EOL . $row['id'] . ') Phrasetrans : ';
+
+        $res = kDraft::phrasetrans($row['guideline']);
         usleep(30000); // 0.03s
 
         $data = mh()->update(self::fmTbl(), [
