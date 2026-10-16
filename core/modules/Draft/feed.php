@@ -231,6 +231,14 @@ class fDraft extends Feed
             if ($phrase['lang'] == 'tw') {
                 continue;
             }
+            // when lang is en, save SLUG 
+            if ($phrase['lang'] == 'en') {
+                $that::saveCol([
+                    'col' => 'slug',
+                    'val' => parent::_slugify($phrase['text']),
+                    'pid' => $keywordID,
+                ]);
+            }
             $langData[] = [
                 $phrase['lang'],
                 [
