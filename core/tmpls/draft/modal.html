@@ -109,8 +109,8 @@
                   <label class="label">推薦 Hashtag</label>
                   <ul class="control mb-3">
                   {{for item.meta.hashtags}}
-                    <li class="tr-like">{{:text}} <span>| <a href="javascript:;" class="pre-gee" data-gene="click:arena/touch" data-confirm="加入新的標籤？ 點擊【確定】後加入!!"
-                data-endpoint="draft/nextstep" data-params='{"pid":"{{:text}}","method":"importTag"}' >加入</a></span></li>
+                    <li class="tr-like">{{:text}} <span>| <a href="javascript:;" class="pre-gee" data-gene="click:arena/touch" data-confirm="匯入新的標籤？ 點擊【確定】後匯入!!"
+                data-endpoint="draft/nextstep" data-params='{"pid":"{{:#parent.parent.data.item.id}}","keyword":"{{:text}}","method":"importTag"}' >匯入</a></span></li>
                   {{/for}}
                   </ul>
                 </div>
@@ -118,8 +118,8 @@
                   <label class="label">推薦詞彙表</label>
                   <ul class="control mb-3">
                   {{for item.meta.glossaries}}
-                    <li class="tr-like">{{:text}} <span>| <a href="javascript:;" class="pre-gee" data-gene="click:arena/touch" data-confirm="加入新的翻譯詞彙？ 點擊【確定】後加入!!"
-                data-endpoint="draft/nextstep" data-params='{"pid":"{{:text}}","method":"importDict"}' >加入</a></span></li>
+                    <li class="tr-like">{{:text}} <span>| <a href="javascript:;" class="pre-gee" data-gene="click:arena/touch" data-confirm="匯入新的翻譯詞彙？ 點擊【確定】後匯入!!"
+                data-endpoint="draft/nextstep" data-params='{"pid":"{{:#parent.parent.data.item.id}}","keyword":"{{:text}}","method":"importDict"}' >匯入</a></span></li>
                   {{/for}}
                   </ul>
                 </div>

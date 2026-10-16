@@ -20,7 +20,7 @@ class fDictionary extends Feed
      * @return array [word => id]
      * @throws \Exception If there is an error inserting a new word.
      */
-    function findWord(array $words) 
+    public static function findWord(array $words) 
     {
         $rows = self::lots([
             'l1.lang' => 'tw',
@@ -30,41 +30,24 @@ class fDictionary extends Feed
                 'l1.parent_id' => 'id',
                 'm.status' => '[SV]' . self::ST_ON,
             ],
-        ], 500, self::fmTbl('lang') . '(l1)');
+        ], 500, 'lang(l1)');
 
         // 把 rows 跟 words 做差集，沒有 id 的 words 就進行寫入 
         $existingWords = array_column($rows, 'word');
         $newWords = array_diff($words, $existingWords);
 
-        $acceptLang = fDraft::acceptLang();
         $insertedRows = [];
-
         foreach ($newWords as $word) {
-            
             $pid = self::add([], [
                 ['tw', [
                     'title' => $word,
                 ]]
             ]);
 
-            foreach ($acceptLang as $idx => $label) {
-                if ($idx == 'tw') {
-                    continue;
-                }
-
-                fDraft::add([
-                    'lang' => $idx,
-                    'row_id' => $pid,
-                    'target' => 'Dictionary',
-                    'intent' => '翻譯文章 (' . $pid . ') 為 ' . $label,
-                    'guideline' => $word,
-                    'method' => 'quicktrans'
-                ]);
-            }
-
             $insertedRows[] = [
                 'word' => $word,
                 'id'   => $pid,
+                'new'   => 1,
             ];
         }
 

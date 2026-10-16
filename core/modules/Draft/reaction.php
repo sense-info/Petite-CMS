@@ -148,25 +148,16 @@ class rDraft extends Reaction
         chkAuth(fDraft::PV_U);
         $req = parent::_getReq();
 
-        // pid is numeric
-        if (!is_numeric($req['pid'])) {
-            // check method is importDict or importTag
-            if (!in_array($req['method'], ['importDict', 'importTag'])) {
-                return self::_return(8106, ['msg' => '無效的操作方法']);
-            }
-            $guideline = $req['pid'];
-        } else {
-            $old = fDraft::one($req['pid'], 'id', [
-                'status[!]' => fDraft::ST_NEW,
-            ]);
+        $old = fDraft::one($req['pid'], 'id', [
+            'status[!]' => fDraft::ST_NEW,
+        ]);
 
-            if (empty($old)) {
-                return self::_return(8106, ['msg' => '無來源資料']);
-            }
+        if (empty($old)) {
+            return self::_return(8106, ['msg' => '無來源資料']);
+        }
 
-            if (empty($old['intent'])) {
-                return self::_return(8106, ['msg' => '來源意圖為空']);
-            }
+        if (empty($old['intent'])) {
+            return self::_return(8106, ['msg' => '來源意圖為空']);
         }
 
         // use switch to handle different methods
@@ -255,30 +246,64 @@ class rDraft extends Reaction
                 $method = 'phrasetrans';
                 $tip    = '已建立快速翻譯，稍後由排程執行工作，可至草稿區查看結果。';
 
+                // if empty keyword, return error
+                if (empty($req['keyword'])) {
+                    return self::_return(8106, ['msg' => '無效的方法']);
+                }
+                $guideline = $req['keyword'];
+
+                // check Dictionary keyword not exist in DB
+                $dict = fDictionary::findWord([$guideline]);
+                $dictID = $dict[0]['id'];
+                if (!isset($dict[0]['new'])) {
+                    // return self::_return(8106, ['msg' => '字典中已存在該關鍵字']);
+                }
+
                 $pid = fDraft::add([
                     'lang'      => 'tw',
-                    'row_id'    => 0,
+                    'row_id'    => $old['row_id'],
                     'target'    => 'Dictionary',
                     'intent'    => '進行短詞翻譯，稍後由排程執行工作，可至草稿區查看結果。',
                     'guideline' => $guideline,
                     'method'    => $method,
                 ]);
+
+                // store the keyword ID in the row_id for relation
+                fPress::saveMany('term', $old['row_id'], [$dictID], false, true);
+
                 break;
             case 'importTag':
                 $method = 'phrasetrans';
                 $tip    = '已建立快速翻譯，稍後由排程執行工作，可至草稿區查看結果。';
 
+                // if empty keyword, return error
+                if (empty($req['keyword'])) {
+                    return self::_return(8106, ['msg' => '無效的方法']);
+                }
+
                 // remove # from $guideline
+                $guideline = $req['keyword'];
                 $guideline = str_replace('#', '', $guideline);
+
+                // check Dictionary keyword not exist in DB
+                $tag = fTag::findWord([$guideline]);
+                $tagID = $tag[0]['id'];
+                if (!isset($tag[0]['new'])) {
+                    // return self::_return(8106, ['msg' => '中已存在該關鍵字']);
+                }
 
                 $pid = fDraft::add([
                     'lang'      => 'tw',
-                    'row_id'    => 0,
+                    'row_id'    => $old['row_id'],
                     'target'    => 'Tag',
                     'intent'    => '進行短詞翻譯，稍後由排程執行工作，可至草稿區查看結果。',
                     'guideline' => $guideline,
                     'method'    => $method,
                 ]);
+
+                // store the keyword ID in the row_id for relation
+                fPress::saveMany('tag', $old['row_id'], [$tagID], false, true);
+
                 break;
             default:
                 return self::_return(8106, ['msg' => '未知的方法']);

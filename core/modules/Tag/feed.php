@@ -132,5 +132,73 @@ class fTag extends Feed
         ]);
 
         return self::chkErr($rtn->rowCount());
+    }    
+    
+    /**
+     * Find words in the dictionary and insert new ones if they don't exist.
+     *
+     * @param array $words
+     * @return array [word => id]
+     * @throws \Exception If there is an error inserting a new word.
+     */
+    public static function findWord(array $words) 
+    {
+        $rows = self::lots([
+            'l1.lang' => 'tw',
+            'l1.title' => $words,
+        ], ['l1.title(word)', 'm.id'], [
+            '[><]' . self::fmTbl() . '(m)' => [
+                'l1.parent_id' => 'id',
+                'm.status' => '[SV]' . self::ST_ON,
+            ],
+        ], 500, 'lang(l1)');
+
+        // 把 rows 跟 words 做差集，沒有 id 的 words 就進行寫入 
+        $existingWords = array_column($rows, 'word');
+        $newWords = array_diff($words, $existingWords);
+
+        $insertedRows = [];
+        foreach ($newWords as $word) {
+            $pid = self::add([], [
+                ['tw', [
+                    'title' => $word,
+                ]]
+            ]);
+
+            $insertedRows[] = [
+                'word' => $word,
+                'id'   => $pid,
+                'new'   => 1,
+            ];
+        }
+
+        return array_merge($rows, $insertedRows);
+    }
+
+    /**
+     * @param $mainData
+     * @param $lang
+     * @return mixed
+     */
+    public static function add(array $mainData, array $lang)
+    {
+        $pid  = 0;
+        $now  = date('Y-m-d H:i:s');
+        $data = array_merge([
+            'status'      => self::ST_ON,
+            'slug'        => self::renderUniqueNo(16),
+            'last_ts'     => $now,
+            'insert_ts'   => $now,
+            'insert_user' => fStaff::_current('id')
+        ], $mainData);
+
+        mh()->insert(self::fmTbl(), $data);
+        $pid = mh()->id();
+
+        if (self::chkErr($pid)) {
+            self::saveLang($pid, $lang);
+        }
+
+        return $pid;
     }
 }

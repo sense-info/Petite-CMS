@@ -214,6 +214,33 @@ class fDraft extends Feed
             'id' => $row['id'],
         ]);
 
+        // 將翻譯結果更新到對應的資料庫欄位中
+        $that = '\\F3CMS\\f' . ucfirst($row['target']);
+        // check Dictionary keyword not exist in DB
+        $phrases = $res['data']['reply']['phrases'];
+        // {"phrases":[{"lang":"tw","text":"農村體驗"},{"lang":"en","text":"Rural Experience"},{"lang":"ja","text":"農村体験"},{"lang":"ko","text":"농촌 체험"}]}
+        $twPhrases = \__::filter($phrases, function($n) {
+            return $n['lang'] == 'tw';
+        });
+        $keyword = $that::findWord([$twPhrases[0]['text']]);
+        $keywordID = $keyword[0]['id'];
+
+        // convert $phrases to $langData without lang = tw
+        $langData = [];
+        foreach ($phrases as $phrase) {
+            if ($phrase['lang'] == 'tw') {
+                continue;
+            }
+            $langData[] = [
+                $phrase['lang'],
+                [
+                    'title' => $phrase['text'],
+                ]
+            ];
+        }
+
+        $that::saveLang($keywordID, $langData);
+
         $rtn .= 'Done';
 
         return $rtn; // TODO: return json
