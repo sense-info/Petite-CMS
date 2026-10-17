@@ -251,7 +251,7 @@ class rDraft extends Reaction
                 break;
             case 'importDict':
                 $method = 'phrasetrans';
-                $tip    = '已建立短詞翻譯，稍後由排程執行工作，可至草稿區查看結果。';
+                $tip    = '現有詞彙，已進行綁定。';
 
                 // if empty keyword, return error
                 if (empty($req['keyword'])) {
@@ -262,18 +262,17 @@ class rDraft extends Reaction
                 // check Dictionary keyword not exist in DB
                 $dict = fDictionary::findWord([$guideline]);
                 $dictID = $dict[0]['id'];
-                if (!isset($dict[0]['new'])) {
-                    return self::_return(8106, ['msg' => '字典中已存在該關鍵字']);
+                if (isset($dict[0]['new'])) {
+                    $pid = fDraft::add([
+                        'lang'      => 'tw',
+                        'row_id'    => $old['row_id'],
+                        'target'    => 'Dictionary',
+                        'intent'    => '進行詞彙短詞翻譯。',
+                        'guideline' => $guideline,
+                        'method'    => $method,
+                    ]);
+                    $tip    = '已建立短詞翻譯，稍後由排程執行工作，可至草稿區查看結果。';
                 }
-
-                $pid = fDraft::add([
-                    'lang'      => 'tw',
-                    'row_id'    => $old['row_id'],
-                    'target'    => 'Dictionary',
-                    'intent'    => '進行短詞翻譯，稍後由排程執行工作，可至草稿區查看結果。',
-                    'guideline' => $guideline,
-                    'method'    => $method,
-                ]);
 
                 // store the keyword ID in the row_id for relation
                 fPress::addRelated('term', $old['row_id'], $dictID);
@@ -281,7 +280,7 @@ class rDraft extends Reaction
                 break;
             case 'importTag':
                 $method = 'phrasetrans';
-                $tip    = '已建立短詞翻譯，稍後由排程執行工作，可至草稿區查看結果。';
+                $tip    = '現有標籤，已進行綁定。';
 
                 // if empty keyword, return error
                 if (empty($req['keyword'])) {
@@ -296,17 +295,16 @@ class rDraft extends Reaction
                 $tag = fTag::findWord([$guideline]);
                 $tagID = $tag[0]['id'];
                 if (!isset($tag[0]['new'])) {
-                    return self::_return(8106, ['msg' => '標籤中已存在該關鍵字']);
+                    $pid = fDraft::add([
+                        'lang'      => 'tw',
+                        'row_id'    => $old['row_id'],
+                        'target'    => 'Tag',
+                        'intent'    => '進行標籤短詞翻譯。',
+                        'guideline' => $guideline,
+                        'method'    => $method,
+                    ]);
+                    $tip    = '已建立短詞翻譯，稍後由排程執行工作，可至草稿區查看結果。';
                 }
-
-                $pid = fDraft::add([
-                    'lang'      => 'tw',
-                    'row_id'    => $old['row_id'],
-                    'target'    => 'Tag',
-                    'intent'    => '進行短詞翻譯，稍後由排程執行工作，可至草稿區查看結果。',
-                    'guideline' => $guideline,
-                    'method'    => $method,
-                ]);
 
                 // store the keyword ID in the row_id for relation
                 fPress::addRelated('tag', $old['row_id'], $tagID);
