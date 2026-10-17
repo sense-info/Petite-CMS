@@ -20,7 +20,16 @@ www/demo/cache/**
 !www/demo/cache/.gitkeep
 www/demo/vendor/**
 !www/demo/vendor/.gitkeep
+www/demo/theme/**
+!www/demo/theme/.gitkeep
+www/demo/tmpls/**
+!www/demo/tmpls/.gitkeep
 !www/error-pages/
+!www/modules/
+www/modules/**
+!www/modules/.gitkeep
+!www/theme/
+!www/theme/**
 
 # www/_
 !www/_infra/

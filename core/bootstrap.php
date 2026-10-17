@@ -23,7 +23,8 @@ $f3 = \Base::instance();
 
 $siteConfigDir = defined('SITE_CONFIG_DIR') ? SITE_CONFIG_DIR : basename(rtrim($siteRootDir, '/'));
 $fallbackConfigRoot = $projectRootDir . 'config/';
-$fallbackSiteModulesDir = $projectRootDir . $siteConfigDir . '/modules/';
+$sharedModulesDir = $projectRootDir . 'modules/';
+$sharedThemeRootDir = $projectRootDir . 'theme/';
 
 $rootDir = $projectRootDir;
 $webRootDir = $sitePublicDir;
@@ -55,19 +56,20 @@ if ($env !== '' && file_exists($envConfigFile)) {
     require_once $envConfigFile;
 }
 
-$autoload = $siteRootDir . 'modules/;';
-if (is_dir($sitePublicDir . 'modules/') && $sitePublicDir . 'modules/' !== $siteRootDir . 'modules/') {
-    $autoload .= $sitePublicDir . 'modules/;';
-}
-if (is_dir($fallbackSiteModulesDir) && $fallbackSiteModulesDir !== $siteRootDir . 'modules/') {
-    $autoload .= $fallbackSiteModulesDir . ';';
-}
-$autoload .= $activeCoreDir . 'modules/;' . $activeCoreDir . 'libs/;/var/vendor/;';
+$autoload = $siteRootDir . 'modules/;' . $sharedModulesDir . ';' . $activeCoreDir . 'modules/;' . $activeCoreDir . 'libs/;/var/vendor/;';
 $f3->set('AUTOLOAD', $autoload);
 $f3->set('abspath', $projectRootDir);
 $f3->set('webpath', $sitePublicDir);
 $f3->set('core_configpath', $activeCoreDir . 'config');
-$f3->set('UI', $activeCoreDir . 'theme/');
+$themeName = (string) $f3->get('theme');
+$siteThemeRootDir = $siteRootDir . 'theme/';
+$themeRootDir = $activeCoreDir . 'theme/';
+if ($themeName !== '' && is_dir($siteThemeRootDir . $themeName)) {
+    $themeRootDir = $siteThemeRootDir;
+} elseif ($themeName !== '' && is_dir($sharedThemeRootDir . $themeName)) {
+    $themeRootDir = $sharedThemeRootDir;
+}
+$f3->set('UI', $themeRootDir);
 
 if (isset($_SERVER['HTTP_ORIGIN'])) {
     $f3->set('isCORS', 1);

@@ -350,3 +350,135 @@
 2. 已完成最小調整：
    - `Home` → `文件首頁`（對應 `document/README.md` 標題語意）
    - `Environment Info` → `開發環境與操作筆記`（對應 `document/info.md` 內容定位）
+
+## 第 37 輪討論結果
+1. 使用者要求子站可建立自定義 `theme` / `tmpls`，並補齊安裝文件說明。
+2. 已完成目錄補齊：
+   - 新增 `www/demo/theme/.gitkeep`
+   - 新增 `www/demo/tmpls/.gitkeep`
+3. 已補齊 runtime 行為（theme）：
+   - `core/bootstrap.php` 與 `core/cli_bootstrap.php` 調整為：若存在 `www/<site>/theme/<theme名稱>/`，優先使用子站 theme；否則 fallback 至 `core/theme/<theme名稱>/`。
+4. 文件更新：
+   - `document/README.md` 新增「子站自定義 theme / tmpls」段落與 `public/tmpls` 連結切換說明。
+   - `document/info.md` 新站複製 SOP 新增 theme/tmpls 建立步驟與 tmpls 連結改法。
+5. 驗證：
+   - Docker `php-fpm` 容器 lint：`/var/core/bootstrap.php`、`/var/core/cli_bootstrap.php` 皆通過。
+
+## 第 38 輪討論結果
+1. 使用者要求補上 `.gitignore` 規則，確保只有以下兩個檔案納入版控：
+   - `www/demo/theme/.gitkeep`
+   - `www/demo/tmpls/.gitkeep`
+2. 已更新 `.gitignore`：
+   - `www/demo/theme/**`
+   - `!www/demo/theme/.gitkeep`
+   - `www/demo/tmpls/**`
+   - `!www/demo/tmpls/.gitkeep`
+3. 驗證結果（`git check-ignore -v -n`）：
+   - `www/demo/theme/.gitkeep`、`www/demo/tmpls/.gitkeep` 不被忽略。
+   - `www/demo/theme/foo.txt`、`www/demo/tmpls/foo.html` 被忽略。
+
+## 第 39 輪討論結果
+1. 使用者要求支援多子站共用自定義 `modules` / `theme`，並補齊安裝文件。
+2. 已新增共用目錄：
+   - `www/modules/.gitkeep`
+   - `www/theme/.gitkeep`
+3. Runtime 調整：
+   - `core/bootstrap.php`：AUTOLOAD 新增 `www/modules/`；theme 載入優先序調整為 `www/<site>/theme/<theme>` → `www/theme/<theme>` → `core/theme/<theme>`。
+   - `core/cli_bootstrap.php`：同步新增 shared modules AUTOLOAD 與 shared theme fallback 規則。
+4. `.gitignore` 已加入 `www/modules`、`www/theme` 的追蹤例外，允許共用程式碼與模板納入版控。
+5. 文件更新：
+   - `document/README.md`：新增共用 modules/theme 的目錄與使用規則。
+   - `document/info.md`：新站 SOP 補充 shared theme fallback 與 shared modules/theme 說明。
+6. 驗證：
+   - Docker lint：`/var/core/bootstrap.php`、`/var/core/cli_bootstrap.php` 通過。
+   - ignore 驗證：`www/modules/*`、`www/theme/*` 為可追蹤狀態。
+
+## 第 40 輪討論結果
+1. 使用者確認無舊站相容需求，要求移除 modules AUTOLOAD 的目錄存在判斷式。
+2. 已調整 `core/bootstrap.php` 與 `core/cli_bootstrap.php`：
+   - modules AUTOLOAD 改為固定路徑串接（不再使用 `is_dir` 條件）：
+     - `www/<site>/modules`
+     - `www/modules`
+     - `core/modules`
+     - `core/libs`
+3. 驗證：
+   - Docker lint：`/var/core/bootstrap.php`、`/var/core/cli_bootstrap.php` 皆通過。
+
+## 第 41 輪討論結果
+1. 使用者要求確認 autoload 載入順序：
+   - `PCMS` namespace：子站 → 共用 → core
+   - `F3CMS` namespace：直接 core
+2. 已調整 `core/libs/Autoload.php` 的 module 偵測邏輯：
+   - `PCMS` 候選路徑固定為：
+     1) `www/<site>/modules`
+     2) `www/modules`
+     3) `core/modules`
+   - `F3CMS` 候選路徑固定為：
+     1) `core/modules`
+3. 驗證：
+   - Docker lint：`/var/core/libs/Autoload.php` 通過。
+
+## 第 42 輪討論結果
+1. 使用者要求將 namespace 與 autoload 順序補充至說明文件。
+2. 已更新文件：
+   - `document/README.md`：在「多子站共用自定義 modules / theme」段落補上 `PCMS`/`F3CMS` 載入規則。
+   - `document/info.md`：在新站 SOP 補上 namespace 使用規則與 module 載入順序。
+
+## 第 43 輪討論結果
+1. 使用者新增臨時共用 module `www/modules/Inquiry`，要求檢查是否可運作，並要求該目錄不納入 core repo 版控。
+2. 已修正 `Inquiry` namespace 繼承與依賴引用（避免 `PCMS\F3CMS\*` 錯誤）：
+   - `www/modules/Inquiry/feed.php`
+   - `www/modules/Inquiry/kit.php`
+   - `www/modules/Inquiry/outfit.php`
+   - `www/modules/Inquiry/reaction.php`
+3. 已補 `demo` 測試路由：
+   - `GET|HEAD /inquiry/xls=\PCMS\oInquiry->do_xls`
+   - `POST /inquiry/add_new=\PCMS\rInquiry->do_add_new`
+4. `.gitignore` 已加入 `www/modules/Inquiry/**`，避免臨時共用 module 被納入 repo。
+5. 驗證：
+   - Docker lint：`www/modules/Inquiry/*.php` 全數通過。
+   - Autoload 測試：`\PCMS\fInquiry`、`\PCMS\kInquiry`、`\PCMS\oInquiry`、`\PCMS\rInquiry` 皆可 `class_exists(..., true)` 成功載入。
+   - 路由檢查：`/inquiry/xls` 回應 302 導向 `/login`（符合該 action 的登入檢查邏輯，代表路由與 class 綁定成功）。
+
+## 第 44 輪討論結果
+1. 使用者明確要求 `www/modules` 子資料夾屬於 sites repo，不應納入 core repo。
+2. 已調整 `.gitignore`：
+   - 保留 `www/modules/` 根目錄
+   - 忽略 `www/modules/**`
+   - 僅保留 `www/modules/.gitkeep`
+3. 已同步更新 `www/gitignore.sample`：
+   - `/modules/**`
+   - `!/modules/.gitkeep`
+4. 驗證（`git check-ignore -v -n`）：
+   - `www/modules/.gitkeep` 不被忽略。
+   - `www/modules/Inquiry/reaction.php` 與其他子檔案會被忽略。
+
+## 第 45 輪討論結果
+1. 使用者要求「最小」改寫 `document/guides/create_new_module.md`，僅補可執行步驟並對齊最新規則。
+2. 已以最小變更新增 `RepoSplit 可執行步驟（最小版）`，包含：
+   - JSON → Entity 初始化
+   - `PCMS` / `F3CMS` 模組落點
+   - 四層檔案建立
+   - route 接線與 Docker 驗證
+   - autoload 固定順序
+   - `www/modules/**` 版控政策
+3. 已同步修正舊路徑描述：
+   - `Step 3` 不再使用 `www/f3cms/modules`，改為 site/shared/core 三種現況路徑。
+
+## 第 46 輪討論結果
+1. 使用者回報 `MHelper::hasColumn()` 不存在。
+2. 已在 `core/libs/MHelper.php` 補上 `hasColumn($table, $column)`：
+   - 支援 `table(alias)` 輸入正規化
+   - 驗證 table/column 名稱格式
+   - 以 `INFORMATION_SCHEMA.COLUMNS` 查詢當前資料庫是否存在指定欄位
+3. 既有 `Belong` trait 的 `mh()->hasColumn(...)` 呼叫可直接沿用，無需改動呼叫端。
+4. 驗證：
+   - Docker lint：`/var/core/libs/MHelper.php`、`/var/core/libs/Belong.php` 皆通過。
+
+## 第 47 輪討論結果
+1. 使用者要求 `hasColumn()` 不使用 `INFORMATION_SCHEMA.COLUMNS`，改為 `SHOW COLUMNS FROM <table> LIKE <column>`。
+2. 已更新 `core/libs/MHelper.php` 的 `hasColumn()` 查詢方式為：
+   - `SHOW COLUMNS FROM \`<table>\` LIKE :column`
+3. 既有 table/column 名稱格式驗證保留，降低 SQL 注入風險。
+4. 驗證：
+   - Docker lint：`/var/core/libs/MHelper.php`、`/var/core/libs/Belong.php` 皆通過。

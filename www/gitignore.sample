@@ -1,5 +1,7 @@
 /demo/
 /error-pages/
+/modules/**
+!/modules/.gitkeep
 /_infra/10-demo.conf
 /_pma/
 /_upload/**

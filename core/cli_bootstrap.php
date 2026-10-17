@@ -22,6 +22,8 @@ $f3 = \Base::instance();
 
 $siteConfigDir = defined('SITE_CONFIG_DIR') ? SITE_CONFIG_DIR : basename(rtrim($siteRootDir, '/'));
 $fallbackConfigRoot = $projectRootDir . 'config/';
+$sharedModulesDir = $projectRootDir . 'modules/';
+$sharedThemeRootDir = $projectRootDir . 'theme/';
 
 $rootDir = $projectRootDir;
 $siteDir = $siteConfigDir . '/';
@@ -53,10 +55,21 @@ if ($env !== '' && file_exists($envConfigFile)) {
     require_once $envConfigFile;
 }
 
+$autoload = $siteRootDir . 'modules/;' . $sharedModulesDir . ';' . $activeCoreDir . 'modules/;' . $activeCoreDir . 'libs/;/var/vendor/;';
+$f3->set('AUTOLOAD', $autoload);
+
 $f3->set('TEMP', $siteRootDir . 'tmp/');
 $f3->set('LOGS', $f3->get('TEMP') . 'logs/');
 $f3->set('core_configpath', $activeCoreDir . 'config');
-$f3->set('UI', $activeCoreDir . 'theme/');
+$themeName = (string) $f3->get('theme');
+$siteThemeRootDir = $siteRootDir . 'theme/';
+$themeRootDir = $activeCoreDir . 'theme/';
+if ($themeName !== '' && is_dir($siteThemeRootDir . $themeName)) {
+    $themeRootDir = $siteThemeRootDir;
+} elseif ($themeName !== '' && is_dir($sharedThemeRootDir . $themeName)) {
+    $themeRootDir = $sharedThemeRootDir;
+}
+$f3->set('UI', $themeRootDir);
 
 $logger = new \Log('crontab.log');
 $f3->set('cliLogger', $logger);

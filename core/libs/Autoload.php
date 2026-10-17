@@ -90,17 +90,33 @@ class F3CMS_Autoloader
             $moduleName = $match[2];
 
             // Construct the file path based on the module type and name.
-            $fileName .= str_replace('_', DIRECTORY_SEPARATOR, $moduleName) . DIRECTORY_SEPARATOR . self::getType()[$type] . '.php';
+            $moduleFile = str_replace('_', DIRECTORY_SEPARATOR, $moduleName) . DIRECTORY_SEPARATOR . self::getType()[$type] . '.php';
+            $coreModulesDir = str_replace('libs', 'modules', __DIR__) . DIRECTORY_SEPARATOR;
+            $siteRootDir = defined('SITE_DIR')
+                ? rtrim(SITE_DIR, DIRECTORY_SEPARATOR)
+                : rtrim(dirname((string) f3()->get('webpath')), DIRECTORY_SEPARATOR);
+            $siteModulesDir = $siteRootDir . DIRECTORY_SEPARATOR . 'modules' . DIRECTORY_SEPARATOR;
+            $sharedModulesDir = dirname($siteRootDir) . DIRECTORY_SEPARATOR . 'modules' . DIRECTORY_SEPARATOR;
 
-            // Check for the file in two possible locations.
-            $siteModulesDir = defined('SITE_DIR')
-                ? rtrim(SITE_DIR, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR . 'modules'
-                : f3()->get('webpath') . 'modules';
-            $fileName1 = str_replace('PCMS', $siteModulesDir, $fileName);
-            $fileName2 = str_replace('libs', 'modules', __DIR__) . str_replace('F3CMS', '', $fileName);
+            if ($namespace === 'PCMS') {
+                $candidates = [
+                    $siteModulesDir . $moduleFile,
+                    $sharedModulesDir . $moduleFile,
+                    $coreModulesDir . $moduleFile,
+                ];
+            } else {
+                $candidates = [
+                    $coreModulesDir . $moduleFile,
+                ];
+            }
 
-            // Use the first valid file path found.
-            $fileName = (file_exists($fileName1)) ? $fileName1 : $fileName2;
+            $fileName = false;
+            foreach ($candidates as $candidate) {
+                if (file_exists($candidate) && is_readable($candidate)) {
+                    $fileName = $candidate;
+                    break;
+                }
+            }
         } else {
             // Handle standard class names without type prefixes.
             $fileName .= str_replace('_', DIRECTORY_SEPARATOR, $className) . '.php';

@@ -20,17 +20,37 @@ trait Belong
         [$that, $sub, $pk, $fk] = self::_init(get_called_class(), $subTbl);
 
         // If no member ID is provided, use a default value.
+        // now there is no member
         if (0 == $member_id) {
-            $member_id = fMember::_CMember();
+            $member_id = 0; // fMember::_CMember();
+        }
+
+        // Ensure the sub-table has 'status' column & 'member_id' column before proceeding.
+        $noStatus = 0;
+        $noMember = 0;
+        if (!mh()->hasColumn($that::fmTbl($subTbl), 'status')) {
+            $noStatus = 1;
+        }
+        if (!mh()->hasColumn($that::fmTbl($subTbl), 'member_id')) {
+            $noMember = 1;
+        }
+
+        $conditions = [
+            'r.' . $pk    => $target_id,
+        ];
+        $columns = ['t.id'];
+        // ['t.id', 'r.status']
+        if (!$noStatus) {
+            $columns[] = 'r.status';
+        }
+        if (!$noMember) {
+            $conditions['r.member_id'] = $member_id;
         }
 
         // Fetch related data from the database.
         $related = mh()->get($that::fmTbl($subTbl) . '(r)', [
             '[>]' . $that::fmTbl() . '(t)'       => ['r.' . $pk => 'id'],
-        ], ['t.id', 'r.status'], [
-            'r.member_id' => $member_id,
-            'r.' . $pk    => $target_id,
-        ]);
+        ], $columns, $conditions);
 
         // Handle the case where related data exists or does not exist.
         if ($related) {
@@ -60,12 +80,18 @@ trait Belong
                 }
             }
         } else {
-            mh()->insert($that::fmTbl($subTbl), [
-                'member_id' => $member_id,
-                $pk         => $target_id,
-                'status'    => 'Enabled',
-                'insert_ts' => date('Y-m-d H:i:s'),
-            ]);
+            $data = [
+                $pk => $target_id,
+            ];
+            if (!$noStatus) {
+                $data['status'] = 'Enabled';
+                $data['insert_ts'] = date('Y-m-d H:i:s');
+            }
+            if (!$noMember) {
+                $data['member_id'] = $member_id;
+            }
+
+            mh()->insert($that::fmTbl($subTbl), $data);
         }
 
         // Additional logic for specific sub-tables like 'seen' or 'favo'.
@@ -262,6 +288,32 @@ trait Belong
         if (!empty($data)) {
             mh()->insert($that::fmTbl($subTbl), $data);
         }
+
+        return 1;
+    }
+
+    /**
+     * Adds a related record to the sub-table.
+     *
+     * @param string $subTbl     The name of the sub-table.
+     * @param int    $pid        The ID of the target.
+     * @param int    $fid        The ID of the related record.
+     * @param string $fixedFkey  The fixed foreign key column name, if any.
+     * @return int Returns 1 on success.
+     */
+    public static function addRelated($subTbl, $pid, $fid, $fixedFkey = '')
+    {
+        [$that, $sub, $pk, $fk] = self::_init(get_called_class(), $subTbl);
+        if (!empty($fixedFkey)) {
+            $fk = $fixedFkey;
+        }
+
+        $data = [
+            $pk => $pid,
+            $fk => $fid,
+        ];
+
+        mh()->insert($that::fmTbl($subTbl), $data);
 
         return 1;
     }

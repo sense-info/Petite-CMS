@@ -208,4 +208,34 @@ class MHelper extends Medoo
             return null;
         }
     }
+
+    /**
+     * Checks whether a column exists on a table in the current database.
+     *
+     * @param string $table Table name (optionally with "(alias)" suffix).
+     * @param string $column Column name.
+     * @return bool True when the column exists.
+     */
+    public function hasColumn($table, $column)
+    {
+        $table = preg_replace('/\s*\(.+\)$/', '', trim((string) $table));
+        $table = str_replace('`', '', $table);
+        $column = str_replace('`', '', trim((string) $column));
+
+        if (!preg_match('/^[a-zA-Z0-9_]+$/', $table)) {
+            throw new \InvalidArgumentException('Invalid table name for hasColumn: ' . $table);
+        }
+
+        if (!preg_match('/^[a-zA-Z0-9_]+$/', $column)) {
+            throw new \InvalidArgumentException('Invalid column name for hasColumn: ' . $column);
+        }
+
+        $sql = 'SHOW COLUMNS FROM `' . $table . '` LIKE :column';
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->execute([
+            ':column' => $column,
+        ]);
+
+        return (bool) $stmt->fetchColumn();
+    }
 }

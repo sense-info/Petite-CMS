@@ -355,3 +355,96 @@
    - `開發環境與操作筆記`（原 `Environment Info`）
 2. 導覽連結目標未變更，僅文案調整。
 3. 本輪為文件修正，未涉及 runtime 行為變更，無需額外 Docker smoke。
+
+## Optimization 補丁驗收（子站 theme/tmpls）
+1. `www/demo` 已補上空目錄並可納版控：
+   - `www/demo/theme/.gitkeep`
+   - `www/demo/tmpls/.gitkeep`
+2. 子站 theme 載入已支援優先級：
+   - `www/<site>/theme/<theme名稱>/` 存在時優先使用
+   - 否則 fallback 至 `core/theme/<theme名稱>/`
+3. 安裝文件已補充如何使用子站 `theme/tmpls`：
+   - `document/README.md` 新增用法段落
+   - `document/info.md` 新站複製 SOP 新增操作步驟
+4. 驗證通過（Docker）：
+   - `docker exec php-fpm_pcms php -l /var/core/bootstrap.php`
+   - `docker exec php-fpm_pcms php -l /var/core/cli_bootstrap.php`
+
+## Optimization 補丁驗收（demo theme/tmpls ignore）
+1. `.gitignore` 已新增 demo 子站 theme/tmpls 忽略規則：
+   - `www/demo/theme/**` + `!www/demo/theme/.gitkeep`
+   - `www/demo/tmpls/**` + `!www/demo/tmpls/.gitkeep`
+2. 驗證通過（`git check-ignore -v -n`）：
+   - `www/demo/theme/.gitkeep`、`www/demo/tmpls/.gitkeep` 為未忽略。
+   - `www/demo/theme/foo.txt`、`www/demo/tmpls/foo.html` 命中忽略規則。
+
+## Optimization 補丁驗收（共用 modules/theme）
+1. `www` 已新增共用自定義目錄：
+   - `www/modules/.gitkeep`
+   - `www/theme/.gitkeep`
+2. Runtime 行為驗收：
+   - AUTOLOAD 包含 `www/modules/`（web/cli）。
+   - Theme 優先序為子站 → 共用 (`www/theme`) → core (`core/theme`)。
+3. 文件驗收：
+   - `document/README.md` 已補充共用 modules/theme 使用方式。
+   - `document/info.md` 已補充 shared theme fallback 與 shared modules/theme 說明。
+4. 驗證通過：
+   - `docker exec php-fpm_pcms php -l /var/core/bootstrap.php`
+   - `docker exec php-fpm_pcms php -l /var/core/cli_bootstrap.php`
+   - `git check-ignore -v -n` 顯示 `www/modules/*`、`www/theme/*` 可追蹤。
+
+## Optimization 補丁驗收（modules AUTOLOAD 固定路徑）
+1. `core/bootstrap.php`、`core/cli_bootstrap.php` 的 modules AUTOLOAD 已改為固定路徑，不再依賴 `is_dir` 判斷。
+2. 固定順序為：`www/<site>/modules` → `www/modules` → `core/modules` → `core/libs`。
+3. 驗證通過（Docker）：
+   - `docker exec php-fpm_pcms php -l /var/core/bootstrap.php`
+   - `docker exec php-fpm_pcms php -l /var/core/cli_bootstrap.php`
+
+## Optimization 補丁驗收（Autoload namespace 路徑順序）
+1. `core/libs/Autoload.php` 已依 namespace 固定 module 載入順序：
+   - `PCMS`：子站 `www/<site>/modules` → 共用 `www/modules` → `core/modules`
+   - `F3CMS`：僅 `core/modules`
+2. 驗證通過（Docker）：
+   - `docker exec php-fpm_pcms php -l /var/core/libs/Autoload.php`
+
+## Optimization 補丁驗收（namespace 規則文件化）
+1. `document/README.md` 已補上 namespace 與 module 載入順序：
+   - `PCMS`：子站 → 共用 → core
+   - `F3CMS`：core only
+2. `document/info.md` 已補上新站 SOP 中的 namespace 使用規則與同一載入順序說明。
+3. 本輪為文件修正，未涉及 runtime 行為變更，無需額外 Docker smoke。
+
+## Optimization 補丁驗收（臨時 Inquiry 共用 module）
+1. `www/modules/Inquiry` 四個 class 已修正為可正確繼承/引用 core 類別（`F3CMS`）。
+2. `www/demo/config/routes.site.ini` 已補測試路由：
+   - `/inquiry/xls`
+   - `/inquiry/add_new`
+3. `.gitignore` 已加入 `www/modules/Inquiry/**`，確保臨時 module 不會納入 core repo。
+4. 驗證通過：
+   - `docker exec php-fpm_pcms php -l /var/www/modules/Inquiry/*.php`
+   - Docker CLI autoload 測試：`\PCMS\fInquiry`、`\PCMS\kInquiry`、`\PCMS\oInquiry`、`\PCMS\rInquiry` 皆為 `OK`
+   - `curl -k -I https://loc.f3cms.com:4433/inquiry/xls` 回應 `302` 導向 `/login`（路由與 handler 已生效）
+
+## Optimization 補丁驗收（create_new_module 最小改寫）
+1. `document/guides/create_new_module.md` 已新增「RepoSplit 可執行步驟（最小版）」。
+2. 已納入最新規則：
+   - `PCMS`/`F3CMS` 模組落點
+   - autoload 載入順序
+   - `www/modules/**` 在 core repo 的忽略政策
+3. 已修正舊路徑敘述：
+   - `Step 3` 改為 site/shared/core 現況路徑，不再使用 `www/f3cms/modules`。
+4. 本輪為文件修正，未涉及 runtime 行為變更，無需額外 Docker smoke。
+
+## Optimization 補丁驗收（MHelper hasColumn 補齊）
+1. `core/libs/MHelper.php` 已新增 `hasColumn($table, $column)`，可供 `mh()->hasColumn(...)` 使用。
+2. `Belong` 內既有欄位檢查呼叫可正常對接，無需修改呼叫點。
+3. 驗證通過（Docker）：
+   - `docker exec php-fpm_pcms php -l /var/core/libs/MHelper.php`
+   - `docker exec php-fpm_pcms php -l /var/core/libs/Belong.php`
+
+## Optimization 補丁驗收（hasColumn 改用 SHOW COLUMNS）
+1. `MHelper::hasColumn()` 已改為 `SHOW COLUMNS FROM \`<table>\` LIKE :column`，不再依賴 `INFORMATION_SCHEMA.COLUMNS`。
+2. 既有 `Belong` 呼叫端無需修改。
+3. 驗證通過（Docker）：
+   - `docker exec php-fpm_pcms php -l /var/core/libs/MHelper.php`
+   - `docker exec php-fpm_pcms php -l /var/core/libs/Belong.php`

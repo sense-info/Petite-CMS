@@ -180,10 +180,34 @@ ln -s ../../_upload/client-a www/client-a/public/upload
 # 3) 建立 upload 目錄錨點（只追蹤 .gitkeep）
 mkdir -p www/_upload/client-a
 touch www/_upload/client-a/.gitkeep
+
+# 4) 建立子站 theme/tmpls 目錄（專屬客製化）
+mkdir -p www/client-a/theme www/client-a/tmpls
+touch www/client-a/theme/.gitkeep www/client-a/tmpls/.gitkeep
+
+# 5) 若需子站專屬 tmpls 對外路徑，改 public/tmpls 連結
+rm -f www/client-a/public/tmpls
+ln -s ../../tmpls www/client-a/public/tmpls
 ```
 
 並調整 `www/client-a/config/site.config.php`：
 - `upload_dir` 改為 `client-a/`
+- `theme` 設為要使用的 theme 名稱（例如 `default`）
+
+Theme 載入規則：
+- 若存在 `www/client-a/theme/<theme名稱>/`，系統優先使用子站 theme。
+- 若不存在，且 `www/theme/<theme名稱>/` 存在，使用共用 theme。
+- 若都不存在，則 fallback 到 `core/theme/<theme名稱>/`。
+
+共用自定義 modules/theme：
+- `www/modules/`：多子站共用 modules（已納入 AUTOLOAD）。
+- `www/theme/`：多子站共用 theme（子站同名 theme 不存在時會採用）。
+- Namespace 使用規則：
+  - 子站與共用 modules 請使用 `PCMS` namespace。
+  - core modules 使用 `F3CMS` namespace。
+- Module 載入順序：
+  - `PCMS`：`www/<site>/modules` → `www/modules` → `core/modules`
+  - `F3CMS`：`core/modules`
 
 ## Crontab
 

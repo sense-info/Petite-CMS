@@ -65,8 +65,8 @@ class fPost extends Feed
     }
 
     /**
-     * @param $pid
-     * @param $reverse
+     * @param int $pid
+     * @param string $lang
      */
     public static function lotsTerm($pid, $lang = '')
     {

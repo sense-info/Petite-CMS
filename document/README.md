@@ -14,6 +14,8 @@
 core/        # 核心程式（config/libs/modules/vendor/theme/tmpls）
 www/         # 站點層
   demo/      # 範例站（public/config/modules/tmp/cache）
+  modules/   # 多子站共用自定義 modules
+  theme/     # 多子站共用自定義 themes
   _infra/    # Nginx 站點設定（*.conf）
   _pma/      # phpMyAdmin 目錄
   _upload/   # 站點上傳共用根目錄
@@ -63,6 +65,25 @@ docker exec nginx_pcms tail -f /var/log/nginx/error.log
 ```sh
 mysql -uroot -p --port=3366 -h loc.f3cms.com target_db < ./conf/mysql/init.sql
 ```
+
+## 子站自定義 theme / tmpls
+- 每個子站可在 `www/<site>/theme` 與 `www/<site>/tmpls` 放置站點專屬檔案。
+- Theme 載入規則：
+  - 若存在 `www/<site>/theme/<theme名稱>/`，系統優先使用子站 theme。
+  - 若不存在，且 `www/theme/<theme名稱>/` 存在，使用共用 theme。
+  - 若不存在，則 fallback 到 `core/theme/<theme名稱>/`。
+- `tmpls` 對外路徑（`/tmpls/...`）由 `www/<site>/public/tmpls` 決定：
+  - 共用 core：`public/tmpls -> ../../../core/tmpls`
+  - 子站專用：`public/tmpls -> ../../tmpls`
+
+## 多子站共用自定義 modules / theme
+- 共用 module 位置：`www/modules/`
+  - 會加入 AUTOLOAD，所有子站可直接引用。
+- 共用 theme 位置：`www/theme/<theme名稱>/`
+  - 當子站沒有同名 `www/<site>/theme/<theme名稱>/` 時，會自動使用這層共用 theme。
+- Namespace 與 module 載入順序：
+  - `PCMS`：`www/<site>/modules` → `www/modules` → `core/modules`
+  - `F3CMS`：`core/modules`（core 專用）
 
 ## 延伸文件
 - [guides/index.md](./guides/index.md)：指南總覽與閱讀順序

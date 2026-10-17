@@ -29,11 +29,59 @@
 - [feed_guide.md](feed_guide.md)
 - [sd_conventions.md](sd_conventions.md)
 - [data_architecture_checklist.md](data_architecture_checklist.md)
+- [../../core/libs/Feed.php](../../core/libs/Feed.php)
 
 ## Core Thesis
 - A new module should be created only after the entity is clear.
 - This guide is an execution guide, not an architecture arbitration guide.
 - The correct order is: identify entity, confirm module boundary, shape schema, then generate module files.
+
+## RepoSplit 可執行步驟（最小版）
+
+> 本段是目前專案可直接照做的步驟；若和後文示例衝突，以本段為準。
+
+### Step A: 先做 JSON → Entity 初始化
+1. 把 JSON 欄位拆成候選欄位。
+2. 分類到 main / `_lang` / `_meta` / relation。
+3. 先寫出 Entity Contract，再開始建表與建檔。
+
+### Step B: 決定模組落點與 namespace
+- 子站/共用站點模組：`PCMS`
+  - 子站：`www/<site>/modules/<ModuleName>/`
+  - 共用：`www/modules/<ModuleName>/`
+- Core 模組：`F3CMS`
+  - `core/modules/<ModuleName>/`
+
+### Step C: 依規則建立四層檔案
+- `feed.php` → `f{Module}`
+- `reaction.php` → `r{Module}`
+- `outfit.php` → `o{Module}`
+- `kit.php` → `k{Module}`
+
+`PCMS` 內繼承 `F3CMS` 類別時，請使用：
+```php
+use F3CMS\Feed as Elder;
+class fInquiry extends Elder {}
+```
+或：
+```php
+class fInquiry extends \F3CMS\Feed {}
+```
+
+### Step D: 接上路由（site）
+在 `www/<site>/config/routes.site.ini` 增加 `\PCMS\...` 路由。
+
+### Step E: 驗證
+1. Docker lint：`docker exec php-fpm_pcms php -l ...`
+2. 路由 smoke：`curl -k -I https://loc.f3cms.com:4433/<path>`
+
+### Step F: Autoload 順序（固定規則）
+- `PCMS`：`www/<site>/modules` → `www/modules` → `core/modules`
+- `F3CMS`：`core/modules`
+
+### Step G: 版控規則（本 repo）
+- `www/modules/.gitkeep` 追蹤
+- `www/modules/**` 子資料夾/檔案忽略（sites repo 管理）
 
 ## When to Use This Guide
 - the business object has been identified as a stable entity
@@ -193,14 +241,16 @@ CREATE TABLE `tbl_draft` (
 
 ## Step 3: Create the Module Folder
 
-Create the module folder under `www/f3cms/modules/` using PascalCase.
+Create module folder using PascalCase under one of these paths:
+- site-specific `PCMS`: `www/<site>/modules/<ModuleName>/`
+- shared sites-repo `PCMS`: `www/modules/<ModuleName>/`
+- core `F3CMS`: `core/modules/<ModuleName>/`
 
 ### Example
-- folder: `www/f3cms/modules/Draft/`
-- Feed class: `fDraft`
-- Reaction class: `rDraft`
-- Outfit class: `oDraft`
-- Kit class if needed: `kDraft`
+- site folder: `www/demo/modules/Draft/`
+- shared folder: `www/modules/Draft/`
+- core folder: `core/modules/Draft/`
+- class names: `fDraft`, `rDraft`, `oDraft`, `kDraft`
 
 The folder name, class names, and Feed `MTB` must point to the same entity concept.
 

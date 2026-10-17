@@ -68,6 +68,14 @@ class fStaff extends Feed
      */
     public static function _setCurrent($account, $id, $email, $avatar, $priv, $menu_id)
     {
+        $qa = f3()->exists('SESSION.qa') ? (f3()->get('SESSION.qa') == f3()->get('SESSION.qa') ? 1 : 0) : 0;
+
+        session_regenerate_id(true);
+
+        if ($qa) {
+            f3()->set('SESSION.qa', f3()->get('feVersion'));
+        }
+
         f3()->set('SESSION.cu_staff', [
             'name'      => $account,
             'id'        => $id,

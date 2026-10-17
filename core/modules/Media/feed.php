@@ -22,7 +22,6 @@ class fMedia extends Feed
         $now = date('Y-m-d H:i:s');
 
         $data = [
-            'title'     => $req['title'],
             'slug'      => $req['slug'],
             'parent_id' => $req['parent_id'],
             'target'    => ucfirst($req['target']),

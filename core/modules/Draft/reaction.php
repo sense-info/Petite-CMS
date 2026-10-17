@@ -206,7 +206,7 @@ class rDraft extends Reaction
                 }
 
                 $affected = fPress::fromDraft($old['row_id'], 'tw', [
-                    'info'    => $tmp['titles'][$req['idx']],
+                    'title'    => $tmp['titles'][$req['idx']],
                 ]);
 
                 $tip = '已匯入文章標題。';
@@ -276,7 +276,7 @@ class rDraft extends Reaction
                 ]);
 
                 // store the keyword ID in the row_id for relation
-                fPress::saveMany('term', $old['row_id'], [$dictID], false, true);
+                fPress::addRelated('term', $old['row_id'], $dictID);
 
                 break;
             case 'importTag':
@@ -309,7 +309,7 @@ class rDraft extends Reaction
                 ]);
 
                 // store the keyword ID in the row_id for relation
-                fPress::saveMany('tag', $old['row_id'], [$tagID], false, true);
+                fPress::addRelated('tag', $old['row_id'], $tagID);
 
                 break;
             default:
