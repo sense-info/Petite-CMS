@@ -63,4 +63,55 @@ class fPost extends Feed
 
         return parent::chkErr($data->rowCount());
     }
+
+    /**
+     * @param $pid
+     * @param $reverse
+     */
+    public static function lotsTerm($pid, $lang = '')
+    {
+        $filter = [
+            'r.post_id' => $pid,
+            'p.status'   => fDictionary::ST_ON,
+            'ORDER'      => 'r.sorter',
+            'GROUP'      => 'p.id',
+        ];
+
+        if ($lang == '') {
+            $lang = Module::_lang();
+        }
+
+        return mh()->select(
+            self::fmTbl('term') . '(r)',
+            [
+                '[>]' . fDictionary::fmTbl('lang') . '(t)' => ['r.term_id' => 'parent_id', 't.lang' => '[SV]' . $lang],
+                '[>]' . fDictionary::fmTbl() . '(p)'       => ['r.term_id' => 'id'],
+            ], ['p.id', 'p.slug', 'p.cover', 't.title', 't.alias', 't.summary'], $filter
+        );
+    }
+
+    public static function _handleColumn($req)
+    {
+        $terms = explode(',', $req['terms']);
+        unset($req['terms']);
+
+        [$data, $other] = parent::_handleColumn($req);
+
+        $other['terms'] = $terms;
+
+        return [$data, $other];
+    }
+
+    /**
+     * @param  int $pid
+     * @param  array $other
+     * @param  array $data
+     * @return int
+     */
+    public static function _afterSave($pid, $other, $data = [])
+    {
+        self::saveMany('term', $pid, $other['terms'], false, true);
+
+        return parent::_afterSave($pid, $other);
+    }
 }

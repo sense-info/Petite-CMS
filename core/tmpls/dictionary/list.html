@@ -1,8 +1,8 @@
 <nav class="level">
-  <div class="level-left"><h1 class="module-title title is-2">詞典</h1> <p class="desc">各種專業名詞及本站專有定義字詞</p></div>
+  <div class="level-left"><h1 class="module-title title is-2">詞彙表</h1> <p class="desc">各種專業名詞及本站專有定義字詞</p></div>
   <div class="level-right">
     <p class="level-item">
-      <a class="button is-primary modal-btn gee" data-gene="click:showModal" data-tmpl="dictionaryForm" data-src="modal" data-size="lg" data-id="0">新增</a>
+      <a class="button is-primary modal-btn gee" data-gene="click:loadRow" data-tmpl="dictionaryForm" data-id="0">新增</a>
     </p>
   </div>
 </nav>
@@ -42,7 +42,7 @@
 </nav>
 
 <div class="columns is-multiline">
-  <div class="column is-10 is-offset-1 b-table">
+  <div class="column b-table">
     <div class="content box-shadow table-wrapper has-mobile-cards">
       <!-- LIST -->
       <table class="list-body table is-striped is-hoverable">
@@ -62,8 +62,7 @@
             <td data-label="網址">{{:prop.slug}}</td>
             <td data-label="標題">{{:prop.title}}</td>
             <td class="is-actions-cell">
-              <a href="javascript:;" class="button is-info" data-func="loadRow" data-tmpl="dictionaryForm" data-src="modal" data-size="lg" data-id="{{:prop.id}}"> 編輯 </a>
-              <!-- <a href="javascript:;" class="button is-danger" data-func="delRow" data-id="{{:prop.id}}"> 刪除 </a> -->
+              <a href="javascript:;" class="button is-info" data-func="loadRow" data-tmpl="dictionaryForm" data-id="{{:prop.id}}"> 編輯 </a>
             </td>
           </tr>
         </tbody>
@@ -76,6 +75,121 @@
           <ul id="paginate"></ul>
         </nav>
       </div>
+    </div>
+  </div>
+
+  <div class="column is-3">
+    <div class="">
+      <form class="gee" data-gene="init:initForm" data-tmpl="dictionaryForm" id="dictionaryForm">
+        <div class="tabs-content box">
+          <div class="tab-box" title="基本資訊">
+            <div class="field">
+              <label class="label">詞彙名稱</label>
+              <p class="control">
+                <input class="input" name="lang[tw][title]" type="text" placeholder="詞彙">
+              </p>
+            </div>
+            <div class="field">
+              <label class="label">中文相關詞</label>
+              <p class="control">
+                <textarea class="textarea" placeholder="相關詞" name="lang[tw][alias]"></textarea>
+              </p>
+            </div>
+            <div class="field">
+              <label class="label">語意化網址</label>
+              <p class="control">
+                <input class="input" name="slug" type="text" placeholder="語意化可提升搜尋排名！此欄位非必填，可留空">
+              </p>
+            </div>
+            <div class="field">
+              <label class="label">狀態</label>
+              <input type="radio" class="is-checkradio" name="status" value="Enabled" id="tag-status-enabled">
+              <label class="radio" for="tag-status-enabled">啟用</label>
+              <input type="radio" class="is-checkradio" name="status" value="Disabled" checked="checked" id="tag-status-disabled">
+              <label class="radio" for="tag-status-disabled">停用</label>
+            </div>
+            <div class="field">
+              <label class="label">大圖</label>
+              <gee-upload module-name="dictionary" data-param="cover" info-text="1600x900"></gee-upload>
+            </div>
+            <div class="field">
+              <label class="label">簡介</label>
+              <p class="control">
+                <textarea class="textarea" placeholder="簡介" name="lang[tw][summary]"></textarea>
+              </p>
+            </div>
+          </div>
+          <div class="tab-box" title="英文">
+            <div class="field">
+              <label class="label">詞彙名稱</label>
+              <p class="control">
+                <input class="input" name="lang[en][title]" type="text" placeholder="詞彙">
+              </p>
+            </div>
+            <div class="field">
+              <label class="label">英文相關詞</label>
+              <p class="control">
+                <textarea class="textarea" placeholder="相關詞" name="lang[en][alias]"></textarea>
+              </p>
+            </div>
+            <div class="field">
+              <label class="label">簡介</label>
+              <p class="control">
+                <textarea class="textarea" placeholder="簡介" name="lang[en][summary]"></textarea>
+              </p>
+            </div>
+          </div>
+          <div class="tab-box" title="日文">
+            <div class="field">
+              <label class="label">詞彙名稱</label>
+              <p class="control">
+                <input class="input" name="lang[ja][title]" type="text" placeholder="詞彙">
+              </p>
+            </div>
+            <div class="field">
+              <label class="label">日文相關詞</label>
+              <p class="control">
+                <textarea class="textarea" placeholder="相關詞" name="lang[ja][alias]"></textarea>
+              </p>
+            </div>
+            <div class="field">
+              <label class="label">簡介</label>
+              <p class="control">
+                <textarea class="textarea" placeholder="簡介" name="lang[ja][summary]"></textarea>
+              </p>
+            </div>  
+          </div>
+          <div class="tab-box" title="韓文">
+            <div class="field">
+              <label class="label">詞彙名稱</label>
+              <p class="control">
+                <input class="input" name="lang[ko][title]" type="text" placeholder="詞彙">
+              </p>
+            </div>
+            <div class="field">
+              <label class="label">韓文相關詞</label>
+              <p class="control">
+                <textarea class="textarea" placeholder="相關詞" name="lang[ko][alias]"></textarea>
+              </p>
+            </div>
+            <div class="field">
+              <label class="label">簡介</label>
+              <p class="control">
+                <textarea class="textarea" placeholder="簡介" name="lang[ko][summary]"></textarea>
+              </p>
+            </div>
+          </div>
+        </div>
+        <input type="hidden" name="id">
+        <div class="tabs-footer field is-grouped">
+          <p class="control">
+            <button type="button" class="button is-primary pre-gee" data-gene="click:setRow">送出</button><!--  data-reset="1" -->
+          </p>
+          <p class="control">
+            <button type="button" class="button pre-gee" data-gene="click:cancelForm">取消</button>
+          </p>
+        </div>
+      </form>
     </div>
   </div>
 </div>

@@ -114,6 +114,10 @@
           </div>
           <div class="tab-box" title="英文">
             <div class="field">
+              {{if item.id }}{{if item.lang.tw.title != '' }}{{if item.lang.en.title == '' }}
+                <a data-column="title" data-target="en"
+                href="javascript:;" class="pre-gee pull-right" title="翻譯此欄位" data-gene="editor.translate">翻譯 <span class="icon"><i class="fa fa-language"></i></span></a>
+              {{/if }}{{/if }}{{/if }}
               <label class="label">選單標題</label>
               <p class="control">
                 <input class="input" name="lang[en][title]" type="text" placeholder="title">
@@ -135,6 +139,10 @@
           </div>
           <div class="tab-box" title="日文">
             <div class="field">
+              {{if item.id }}{{if item.lang.tw.title != '' }}{{if item.lang.ja.title == '' }}
+                <a data-column="title" data-target="ja"
+                href="javascript:;" class="pre-gee pull-right" title="翻譯此欄位" data-gene="editor.translate">翻譯 <span class="icon"><i class="fa fa-language"></i></span></a>
+              {{/if }}{{/if }}{{/if }}
               <label class="label">選單標題</label>
               <p class="control">
                 <input class="input" name="lang[ja][title]" type="text" placeholder="title">
@@ -156,6 +164,10 @@
           </div>
           <div class="tab-box" title="韓文">
             <div class="field">
+              {{if item.id }}{{if item.lang.tw.title != '' }}{{if item.lang.ko.title == '' }}
+                <a data-column="title" data-target="ko"
+                href="javascript:;" class="pre-gee pull-right" title="翻譯此欄位" data-gene="editor.translate">翻譯 <span class="icon"><i class="fa fa-language"></i></span></a>
+              {{/if }}{{/if }}{{/if }}
               <label class="label">選單標題</label>
               <p class="control">
                 <input class="input" name="lang[ko][title]" type="text" placeholder="title">

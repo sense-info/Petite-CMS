@@ -346,7 +346,7 @@ class fPress extends Feed
      * @param $pid
      * @param $reverse
      */
-    public static function lotsTerm($pid)
+    public static function lotsTerm($pid, $lang = '')
     {
         $filter = [
             'r.press_id' => $pid,
@@ -355,10 +355,14 @@ class fPress extends Feed
             'GROUP'      => 'p.id',
         ];
 
+        if ($lang == '') {
+            $lang = Module::_lang();
+        }
+
         return mh()->select(
             self::fmTbl('term') . '(r)',
             [
-                '[>]' . fDictionary::fmTbl('lang') . '(t)' => ['r.term_id' => 'parent_id', 't.lang' => '[SV]' . Module::_lang()],
+                '[>]' . fDictionary::fmTbl('lang') . '(t)' => ['r.term_id' => 'parent_id', 't.lang' => '[SV]' . $lang],
                 '[>]' . fDictionary::fmTbl() . '(p)'       => ['r.term_id' => 'id'],
             ], ['p.id', 'p.slug', 'p.cover', 't.title', 't.alias', 't.summary'], $filter
         );

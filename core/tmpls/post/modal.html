@@ -33,6 +33,12 @@
               <input type="radio" class="is-checkradio" name="status" value="Disabled" checked="checked" id="post-status-disabled">
               <label class="radio" for="post-status-disabled">下架</label>
             </div>
+            <div class="field">
+              <label class="label">相關字詞</label>
+              <div class="control">
+                <input type="text" multiple class="multipleSelect" data-sortable="1" name="terms" placeholder="請輸入字詞查詢" data-url='dictionary/get_opts' />
+              </div>
+            </div>
           </div>
           <div class="column">
             <div class="field">
@@ -48,6 +54,16 @@
           </p>
         </div>
         <div class="field">
+          {{if item.id }}
+            {{if item.lang.tw.content != '' }}
+              <div class="control pull-right">
+                {{if item.lang.en.content == '' }}{{if item.lang.ko.content == '' }}{{if item.lang.ja.content == ''}}
+                  <button type="button" class="button is-warning pre-gee m-2" data-gene="click:arena/touch"
+                    data-confirm="建立翻譯草稿？ 點擊【確定】後請至草稿頁查看!!" data-endpoint="draft/genI18n" data-params='{"pid":"{{:item.id}}","original":"tw","source":"post"}'> 全部翻譯 </button>
+                {{/if}}{{/if}}{{/if}}
+              </div>
+            {{/if}}
+          {{/if}}
           <input type="radio" class="is-checkradio" name="lang[tw][from_ai]" value="Yes" id="post-fromai-tw-yes">
           <label class="radio" for="post-fromai-tw-yes">由 AI 翻譯</label>
           <input type="radio" class="is-checkradio" name="lang[tw][from_ai]" value="No" checked="checked" id="post-fromai-tw-no">
@@ -62,12 +78,6 @@
       </div>
       <div class="tab-box" title="英文資訊">
         <div class="field">
-
-        {{if item.id }}{{if item.lang.tw.title != '' }}{{if item.lang.en.title == '' }}
-          <a data-column="title" data-target="en"
-          href="javascript:;" class="pre-gee pull-right" title="翻譯此欄位" data-gene="editor.translate">翻譯 <span class="icon"><i class="fa fa-language"></i></span></a>
-        {{/if }}{{/if }}{{/if }}
-
           <label class="label">標題</label>
           <p class="control">
             <input class="input" name="lang[en][title]" type="text" placeholder="標題">
@@ -80,12 +90,6 @@
           <label class="radio" for="post-fromai-en-no">非</label>
         </div>
         <div class="field">
-
-        {{if item.id }}{{if item.lang.tw.content != '' }}{{if item.lang.en.content == '' }}
-          <a data-column="content" data-target="en"
-          href="javascript:;" class="pre-gee pull-right" title="翻譯此欄位" data-gene="editor.translate">翻譯 <span class="icon"><i class="fa fa-language"></i></span></a>
-        {{/if }}{{/if }}{{/if }}
-
           <label class="label">內容</label>
           <p class="control">
             <gee:editor data-param="lang[en][content]" data-inline="0"></gee:editor>
@@ -94,12 +98,6 @@
       </div>
       <div class="tab-box" title="日文資訊">
         <div class="field">
-
-        {{if item.id }}{{if item.lang.tw.title != '' }}{{if item.lang.ja.title == '' }}
-          <a data-column="title" data-target="ja"
-          href="javascript:;" class="pre-gee pull-right" title="翻譯此欄位" data-gene="editor.translate">翻譯 <span class="icon"><i class="fa fa-language"></i></span></a>
-        {{/if }}{{/if }}{{/if }}
-
           <label class="label">標題</label>
           <p class="control">
             <input class="input" name="lang[ja][title]" type="text" placeholder="標題">
@@ -112,12 +110,6 @@
           <label class="radio" for="post-fromai-ja-no">非</label>
         </div>
         <div class="field">
-
-        {{if item.id }}{{if item.lang.tw.content != '' }}{{if item.lang.ja.content == '' }}
-          <a data-column="content" data-target="ja"
-          href="javascript:;" class="pre-gee pull-right" title="翻譯此欄位" data-gene="editor.translate">翻譯 <span class="icon"><i class="fa fa-language"></i></span></a>
-        {{/if }}{{/if }}{{/if }}
-
           <label class="label">內容</label>
           <p class="control">
             <gee:editor data-param="lang[ja][content]" data-inline="0"></gee:editor>
@@ -126,12 +118,6 @@
       </div>
       <div class="tab-box" title="韓文資訊">
         <div class="field">
-
-        {{if item.id }}{{if item.lang.tw.title != '' }}{{if item.lang.ko.title == '' }}
-          <a data-column="title" data-target="ko"
-          href="javascript:;" class="pre-gee pull-right" title="翻譯此欄位" data-gene="editor.translate">翻譯 <span class="icon"><i class="fa fa-language"></i></span></a>
-        {{/if }}{{/if }}{{/if }}
-
           <label class="label">標題</label>
           <p class="control">
             <input class="input" name="lang[ko][title]" type="text" placeholder="標題">
@@ -144,12 +130,6 @@
           <label class="radio" for="post-fromai-ko-no">非</label>
         </div>
         <div class="field">
-
-        {{if item.id }}{{if item.lang.tw.content != '' }}{{if item.lang.ko.content == '' }}
-          <a data-column="content" data-target="ko"
-          href="javascript:;" class="pre-gee pull-right" title="翻譯此欄位" data-gene="editor.translate">翻譯 <span class="icon"><i class="fa fa-language"></i></span></a>
-        {{/if }}{{/if }}{{/if }}
-
           <label class="label">內容</label>
           <p class="control">
             <gee:editor data-param="lang[ko][content]" data-inline="0"></gee:editor>

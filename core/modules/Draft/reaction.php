@@ -35,28 +35,6 @@ class rDraft extends Reaction
         chkAuth(fDraft::PV_U);
         $req = parent::_getReq();
 
-        // if (mb_strlen($req['title']) > 255 || mb_strlen($req['info']) > 600) {
-        //     return self::_return(8106, ['msg' => '標題或引言過長!']);
-        // }
-
-        if (mb_strlen($req['title']) > 255) {
-            $req['title'] = mb_substr($req['title'], 0, 250, 'UTF-8') . '...';
-        }
-
-        if (mb_strlen($req['info']) > 600) {
-            $req['info'] = mb_substr($req['info'], 0, 595, 'UTF-8') . '...';
-        }
-
-        $cu = fPress::one($req['press_id']);
-
-        if (empty($cu)) {
-            return self::_return(8106, ['msg' => '無內容']);
-        }
-
-        if (!empty($cu['lang'][$req['lang']]['content'])) {
-            return self::_return(8106, ['msg' => '文章中已有內容，請先清空!!']);
-        }
-
         $old = fDraft::one($req['id'], 'id', [
             'status' => [fDraft::ST_DONE, fDraft::ST_USED],
             'lang'   => $req['lang'],
@@ -66,13 +44,42 @@ class rDraft extends Reaction
             return self::_return(8106, ['msg' => '請檢查草稿狀態及內容']);
         }
 
+        $source = ucfirst($old['target']);
+        $that = '\F3CMS\f' . $source;
+        
+
+        if (mb_strlen($req['title']) > 255) {
+            $req['title'] = mb_substr($req['title'], 0, 250, 'UTF-8') . '...';
+        }
+
+        if ($source == 'Press') {
+            if (mb_strlen($req['info']) > 600) {
+                $req['info'] = mb_substr($req['info'], 0, 595, 'UTF-8') . '...';
+            }
+        }
+
+        $cu = $that::one($req['press_id']);
+
+        if (empty($cu)) {
+            return self::_return(8106, ['msg' => '無內容']);
+        }
+
+        if (!empty($cu['lang'][$req['lang']]['content'])) {
+            return self::_return(8106, ['msg' => '文章中已有內容，請先清空!!']);
+        }
+
         $req['content'] = str_replace(['"%22', '%22"', '\r\n', '\n', '\r'], ['"', '"', '<br />', '<br />', '<br />'], $req['content']);
 
-        $affected = fPress::fromDraft($req['press_id'], $req['lang'], [
+        $data = [
             'title'   => $req['title'],
-            'info'    => $req['info'],
             'content' => $req['content'],
-        ]);
+        ];
+
+        if ($source == 'Press') {
+            $data['info'] = $req['info'];
+        }
+
+        $affected = $that::fromDraft($req['press_id'], $req['lang'], $data);
 
         if ($affected) {
             fDraft::saveCol([
@@ -485,13 +492,25 @@ class rDraft extends Reaction
             return self::_return(8106, ['msg' => '無法取得原文內容']);
         }
 
-        $tmp = [
+        $guidelineAry = [
             'article_title' => $oriContent['title'],
             'article_info' => $oriContent['info'],
             'article_content' => $content,
         ];
+        $cu['terms'] = fPress::lotsTerm($cu['id']);
+        // [{"id": 181, "slug": "lin-coffee", "cover": "", "title": "林咖啡", "alias": "", "summary": "某家咖啡館"}]
+        $twTerms = $cu['terms'];
 
-        $guideline = jsonEncode($tmp);
+        $targetLangTerms = fPress::lotsTerm($cu['id'], $req['target']);
+        $guidelineAry['phrases'] = [];
+        foreach ($twTerms as $term) {
+            $targetTerm = \__::filter($targetLangTerms, function($n) use ($term) {
+                return $n['id'] == $term['id'];
+            });
+            $guidelineAry['phrases'][] = ['original' => $term['title'], 'tranx' =>  !empty($targetTerm) ? $targetTerm[0]['title'] : $term['title']];
+        }
+
+        $guideline = jsonEncode($guidelineAry);
 
         // $guideline = '-- 標題開始 --' . PHP_EOL . $oriContent['title'] . PHP_EOL . '-- 標題結束 --' . PHP_EOL .
         //     '-- 引言開始 --' . PHP_EOL . $oriContent['info'] . PHP_EOL . '-- 引言結束 --' . PHP_EOL .
@@ -523,16 +542,22 @@ class rDraft extends Reaction
         $req = parent::_getReq();
 
         $acceptLang = fDraft::acceptLang();
-
         $original = (isset($req['original'])) ? $req['original'] : 'tw';
         if (!array_key_exists($original, $acceptLang)) {
             return self::_return(8106, ['msg' => '無來源語系參數']);
         }
-        $cu = fPress::one($req['pid']);
+
+        $source = ucfirst((isset($req['source'])) ? $req['source'] : 'press');
+        $that = '\\F3CMS\\f' . $source;
+        $cu = $that::one($req['pid']);
         $oriContent = $cu['lang'][$original];
 
-        if (empty($cu) || empty($oriContent['title']) || empty($oriContent['info']) || empty($oriContent['content'])) {
-            return self::_return(8106, ['msg' => '原文中應有標題、引言、內文等資訊']);
+        if (empty($cu) || empty($oriContent['title']) || empty($oriContent['content'])) {
+            return self::_return(8106, ['msg' => '原文中應有標題、內文等資訊']);
+        }
+
+        if ($source == 'Press' && !empty($oriContent['info'])) {
+            return self::_return(8106, ['msg' => '原文中應有引言資訊']);
         }
 
         $content = trim($oriContent['content']);
@@ -540,17 +565,17 @@ class rDraft extends Reaction
             return self::_return(8106, ['msg' => '無法取得原文內容']);
         }
 
-        $tmp = [
+        $guidelineAry = [
             'article_title' => $oriContent['title'],
-            'article_info' => $oriContent['info'],
             'article_content' => $content,
         ];
 
-        $guideline = jsonEncode($tmp);
-
-        // $guideline = '-- 標題開始 --'. PHP_EOL . $oriContent['title'] . PHP_EOL .'-- 標題結束 --'. PHP_EOL .
-        //     '-- 引言開始 --'. PHP_EOL . $oriContent['info'] . PHP_EOL .'-- 引言結束 --'. PHP_EOL .
-        //     '-- 文本開始 --'. PHP_EOL . $content . PHP_EOL .'-- 文本結束 --';
+        if ($source == 'Press') {
+            $guidelineAry['article_info'] = $oriContent['info'];
+        }
+        $cu['terms'] = $that::lotsTerm($cu['id']);
+        // [{"id": 181, "slug": "lin-coffee", "cover": "", "title": "林咖啡", "alias": "", "summary": "某家咖啡館"}]
+        $twTerms = $cu['terms'];
 
         $error = '';
 
@@ -560,28 +585,39 @@ class rDraft extends Reaction
             }
             $tmp = '';
 
-            $targetLang = $acceptLang[$idx];
-
             if (!empty($cu['lang'][$idx]) && !empty($cu['lang'][$idx]['content'])) {
-                $tmp .= '已有'. $targetLang .'的內容';
+                $tmp .= '已有'. $label .'的內容';
             }
 
             $old = fDraft::one($cu['id'], 'row_id', [
                 'status[!]' => fDraft::ST_INVALID,
+                'target' => $source,
                 'method' => 'translate',
                 'lang' => $idx,
             ]);
 
             if (!empty($old)) {
-                $tmp .= '已有相同的'. $targetLang .'草稿';
+                $tmp .= '已有相同的'. $label .'草稿';
             }
+
+            // $guidelineAry['phrases'] 是用 $twTerms 當中的 title 加上對應語言的翻譯
+            $targetLangTerms = $that::lotsTerm($cu['id'], $idx);
+            $guidelineAry['phrases'] = [];
+            foreach ($twTerms as $term) {
+                $targetTerm = \__::filter($targetLangTerms, function($n) use ($term) {
+                    return $n['id'] == $term['id'];
+                });
+                $guidelineAry['phrases'][] = ['original' => $term['title'], 'tranx' =>  !empty($targetTerm) ? $targetTerm[0]['title'] : $term['title']];
+            }
+
+            $guideline = jsonEncode($guidelineAry);
 
             if ($tmp == '') {
                 $pid = fDraft::add([
                     'lang' => $idx,
                     'row_id' => $cu['id'],
-                    'target' => 'Press',
-                    'intent' => '翻譯文章 (' . $cu['id'] . ') 為 ' . $targetLang,
+                    'target' => $source,
+                    'intent' => '翻譯文章 (' . $cu['id'] . ') 為 ' . $label,
                     'guideline' => $guideline,
                     'method' => 'translate'
                 ]);
