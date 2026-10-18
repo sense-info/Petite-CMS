@@ -373,8 +373,10 @@ class Feed extends Module
      * @param array $data The language-specific data to save.
      * @return bool True if the data was saved successfully, false otherwise.
      */
-    public static function saveLang($pid, $data = [])
+    public static function saveLang($pid, $data = [], $mh = null)
     {
+        $mh = $mh ?: mh();
+
         if (empty($data)) {
             return false;
         }
@@ -400,18 +402,18 @@ class Feed extends Module
                 $v[1]['last_ts']   = date('Y-m-d H:i:s');
                 $v[1]['last_user'] = fStaff::_current('id');
 
-                if (mh()->get($that::fmTbl('lang'), ['parent_id'], $filter)) {
-                    mh()->update($that::fmTbl('lang'), $v[1], $filter);
+                if ($mh->get($that::fmTbl('lang'), ['parent_id'], $filter)) {
+                    $mh->update($that::fmTbl('lang'), $v[1], $filter);
                 } else {
                     $v[1]['insert_ts']   = date('Y-m-d H:i:s');
                     $v[1]['insert_user'] = fStaff::_current('id');
 
-                    mh()->insert($that::fmTbl('lang'), array_merge($v[1], $filter));
+                    $mh->insert($that::fmTbl('lang'), array_merge($v[1], $filter));
                 }
             }
         }
 
-        return self::chkErr(1);
+        return self::chkErr(1, $mh);
     }
 
     /**
@@ -1169,9 +1171,10 @@ class Feed extends Module
      *
      * @return mixed
      */
-    final public static function chkErr($rtn = 1)
+    final public static function chkErr($rtn = 1, $mh = null)
     {
-        $err = mh()->error();
+        $mh  = $mh ?: mh();
+        $err = $mh->error();
 
         // array (
         //     ODBC 3.x SQLSTATE
@@ -1182,12 +1185,12 @@ class Feed extends Module
         if (is_array($err) && (!empty($err[1]) || !empty($err[2]))) {
             $logger = new \Log('sql_error.log');
             $logger->write($err[2]);
-            $logger->write(mh()->last());
+            $logger->write($mh->last());
 
             if (0 === f3()->get('DEBUG')) {
                 return null;
             } else {
-                $err['query'] = mh()->last();
+                $err['query'] = $mh->last();
                 print_r($err);
                 exit;
             }

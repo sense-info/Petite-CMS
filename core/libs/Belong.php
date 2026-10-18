@@ -299,7 +299,7 @@ trait Belong
      * @param int    $pid        The ID of the target.
      * @param int    $fid        The ID of the related record.
      * @param string $fixedFkey  The fixed foreign key column name, if any.
-     * @return int Returns 1 on success.
+     * @return int Returns 1 when inserted, or 0 when the relation already exists.
      */
     public static function addRelated($subTbl, $pid, $fid, $fixedFkey = '')
     {
@@ -312,6 +312,10 @@ trait Belong
             $pk => $pid,
             $fk => $fid,
         ];
+
+        if (mh()->get($that::fmTbl($subTbl), '*', $data)) {
+            return 0;
+        }
 
         mh()->insert($that::fmTbl($subTbl), $data);
 

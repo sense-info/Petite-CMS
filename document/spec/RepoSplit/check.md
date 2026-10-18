@@ -441,7 +441,6 @@
 3. 驗證通過（Docker）：
    - `docker exec php-fpm_pcms php -l /var/core/libs/MHelper.php`
    - `docker exec php-fpm_pcms php -l /var/core/libs/Belong.php`
-
 ## Optimization 補丁驗收（hasColumn 改用 SHOW COLUMNS）
 1. `MHelper::hasColumn()` 已改為 `SHOW COLUMNS FROM \`<table>\` LIKE :column`，不再依賴 `INFORMATION_SCHEMA.COLUMNS`。
 2. 既有 `Belong` 呼叫端無需修改。

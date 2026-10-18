@@ -7,20 +7,57 @@ namespace F3CMS;
  */
 class kExcel extends Kit
 {
-    public static function loadCsv($filename)
+    public static function dumpCsv($columns, $rows, $path = '/upload/doc/')
     {
-        $root    = f3()->get('ROOT') . f3()->get('BASE');
-        // load the CSV file
-        $csv = array_map('str_getcsv', file($root . $filename));
-        // handle each row
-        foreach ($csv as $row) {
-            // handle each column
-            foreach ($row as $idx => $column) {
-                // do something with the column
-            }
+        $root = f3()->get('ROOT') . f3()->get('BASE');
+
+        if (!FSHelper::mkdir($root . $path) || !is_writable($root . $path)) {
+            return [
+                'code' => 0,
+                'msg'  => 'failed to mkdir(' . $root . $path . ').',
+            ];
         }
 
-        return $csv;
+        $filename = substr(md5(uniqid(microtime(), 1)), 0, 15) . '.csv';
+        $fullpath = $root . $path . $filename;
+        $fp       = fopen($fullpath, 'w');
+
+        if (false === $fp) {
+            return [
+                'code' => 0,
+                'msg'  => 'failed to open file(' . $fullpath . ').',
+            ];
+        }
+
+        fputcsv($fp, $columns);
+        foreach ($rows as $row) {
+            fputcsv($fp, $row);
+        }
+        fclose($fp);
+
+        return [
+            'code'     => 1,
+            'msg'      => 'ok',
+            'filename' => $path . $filename,
+            'count'    => count($rows),
+        ];
+    }
+
+    public static function loadCsv($filename)
+    {
+        $root = f3()->get('ROOT') . f3()->get('BASE');
+        $csv  = file($root . $filename, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+
+        if (false === $csv) {
+            return [];
+        }
+
+        $rows = array_map('str_getcsv', $csv);
+        if (!empty($rows[0][0])) {
+            $rows[0][0] = preg_replace('/^\xEF\xBB\xBF/', '', $rows[0][0]);
+        }
+
+        return $rows;
     }
 
     /**

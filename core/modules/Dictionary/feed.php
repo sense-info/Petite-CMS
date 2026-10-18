@@ -102,13 +102,80 @@ class fDictionary extends Feed
 
     }
 
+    public static function importTranslations(array $rows)
+    {
+        $headers = ['中文', '英文', '日文', '韓文'];
+        $result  = [
+            'inserted' => 0,
+            'skipped'  => 0,
+            'invalid'  => 0,
+            'errors'   => [],
+        ];
+
+        if (empty($rows) || $headers !== array_slice($rows[0], 0, 4)) {
+            $result['errors'][] = 'CSV 標題必須為：中文,英文,日文,韓文';
+
+            return $result;
+        }
+
+        foreach (array_slice($rows, 1) as $index => $row) {
+            $line = $index + 2;
+            $row  = array_map('trim', array_slice($row, 0, 4));
+
+            if (4 !== count($row) || in_array('', $row, true)) {
+                $result['invalid']++;
+                $result['errors'][] = '第 ' . $line . ' 列資料不完整';
+                continue;
+            }
+
+            list($tw, $en, $ja, $ko) = $row;
+            $exists = mh()->get(self::fmTbl('lang'), 'parent_id', [
+                'lang'  => 'tw',
+                'title' => $tw,
+            ]);
+
+            if (!empty($exists)) {
+                $result['skipped']++;
+                continue;
+            }
+
+            $pid      = 0;
+            $imported = false;
+            mh()->action(function ($mh) use ($tw, $en, $ja, $ko, &$pid, &$imported) {
+                $pid = self::add([
+                    'slug'      => parent::_slugify($en),
+                    'last_user' => fStaff::_current('id'),
+                ], [
+                    ['tw', ['title' => $tw]],
+                    ['en', ['title' => $en]],
+                    ['ja', ['title' => $ja]],
+                    ['ko', ['title' => $ko]],
+                ], $mh);
+
+                $imported = !empty($pid) && !$mh->error();
+
+                return $imported;
+            });
+
+            if (!$imported) {
+                $result['errors'][] = '第 ' . $line . ' 列寫入失敗';
+                continue;
+            }
+
+            $result['inserted']++;
+        }
+
+        return $result;
+    }
+
     /**
      * @param $mainData
      * @param $lang
      * @return mixed
      */
-    public static function add(array $mainData, array $lang)
+    public static function add(array $mainData, array $lang, $mh = null)
     {
+        $mh   = $mh ?: mh();
         $pid  = 0;
         $now  = date('Y-m-d H:i:s');
         $data = array_merge([
@@ -119,13 +186,62 @@ class fDictionary extends Feed
             'insert_user' => fStaff::_current('id')
         ], $mainData);
 
-        mh()->insert(self::fmTbl(), $data);
-        $pid = mh()->id();
+        $mh->insert(self::fmTbl(), $data);
+        $pid = $mh->id();
 
-        if (self::chkErr($pid)) {
-            self::saveLang($pid, $lang);
+        if (self::chkErr($pid, $mh)) {
+            self::saveLang($pid, $lang, $mh);
         }
 
         return $pid;
+    }
+
+    public static function autoBindTerms($target = 'press')
+    {
+        $target = ucfirst($target);
+        $that = '\\F3CMS\\f' . $target;
+
+        $result = [
+            'articles'  => 0,
+            'terms'    => 0,
+            'linked'   => 0,
+            'existing' => 0,
+        ];
+        $terms = self::lots([
+            'm.status'   => self::ST_ON,
+            'l.lang'     => 'tw',
+            'l.title[!]' => '',
+            'ORDER'      => ['m.id' => 'ASC'],
+        ], ['m.id', 'l.title'], [
+            '[>]' . self::fmTbl('lang') . '(l)' => ['m.id' => 'parent_id'],
+        ]);
+
+        $matchedArticles = [];
+
+        foreach ($terms as $term) {
+            $articles = $that::lots([
+                'm.status'     => ($target == 'Press') ? [$that::ST_PUBLISHED, $that::ST_CHANGED] : $that::ST_ON,
+                'l.lang'       => 'tw',
+                'l.content[~]' => $term['title'],
+                'ORDER'        => ['m.id' => 'ASC'],
+            ], ['m.id'], [
+                '[>]' . $that::fmTbl('lang') . '(l)' => ['m.id' => 'parent_id'],
+            ]);
+
+            foreach ($articles as $row) {
+                $matchedArticles[$row['id']] = true;
+
+                if ($that::addRelated('term', $row['id'], $term['id'])) {
+                    $result['linked']++;
+                } else {
+                    $result['existing']++;
+                }
+            }
+        }
+
+        $result['articles'] = count($matchedArticles);
+        $result['terms']   = count($terms);
+
+        return $result;
     }
 }

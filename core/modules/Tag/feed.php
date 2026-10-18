@@ -175,6 +175,61 @@ class fTag extends Feed
         return array_merge($rows, $insertedRows);
     }
 
+    public static function autoBindTerms($target = 'press')
+    {
+        $target = ucfirst($target);
+        $that   = '\\F3CMS\\f' . $target;
+        $result = [
+            'articles' => 0,
+            'terms'    => 0,
+            'linked'   => 0,
+            'existing' => 0,
+        ];
+        $terms = self::lots([
+            'm.status'   => self::ST_ON,
+            'l.lang'     => 'tw',
+            'l.title[!]' => '',
+            'ORDER'      => ['m.id' => 'ASC'],
+        ], ['m.id', 'l.title'], [
+            '[>]' . self::fmTbl('lang') . '(l)' => ['m.id' => 'parent_id'],
+        ]);
+        $matchedArticles = [];
+        $changedTags     = [];
+
+        foreach ($terms as $term) {
+            $articles = $that::lots([
+                'm.status'     => ($target == 'Press') ? [$that::ST_PUBLISHED, $that::ST_CHANGED] : $that::ST_ON,
+                'l.lang'       => 'tw',
+                'l.content[~]' => $term['title'],
+                'ORDER'        => ['m.id' => 'ASC'],
+            ], ['m.id'], [
+                '[>]' . $that::fmTbl('lang') . '(l)' => ['m.id' => 'parent_id'],
+            ]);
+
+            foreach ($articles as $row) {
+                $matchedArticles[$row['id']] = true;
+
+                if ($that::addRelated('tag', $row['id'], $term['id'])) {
+                    $changedTags[$term['id']] = true;
+                    $result['linked']++;
+                } else {
+                    $result['existing']++;
+                }
+            }
+        }
+
+        if ('Press' == $target) {
+            foreach (array_keys($changedTags) as $tagId) {
+                self::setPressCnt($tagId);
+            }
+        }
+
+        $result['articles'] = count($matchedArticles);
+        $result['terms']    = count($terms);
+
+        return $result;
+    }
+
     /**
      * @param $mainData
      * @param $lang

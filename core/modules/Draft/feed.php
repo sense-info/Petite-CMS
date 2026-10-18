@@ -139,6 +139,69 @@ class fDraft extends Feed
         });
     }
 
+    public static function glossaryTermCountRows($method = 'seohelper')
+    {
+        mh(true)->info();
+
+        $rows = mh()->select(self::fmTbl(), [
+            'content',
+        ], [
+            'method' => $method,
+            'ORDER'  => ['id' => 'ASC'],
+        ]);
+
+        $termCount = [];
+
+        \__::map($rows, function ($row) use (&$termCount) {
+            $json = jsonDecode($row['content']);
+
+            if (!is_array($json) || empty($json['glossaries']) || !is_array($json['glossaries'])) {
+                return;
+            }
+
+            foreach ($json['glossaries'] as $key => $value) {
+                if (is_string($key)) {
+                    self::increaseGlossaryTermCount($termCount, $key);
+                    continue;
+                }
+
+                if (!is_array($value)) {
+                    continue;
+                }
+
+                $term = isset($value['text']) ? $value['text'] : '';
+                if ('' !== $term) {
+                    self::increaseGlossaryTermCount($termCount, $term);
+                }
+            }
+        });
+
+        arsort($termCount);
+
+        $csvRows = [];
+        foreach ($termCount as $term => $count) {
+            $csvRows[] = [
+                'term'  => $term,
+                'count' => $count,
+            ];
+        }
+
+        return $csvRows;
+    }
+
+    private static function increaseGlossaryTermCount(&$termCount, $term)
+    {
+        $term = trim($term);
+        if ('' === $term) {
+            return;
+        }
+
+        if (!isset($termCount[$term])) {
+            $termCount[$term] = 0;
+        }
+        $termCount[$term]++;
+    }
+
     public static function batchWriting($row)
     {
         $rtn = PHP_EOL . $row['id'] . ') Writing : ';

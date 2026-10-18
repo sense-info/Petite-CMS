@@ -46,6 +46,26 @@ class rLab extends Reaction
             self::test('batchImport');
         }
 
+        // /api/lab/info?draftGlossaryTermCount=1
+        if (!empty($_GET['draftGlossaryTermCount'])) {
+            self::test('draftGlossaryTermCount');
+        }
+
+        // /api/lab/info?dictionaryImport=1&path=/upload/doc/example.csv
+        if (!empty($_GET['dictionaryImport'])) {
+            self::test('dictionaryImport');
+        }
+
+        // /api/lab/info?dictionaryPressBind=1
+        if (!empty($_GET['dictionaryPressBind'])) {
+            self::test('dictionaryPressBind');
+        }
+
+        // /api/lab/info?tagPressBind=1
+        if (!empty($_GET['tagPressBind'])) {
+            self::test('tagPressBind');
+        }
+
         if (!empty($_GET['repeat'])) {
             echo '<script type="text/javascript"> setTimeout(function () { location.reload(true); }, 3000); </script>';
         }
@@ -146,6 +166,38 @@ class rLab extends Reaction
                 // 增加 PHP 腳本的最大執行時間
                 set_time_limit(0);
                 fDraft::cronImport(1);
+                break;
+            case 'draftGlossaryTermCount':
+                set_time_limit(0);
+                $rows   = fDraft::glossaryTermCountRows('seohelper');
+                $result = kExcel::dumpCsv(['term', 'count'], $rows, '/upload/doc/');
+                if (!empty($result['filename'])) {
+                    echo 'filename: ' . $result['filename'] . PHP_EOL;
+                }
+                break;
+            case 'dictionaryImport':
+                $path = $_GET['path'] ?? '';
+                $root = f3()->get('ROOT') . f3()->get('BASE');
+                $docRoot = realpath($root . '/upload/doc');
+                $filename = realpath($root . $path);
+
+                if (empty($docRoot) || empty($filename)
+                    || 0 !== strpos($filename, $docRoot . DIRECTORY_SEPARATOR)
+                    || 'csv' !== strtolower(pathinfo($filename, PATHINFO_EXTENSION))) {
+                    echo 'invalid csv path' . PHP_EOL;
+                    break;
+                }
+
+                $rows = kExcel::loadCsv($path);
+                echo jsonEncode(fDictionary::importTranslations($rows)) . PHP_EOL;
+                break;
+            case 'dictionaryPressBind':
+                set_time_limit(0);
+                echo jsonEncode(fDictionary::autoBindTerms('press')) . PHP_EOL;
+                break;
+            case 'tagPressBind':
+                set_time_limit(0);
+                echo jsonEncode(fTag::autoBindTerms('press')) . PHP_EOL;
                 break;
             case 'getHashCost':
                 echo 'Appropriate Cost Found: ' . kLab::getHashCost() . PHP_EOL; // 50 milliseconds
