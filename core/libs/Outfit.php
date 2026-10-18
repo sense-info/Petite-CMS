@@ -350,11 +350,16 @@ class Outfit extends Module
      * @param $val
      * @param $format
      */
-    public static function gmapI18n($val, $lang1, $lang2)
+    public static function gmapI18n(string|null $val = '', string|null $lang1 = '', string|null $lang2 = ''): string
     {
+        $val   = self::normalizeString($val);
+        $lang1 = self::normalizeString($lang1);
+        $lang2 = self::normalizeString($lang2);
+
         if ($lang2 == f3()->get('defaultLang')) {
             return $val;
         }
+
         return str_replace($lang1, $lang2, $val);
     }
 
@@ -392,27 +397,21 @@ class Outfit extends Module
      * @param string $val The input slug string.
      * @return string The fixed slug string.
      */
-    public static function fixSlug($val)
+    public static function fixSlug(string|null $val = ''): string
     {
-        return ucwords(preg_replace('/[-_]/', ' ', $val));
+        return ucwords(preg_replace('/[-_]/', ' ', self::normalizeString($val)));
     }
 
-    /**
-     * @param $val
-     */
-    public static function nl2brSecurity($val)
+    public static function nl2brSecurity(string|null $val = ''): string
     {
-        $val = str_replace(['&#13;&#10;', '&#13;', '&#10;'], [PHP_EOL, PHP_EOL, PHP_EOL], $val);
+        $val = str_replace(['&#13;&#10;', '&#13;', '&#10;'], [PHP_EOL, PHP_EOL, PHP_EOL], self::normalizeString($val));
 
         return nl2br($val);
     }
 
-    /**
-     * @param $val
-     */
-    public static function upper($val)
+    public static function upper(string|null $val = ''): string
     {
-        return strtoupper($val);
+        return strtoupper(self::normalizeString($val));
     }
 
     /**
@@ -423,95 +422,81 @@ class Outfit extends Module
         return implode($glue, $val);
     }
 
-    /**
-     * @param $val
-     */
-    public static function avatar($email, $size = 80, $type = 'avatar')
+    public static function avatar(string|null $email = '', int|float|null $size = 80, string|null $type = 'avatar'): string
     {
+        $email = self::normalizeString($email);
+        $size  = self::normalizeNumber($size);
+        $type  = self::normalizeString($type);
+
         return (('cat' !== $type) ? '//www.gravatar.com/avatar/' . md5($email) . '.jpg?s=' : '//robohash.org/' . md5($email) . '?set=set4&s=') . $size;
     }
 
-    public static function numFormat($num, $decimals = 0)
+    public static function numFormat(int|float|null $num = 0, int|float|null $decimals = 0): string
     {
-        return number_format($num, $decimals);
+        return number_format(self::normalizeNumber($num), (int) self::normalizeNumber($decimals));
     }
 
-    /**
-     * @param $num
-     */
-    public static function s2m($num)
+    public static function s2m(int|float|null $num = 0): string
     {
-        $s = $num % 60;
-        $m = floor($num / 60);
+        $num = (int) self::normalizeNumber($num);
+        $s   = $num % 60;
+        $m   = floor($num / 60);
 
         return ($s > 0) ? $m . ' 分 ' . $s . ' 秒' : $m . ' 分';
     }
 
-    /**
-     * @param $num
-     */
-    public static function s2ms($num)
+    public static function s2ms(int|float|null $num = 0): float
     {
-        $m = ceil($num / 60);
-
-        return $m;
+        return ceil(self::normalizeNumber($num) / 60);
     }
 
-    /**
-     * @param $num
-     */
-    public static function s2h($num)
+    public static function s2h(int|float|null $num = 0): string
     {
-        $m = ceil(($num % 3600) / 60);
-        $h = floor($num / 3600);
+        $num = (int) self::normalizeNumber($num);
+        $m   = ceil(($num % 3600) / 60);
+        $h   = floor($num / 3600);
 
         return (($h > 0) ? $h . ' 小時' : '') . (($h > 0 && $m > 0) ? ' ' : '') . (($m > 0) ? $m . ' 分' : '');
     }
 
-    public static function repathImg($str)
+    public static function repathImg(string|null $str = ''): string
     {
-        return $str; // str_replace('/upload/', f3()->get('picUri'), empty($str) ? '' : $str);
+        return self::normalizeString($str); // str_replace('/upload/', f3()->get('picUri'), empty($str) ? '' : $str);
     }
 
-    public static function repathUri($str)
+    public static function repathUri(string|null $str = ''): string
     {
-        return $str;
+        return self::normalizeString($str);
     }
 
-    /**
-     * @param $val
-     */
-    public static function str2tbl($val)
+    public static function str2tbl(string|null $val = ''): string
     {
-        $val = str_replace(['&#13;', '&#10;'], [PHP_EOL, ''], $val);
+        $val = str_replace(['&#13;', '&#10;'], [PHP_EOL, ''], self::normalizeString($val));
         $ary = explode(PHP_EOL, $val);
         $str = '';
         foreach ($ary as $row) {
             $row = explode('：', $row);
-            $str .= '<tr><td class="title">' . $row[0] . '：</td><td>' . $row[1] . '</td></tr>';
+            $str .= '<tr><td class="title">' . $row[0] . '：</td><td>' . ($row[1] ?? '') . '</td></tr>';
         }
 
         return '<table class="normal-tbl">' . $str . '</table>';
     }
 
-    /**
-     * @param $val
-     */
-    public static function str2li($val)
+    public static function str2li(string|null $val = ''): string
     {
-        $val = str_replace(['&#13;', '&#10;'], [PHP_EOL, ''], $val);
+        $val = str_replace(['&#13;', '&#10;'], [PHP_EOL, ''], self::normalizeString($val));
         $ary = explode(PHP_EOL, $val);
         $str = '';
-        foreach ($ary as $idx => $row) {
+        foreach ($ary as $row) {
             $str .= '<li>' . $row . '</li>';
         }
 
         return $str;
     }
 
-    public static function str2hashtag($val)
+    public static function str2hashtag(string|null $val = ''): string
     {
-        $val = str_replace(['&#13;', '&#10;'], [PHP_EOL, ''], $val);
+        $val = str_replace(['&#13;', '&#10;'], [PHP_EOL, ''], self::normalizeString($val));
         $ary = explode(PHP_EOL, $val);
         $str = '';
         foreach ($ary as $row) {
@@ -524,9 +509,9 @@ class Outfit extends Module
         return $str;
     }
 
-    public static function str2vtt($val)
+    public static function str2vtt(string|null $val = ''): string
     {
-        $val = str_replace(['&#13;', '&#10;'], [PHP_EOL, ''], $val);
+        $val = str_replace(['&#13;', '&#10;'], [PHP_EOL, ''], self::normalizeString($val));
         $ary = explode(PHP_EOL, $val);
         $str = '';
         foreach ($ary as $row) {
@@ -536,35 +521,34 @@ class Outfit extends Module
         return $str;
     }
 
-    public static function htmlDecode($val)
+    public static function htmlDecode(string|null $val = ''): string
     {
-        return html_entity_decode($val, ENT_QUOTES | ENT_SUBSTITUTE | ENT_HTML401, 'UTF-8');
+        return html_entity_decode(self::normalizeString($val), ENT_QUOTES | ENT_SUBSTITUTE | ENT_HTML401, 'UTF-8');
     }
 
-    public static function urlencode($val)
+    public static function urlencode(string|null $val = ''): string
     {
-        return rawurlencode($val);
+        return rawurlencode(self::normalizeString($val));
     }
 
-    public static function safeRaw($val)
+    public static function safeRaw(string|null $val = ''): string
     {
-        $val = self::htmlDecode($val);
-
-        return str_replace(['<', '>', '@'], ['&lt;', '&gt;', '©'], $val);
-
-        // return html_entity_decode($val, ENT_QUOTES);
-        // return str_replace(['&rsquo;', '&quot;'], ['\'', '"'], $val);
+        return str_replace(['<', '>', '@'], ['&lt;', '&gt;', '©'], self::htmlDecode($val));
     }
 
-    /**
-     * @param $val
-     * @param $len
-     */
-    public static function crop($val, $len)
+    public static function crop(string|null $val = '', int|float|null $len = 0): string
     {
-        $val = empty($val) ? '' : $val;
+        return mb_substr(self::normalizeString($val), 0, (int) self::normalizeNumber($len), 'utf-8');
+    }
 
-        return mb_substr($val, 0, $len, 'utf-8');
+    private static function normalizeString(string|null $val = ''): string
+    {
+        return $val ?? '';
+    }
+
+    private static function normalizeNumber(int|float|null $val = 0): int|float
+    {
+        return $val ?? 0;
     }
 
     /**

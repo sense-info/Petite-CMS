@@ -554,7 +554,7 @@ class rDraft extends Reaction
             return self::_return(8106, ['msg' => '原文中應有標題、內文等資訊']);
         }
 
-        if ($source == 'Press' && !empty($oriContent['info'])) {
+        if ($source == 'Press' && empty($oriContent['info'])) {
             return self::_return(8106, ['msg' => '原文中應有引言資訊']);
         }
 
